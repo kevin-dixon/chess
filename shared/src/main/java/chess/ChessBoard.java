@@ -19,12 +19,12 @@ public class ChessBoard {
             return false;
         }
         ChessBoard that = (ChessBoard) o;
-        return Arrays.equals(spaces, that.spaces);
+        return Arrays.deepEquals(spaces, that.spaces);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(spaces);
+        return Arrays.deepHashCode(spaces);
     }
 
     private ChessPiece[][] spaces = new ChessPiece[9][9];
