@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Represents a single chess piece
@@ -53,7 +54,18 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        
-        return new ArrayList<>();
+        Collection<ChessMove> moves;
+        switch (pieceType) {
+            case BISHOP:
+                // do bishop moves
+                BishopMovesCalc calculator = null;
+                return calculator.pieceMoves(board, myPosition);
+            case KING:
+                //do king moves
+                break;
+            default:
+                throw new RuntimeException("Unknown piece type");
+        }
+        throw new RuntimeException("Moves not calculated");
     }
 }
