@@ -79,6 +79,9 @@ public class ChessPiece {
             case KING:
                 //do king moves
                 return KingMovesCalc.pieceMoves(board, myPosition);
+            case KNIGHT:
+                //do knight moves
+                return KnightMovesCalc.pieceMoves(board, myPosition);
             default:
                 throw new RuntimeException("Unknown piece type");
         }
