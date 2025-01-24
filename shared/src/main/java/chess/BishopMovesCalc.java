@@ -2,12 +2,11 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 public class BishopMovesCalc implements PieceMoveCalculator{
 
     public static Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-        //get all possible moves for the bishop (ignore other pieces and edges)
+
         int row = position.getRow();
         int col = position.getColumn();
         Collection<ChessMove> moves = new ArrayList<>();

@@ -78,10 +78,9 @@ public class ChessPiece {
                 return BishopMovesCalc.pieceMoves(board, myPosition);
             case KING:
                 //do king moves
-                break;
+                return KingMovesCalc.pieceMoves(board, myPosition);
             default:
                 throw new RuntimeException("Unknown piece type");
         }
-        throw new RuntimeException("Moves not calculated");
     }
 }
