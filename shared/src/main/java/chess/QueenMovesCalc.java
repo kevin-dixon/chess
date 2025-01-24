@@ -3,7 +3,7 @@ package chess;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class BishopMovesCalc implements PieceMoveCalculator{
+public class QueenMovesCalc implements PieceMoveCalculator {
 
     public static Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
         int row = position.getRow();
@@ -12,7 +12,7 @@ public class BishopMovesCalc implements PieceMoveCalculator{
         ChessGame.TeamColor currColor = board.getPiece(position).getTeamColor();
 
         // list of directional vectors
-        int[][] directions = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+        int[][] directions = {{1, 0}, {0, -1}, {-1, 0}, {0, 1}};
 
         for (int[] dir : directions) {
             for (int i = 1; i < 8; i++) {
