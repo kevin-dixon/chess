@@ -12,7 +12,7 @@ public class QueenMovesCalc implements PieceMoveCalculator {
         ChessGame.TeamColor currColor = board.getPiece(position).getTeamColor();
 
         // list of directional vectors
-        int[][] directions = {{1, 0}, {0, -1}, {-1, 0}, {0, 1}};
+        int[][] directions = {{1, 0}, {0, -1}, {-1, 0}, {0, 1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
 
         for (int[] dir : directions) {
             for (int i = 1; i < 8; i++) {
