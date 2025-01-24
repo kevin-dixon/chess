@@ -15,7 +15,7 @@ public class BishopMovesCalc implements PieceMoveCalculator{
         int[][] directions = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
 
         for (int[] dir : directions) {
-            for (int i = 1; i < 8; i++) {
+            for (int i = 1; i < 9; i++) {
                 int newRow = row + i * dir[0];
                 int newCol = col + i * dir[1];
 

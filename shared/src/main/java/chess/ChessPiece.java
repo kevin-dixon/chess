@@ -95,4 +95,54 @@ public class ChessPiece {
                 throw new RuntimeException("Unknown piece type");
         }
     }
+
+    @Override
+    public String toString() {
+        switch (pieceType) {
+            case BISHOP:
+                // return bishop letter
+                if (pieceTeam == ChessGame.TeamColor.WHITE) {
+                    return "B";
+                } else {
+                    return "b";
+                }
+            case KING:
+                // return bishop letter
+                if (pieceTeam == ChessGame.TeamColor.WHITE) {
+                    return "K";
+                } else {
+                    return "k";
+                }
+            case KNIGHT:
+                // return bishop letter
+                if (pieceTeam == ChessGame.TeamColor.WHITE) {
+                    return "N";
+                } else {
+                    return "n";
+                }
+            case PAWN:
+                // return bishop letter
+                if (pieceTeam == ChessGame.TeamColor.WHITE) {
+                    return "P";
+                } else {
+                    return "p";
+                }
+            case QUEEN:
+                // return bishop letter
+                if (pieceTeam == ChessGame.TeamColor.WHITE) {
+                    return "Q";
+                } else {
+                    return "q";
+                }
+            case ROOK:
+                // return bishop letter
+                if (pieceTeam == ChessGame.TeamColor.WHITE) {
+                    return "R";
+                } else {
+                    return "r";
+                }
+            default:
+                throw new RuntimeException("Unknown piece type");
+        }
+    }
 }
