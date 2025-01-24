@@ -5,7 +5,10 @@ import java.util.Collection;
 public interface PieceMoveCalculator {
 
     //methods
-    Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position);
+    /*Collection<ChessMove>*/
 
+    static void pieceMoves(ChessBoard board, ChessPosition position) {
+
+    }
 
 }

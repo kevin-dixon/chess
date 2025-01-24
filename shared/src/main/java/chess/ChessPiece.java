@@ -3,6 +3,7 @@ package chess;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -11,6 +12,22 @@ import java.util.Collections;
  * signature of the existing methods.
  */
 public class ChessPiece {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessPiece that = (ChessPiece) o;
+        return pieceTeam == that.pieceTeam && pieceType == that.pieceType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pieceTeam, pieceType);
+    }
 
     private ChessGame.TeamColor pieceTeam;
     private ChessPiece.PieceType pieceType;
@@ -58,8 +75,7 @@ public class ChessPiece {
         switch (pieceType) {
             case BISHOP:
                 // do bishop moves
-                BishopMovesCalc calculator = null;
-                return calculator.pieceMoves(board, myPosition);
+                return BishopMovesCalc.pieceMoves(board, myPosition);
             case KING:
                 //do king moves
                 break;
