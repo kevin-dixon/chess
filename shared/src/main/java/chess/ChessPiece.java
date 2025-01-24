@@ -82,6 +82,9 @@ public class ChessPiece {
             case KNIGHT:
                 //do knight moves
                 return KnightMovesCalc.pieceMoves(board, myPosition);
+            case PAWN:
+                //do knight moves
+                return PawnMovesCalc.pieceMoves(board, myPosition);
             case QUEEN:
                 //do knight moves
                 return QueenMovesCalc.pieceMoves(board, myPosition);
