@@ -1,9 +1,14 @@
-package chess;
+package chess.movecalculators;
+
+import chess.ChessBoard;
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class KingMovesCalc {
+public class KnightMovesCalc {
 
     public static Collection<ChessMove> getMoves(ChessBoard board, ChessPosition position){
         Collection<ChessMove> moves = new ArrayList<>();
@@ -14,15 +19,15 @@ public class KingMovesCalc {
 
         // get direction vectors
         int[][] directions = {
-                {1,1},{-1,1},{-1,-1},{1,-1},{0,1},{0,-1},{1,0},{-1,0}
+                {2,1},{1,2},{2,-1},{-1,2},
+                {-2,1},{1,-2},{-2,-1},{-1,-2}
         };
 
         // for each direction
         for(int[] dir : directions) {
             int newRow = currRow + (dir[0]);
             int newCol = currCol + (dir[1]);
-
-            //check in bounds
+            //validate in bounds
             if (newRow < 9 && newCol < 9 && newRow > 0 && newCol > 0) {
                 ChessPosition newPos = new ChessPosition(newRow, newCol);
                 //check for other pieces

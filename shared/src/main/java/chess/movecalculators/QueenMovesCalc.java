@@ -1,9 +1,14 @@
-package chess;
+package chess.movecalculators;
+
+import chess.ChessBoard;
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class BishopMovesCalc {
+public class QueenMovesCalc {
 
     public static Collection<ChessMove> getMoves(ChessBoard board, ChessPosition position){
         Collection<ChessMove> moves = new ArrayList<>();
@@ -14,7 +19,8 @@ public class BishopMovesCalc {
 
         // get direction vectors
         int[][] directions = {
-                {1,1},{-1,1},{-1,-1},{1,-1}
+                {1,1},{-1,1},{-1,-1},{1,-1},
+                {0,1},{0,-1},{1,0},{-1,0}
         };
 
         // for each direction
@@ -24,7 +30,7 @@ public class BishopMovesCalc {
                 int newCol = currCol + (dir[1] * i);
 
                 //validate in bounds
-                if (newRow >=9  || newCol >= 9 || newRow < 1 || newCol < 1) {
+                if (newRow >= 9 || newCol >= 9 || newRow < 1 || newCol < 1) {
                     break;
                 }
 

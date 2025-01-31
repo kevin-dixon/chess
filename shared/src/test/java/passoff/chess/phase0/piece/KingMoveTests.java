@@ -1,70 +1,60 @@
-package passoff.chess.piece;
+package passoff.chess.phase0.piece;
 
 import chess.ChessPosition;
 import org.junit.jupiter.api.Test;
-import passoff.chess.TestUtilities;
+import passoff.chess.phase0.TestUtilities;
 
-public class BishopMoveTests {
+public class KingMoveTests {
 
     @Test
-    public void bishopMoveUntilEdge() {
+    public void kingMiddleOfBoard() {
         TestUtilities.validateMoves("""
                         | | | | | | | | |
                         | | | | | | | | |
                         | | | | | | | | |
-                        | | | |B| | | | |
                         | | | | | | | | |
                         | | | | | | | | |
+                        | | | | | |K| | |
                         | | | | | | | | |
                         | | | | | | | | |
                         """,
-                new ChessPosition(5, 4),
-                new int[][]{
-                        {6, 5}, {7, 6}, {8, 7},
-                        {4, 5}, {3, 6}, {2, 7}, {1, 8},
-                        {4, 3}, {3, 2}, {2, 1},
-                        {6, 3}, {7, 2}, {8, 1},
-                }
+                new ChessPosition(3, 6),
+                new int[][]{{4, 6}, {4, 7}, {3, 7}, {2, 7}, {2, 6}, {2, 5}, {3, 5}, {4, 5}}
         );
     }
 
 
     @Test
-    public void bishopCaptureEnemy() {
+    public void kingCaptureEnemy() {
         TestUtilities.validateMoves("""
                         | | | | | | | | |
-                        | | | |Q| | | | |
                         | | | | | | | | |
-                        | |b| | | | | | |
-                        |r| | | | | | | |
                         | | | | | | | | |
-                        | | | | |P| | | |
+                        | | | | | | | | |
+                        | | | |N|n| | | |
+                        | | | |k| | | | |
+                        | | |P|b|p| | | |
                         | | | | | | | | |
                         """,
-                new ChessPosition(5, 2),
-                new int[][]{
-                        {6, 3}, {7, 4},
-                        {4, 3}, {3, 4}, {2, 5},
-                        // none
-                        {6, 1},
-                }
+                new ChessPosition(3, 4),
+                new int[][]{{4, 4}, {3, 5}, {2, 3}, {3, 3}, {4, 3}}
         );
     }
 
 
     @Test
-    public void bishopBlocked() {
+    public void kingBlocked() {
         TestUtilities.validateMoves("""
+                        | | | | | | |r|k|
+                        | | | | | | |p|p|
                         | | | | | | | | |
                         | | | | | | | | |
                         | | | | | | | | |
                         | | | | | | | | |
                         | | | | | | | | |
                         | | | | | | | | |
-                        | | | | |R| |P| |
-                        | | | | | |B| | |
                         """,
-                new ChessPosition(1, 6),
+                new ChessPosition(8, 8),
                 new int[][]{}
         );
     }
