@@ -1,8 +1,6 @@
 package chess;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Objects;
 
 /**
@@ -12,28 +10,25 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessPiece {
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof ChessPiece that)) {
             return false;
         }
-        ChessPiece that = (ChessPiece) o;
-        return pieceTeam == that.pieceTeam && pieceType == that.pieceType;
+        return color == that.color && pieceType == that.pieceType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pieceTeam, pieceType);
+        return Objects.hash(color, pieceType);
     }
 
-    private ChessGame.TeamColor pieceTeam;
-    private ChessPiece.PieceType pieceType;
+    public ChessGame.TeamColor color;
+    public PieceType pieceType;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
-        pieceTeam = pieceColor;
+        color = pieceColor;
         pieceType = type;
     }
 
@@ -53,7 +48,7 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        return pieceTeam;
+        return color;
     }
 
     /**
@@ -71,78 +66,58 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> moves;
-        switch (pieceType) {
-            case BISHOP:
-                // do bishop moves
-                return BishopMovesCalc.pieceMoves(board, myPosition);
-            case KING:
-                //do king moves
-                return KingMovesCalc.pieceMoves(board, myPosition);
-            case KNIGHT:
-                //do knight moves
-                return KnightMovesCalc.pieceMoves(board, myPosition);
-            case PAWN:
-                //do knight moves
-                return PawnMovesCalc.pieceMoves(board, myPosition);
-            case QUEEN:
-                //do knight moves
-                return QueenMovesCalc.pieceMoves(board, myPosition);
-            case ROOK:
-                //do knight moves
-                return RookMovesCalc.pieceMoves(board, myPosition);
-            default:
-                throw new RuntimeException("Unknown piece type");
-        }
+        return switch (pieceType) {
+            case BISHOP -> BishopMovesCalc.getMoves(board, myPosition);
+            case KING -> KingMovesCalc.getMoves(board, myPosition);
+            case KNIGHT -> KnightMovesCalc.getMoves(board, myPosition);
+            case QUEEN -> QueenMovesCalc.getMoves(board, myPosition);
+            case ROOK -> RookMovesCalc.getMoves(board, myPosition);
+            case PAWN -> PawnMovesCalc.getMoves(board, myPosition);
+            default -> throw new RuntimeException("piece moves not implemented");
+        };
     }
 
-    @Override
-    public String toString() {
-        switch (pieceType) {
+/*    @Override
+    public String toString(){
+        switch(pieceType) {
             case BISHOP:
-                // return bishop letter
-                if (pieceTeam == ChessGame.TeamColor.WHITE) {
+                if (color == ChessGame.TeamColor.BLACK){
                     return "B";
                 } else {
                     return "b";
                 }
             case KING:
-                // return bishop letter
-                if (pieceTeam == ChessGame.TeamColor.WHITE) {
+                if (color == ChessGame.TeamColor.BLACK){
                     return "K";
                 } else {
                     return "k";
                 }
             case KNIGHT:
-                // return bishop letter
-                if (pieceTeam == ChessGame.TeamColor.WHITE) {
+                if (color == ChessGame.TeamColor.BLACK){
                     return "N";
                 } else {
                     return "n";
                 }
-            case PAWN:
-                // return bishop letter
-                if (pieceTeam == ChessGame.TeamColor.WHITE) {
-                    return "P";
-                } else {
-                    return "p";
-                }
             case QUEEN:
-                // return bishop letter
-                if (pieceTeam == ChessGame.TeamColor.WHITE) {
+                if (color == ChessGame.TeamColor.BLACK){
                     return "Q";
                 } else {
                     return "q";
                 }
             case ROOK:
-                // return bishop letter
-                if (pieceTeam == ChessGame.TeamColor.WHITE) {
+                if (color == ChessGame.TeamColor.BLACK){
                     return "R";
                 } else {
                     return "r";
                 }
+            case PAWN:
+                if (color == ChessGame.TeamColor.BLACK){
+                    return "P";
+                } else {
+                    return "p";
+                }
             default:
-                throw new RuntimeException("Unknown piece type");
+                throw new RuntimeException("piece moves not implemented");
         }
-    }
+    }*/
 }

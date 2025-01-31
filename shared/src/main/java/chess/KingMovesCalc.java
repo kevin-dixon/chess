@@ -3,30 +3,36 @@ package chess;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class KingMovesCalc implements PieceMoveCalculator {
+public class KingMovesCalc {
 
-    public static Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-        int row = position.getRow();
-        int col = position.getColumn();
+    public static Collection<ChessMove> getMoves(ChessBoard board, ChessPosition position){
         Collection<ChessMove> moves = new ArrayList<>();
+
+        int currRow = position.getRow();
+        int currCol = position.getColumn();
         ChessGame.TeamColor currColor = board.getPiece(position).getTeamColor();
 
-        //create list of direction vectors
+        // get direction vectors
         int[][] directions = {
-                {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, {0, 1}
+                {1,1},{-1,1},{-1,-1},{1,-1},{0,1},{0,-1},{1,0},{-1,0}
         };
 
-        for (int[] dir : directions) {
-            int newRow = row + dir[0];
-            int newCol = col + dir[1];
+        // for each direction
+        for(int[] dir : directions) {
+            int newRow = currRow + (dir[0]);
+            int newCol = currCol + (dir[1]);
 
-            //only if in bounds
-            if (newRow > 0 && newRow <= 8 && newCol > 0 && newCol <= 8) {
+            //check in bounds
+            if (newRow < 9 && newCol < 9 && newRow > 0 && newCol > 0) {
                 ChessPosition newPos = new ChessPosition(newRow, newCol);
-                ChessPiece piece = board.getPiece(newPos);
-
-                //only add if space is empty or an opponent piece
-                if (piece == null || piece.getTeamColor() != currColor) {
+                //check for other pieces
+                if (board.getPiece(newPos) != null) {
+                    //piece in space is opponent
+                    if (board.getPiece(newPos).getTeamColor() != currColor) {
+                        moves.add(new ChessMove(position, newPos, null));
+                    }
+                } else {
+                    //empty spot, add as move
                     moves.add(new ChessMove(position, newPos, null));
                 }
             }

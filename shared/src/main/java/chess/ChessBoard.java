@@ -1,6 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
@@ -12,14 +14,11 @@ public class ChessBoard {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
         ChessBoard that = (ChessBoard) o;
-        return Arrays.deepEquals(spaces, that.spaces);
+        return Objects.deepEquals(spaces, that.spaces);
     }
 
     @Override
@@ -27,7 +26,7 @@ public class ChessBoard {
         return Arrays.deepHashCode(spaces);
     }
 
-    private ChessPiece[][] spaces = new ChessPiece[9][9];
+    private final ChessPiece[][] spaces = new ChessPiece[9][9];
 
     public ChessBoard() {
 
@@ -59,83 +58,72 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        for (ChessPiece[] space : spaces) {
-            space = null;
-        }
-
-        for (int i=8; i > 0; --i) {
-            for (int j=8; j > 0; --j) {
+        for(int i = 8; i > 0; i--){
+            for(int j = 8; j > 0; j--) {
+                ChessPosition pos = new ChessPosition(i, j);
                 //add black pawns
-                if (i == 7) {
-                    spaces[i][j] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
+                if(i == 7){
+                    addPiece(pos, new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
                 }
                 //add white pawns
-                if (i == 2) {
-                    spaces[i][j] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+                if(i == 2){
+                    addPiece(pos, new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
                 }
-
-                //add black rooks
-                if (i == 8 && (j == 8 || j == 1)) {
-                    spaces[i][j] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
+                //add rooks
+                if(i == 1 && (j==1 || j==8)){
+                    addPiece(pos, new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK));
                 }
-                //add white rooks
-                if (i == 1 && (j == 8 || j == 1)) {
-                    spaces[i][j] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
+                if(i == 8 && (j==1 || j==8)){
+                    addPiece(pos, new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
                 }
-
-                //add black knights
-                if (i == 8 && (j == 7 || j == 2)) {
-                    spaces[i][j] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
+                //add knights
+                if(i == 1 && (j==2 || j==7)){
+                    addPiece(pos, new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
                 }
-                //add white knights
-                if (i == 1 && (j == 7 || j == 2)) {
-                    spaces[i][j] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
+                if(i == 8 && (j==2 || j==7)){
+                    addPiece(pos, new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT));
                 }
-
-                //add black bishops
-                if (i == 8 && (j == 6 || j == 3)) {
-                    spaces[i][j] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP);
+                //add bishops
+                if(i == 1 && (j==3 || j==6)){
+                    addPiece(pos, new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP));
                 }
-                //add white bishops
-                if (i == 1 && (j == 6 || j == 3)) {
-                    spaces[i][j] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP);
+                if(i == 8 && (j==3 || j==6)){
+                    addPiece(pos, new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP));
                 }
-
-                //add black queen
-                if (i == 8 && j == 4) {
-                    spaces[i][j] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN);
+                //add queens
+                if(i == 1 && j == 4){
+                    addPiece(pos, new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN));
                 }
-                //add white queen
-                if (i == 1 && j == 4) {
-                    spaces[i][j] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
+                if(i == 8 && j == 4){
+                    addPiece(pos, new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN));
                 }
-
-                //add black king
-                if (i == 8 && j == 5) {
-                    spaces[i][j] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING);
+                //add kings
+                if(i == 1 && j == 5){
+                    addPiece(pos, new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING));
                 }
-                //add white king
-                if (i == 1 && j == 5) {
-                    spaces[i][j] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING);
+                if(i == 8 && j == 5){
+                    addPiece(pos, new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING));
                 }
             }
         }
     }
 
     @Override
-    public String toString() {
-        StringBuilder boardString = new StringBuilder();
-        for (int i=8; i > 0; --i) {
-            for (int j=8; j > 0; --j) {
-                boardString.append("|");
-                if (spaces[i][j] == null) {
-                    boardString.append(" ");
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        sb.append("board: \n");
+        for(int i = 8; i > 0; i--) {
+            for (int j = 8; j > 0; j--) {
+                sb.append("|");
+                if(spaces[i][j] == null) {
+                    sb.append(" ");
                 } else {
-                    boardString.append(spaces[i][j]);
+                    sb.append(spaces[i][j]);
                 }
             }
-            boardString.append("|\n");
+            sb.append("|\n");
         }
-        return boardString.toString();
+        return sb.toString();
     }
+
 }

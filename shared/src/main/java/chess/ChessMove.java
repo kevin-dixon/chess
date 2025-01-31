@@ -9,11 +9,9 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessMove {
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
@@ -60,10 +58,9 @@ public class ChessMove {
     public ChessPiece.PieceType getPromotionPiece() {
         return promotion;
     }
-
-
+/*
     @Override
     public String toString() {
-        return "Move{ from: (" + start.getRow() + ", " + start.getColumn() + ") to:(" + end.getRow() + ", " + end.getColumn() + ") prom: " + promotion + "}\n";
-    }
+        return "{" + start + "to" + end + ", promo: " + promotion + "}\n";
+    }*/
 }
