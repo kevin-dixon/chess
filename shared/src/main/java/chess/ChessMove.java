@@ -58,9 +58,9 @@ public class ChessMove {
     public ChessPiece.PieceType getPromotionPiece() {
         return promotion;
     }
-/*
+
     @Override
     public String toString() {
         return "{" + start + "to" + end + ", promo: " + promotion + "}\n";
-    }*/
+    }
 }

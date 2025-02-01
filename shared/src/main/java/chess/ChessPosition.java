@@ -47,9 +47,9 @@ public class ChessPosition {
     public int getColumn() {
         return c;
     }
-/*
+
     @Override
     public String toString(){
         return "(" + r + ", " + c + ")";
-    }*/
+    }
 }

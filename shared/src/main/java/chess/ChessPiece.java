@@ -79,47 +79,52 @@ public class ChessPiece {
         };
     }
 
-/*    @Override
+    @Override
     public String toString(){
-        switch(pieceType) {
-            case BISHOP:
-                if (color == ChessGame.TeamColor.BLACK){
+        switch (pieceType) {
+            case BISHOP -> {
+                if (color == ChessGame.TeamColor.BLACK) {
                     return "B";
                 } else {
                     return "b";
                 }
-            case KING:
-                if (color == ChessGame.TeamColor.BLACK){
+            }
+            case KING -> {
+                if (color == ChessGame.TeamColor.BLACK) {
                     return "K";
                 } else {
                     return "k";
                 }
-            case KNIGHT:
-                if (color == ChessGame.TeamColor.BLACK){
+            }
+            case KNIGHT -> {
+                if (color == ChessGame.TeamColor.BLACK) {
                     return "N";
                 } else {
                     return "n";
                 }
-            case QUEEN:
-                if (color == ChessGame.TeamColor.BLACK){
+            }
+            case QUEEN -> {
+                if (color == ChessGame.TeamColor.BLACK) {
                     return "Q";
                 } else {
                     return "q";
                 }
-            case ROOK:
-                if (color == ChessGame.TeamColor.BLACK){
+            }
+            case ROOK -> {
+                if (color == ChessGame.TeamColor.BLACK) {
                     return "R";
                 } else {
                     return "r";
                 }
-            case PAWN:
-                if (color == ChessGame.TeamColor.BLACK){
+            }
+            case PAWN -> {
+                if (color == ChessGame.TeamColor.BLACK) {
                     return "P";
                 } else {
                     return "p";
                 }
-            default:
-                throw new RuntimeException("piece moves not implemented");
+            }
+            default -> throw new RuntimeException("piece moves not implemented");
         }
-    }*/
+    }
 }
