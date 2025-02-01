@@ -124,10 +124,28 @@ public class ChessGame {
 
     public boolean isInCheck(TeamColor teamColor) {
         // get all opponent pieces
-        
+        TeamColor oppColor = TeamColor.WHITE;
+        if (teamColor == TeamColor.WHITE) { oppColor = TeamColor.BLACK; }
 
+        Collection<ChessPosition> oppTeamPositions = gameBoard.teamPositions(oppColor);
 
         // check that no opponent can take king
+        for (ChessPosition pos : oppTeamPositions) {
+            // get moves of opponent piece
+            Collection<ChessMove> oppMoves = gameBoard.getPiece(pos).pieceMoves(gameBoard, pos);
+            
+            // check if any moves take the king
+            for (ChessMove mov : oppMoves) {
+                // get the end position
+                ChessPosition end = mov.getEndPosition();
+                // check if it is curr team king
+                if (gameBoard.getPiece(end) != null) {
+                    if ((gameBoard.getPiece(end).getTeamColor() == teamColor) && (gameBoard.getPiece(end).getPieceType() == ChessPiece.PieceType.KING)) {
+                        return true;
+                    }
+                }
+            }
+        }
 
         return false;
     }
