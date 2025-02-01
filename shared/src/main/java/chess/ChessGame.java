@@ -13,6 +13,7 @@ public class ChessGame {
 
     private TeamColor currTeam;
     private ChessBoard gameBoard;
+    private ChessBoard tempBoard;
 
     public ChessGame() {
         gameBoard = new ChessBoard();
@@ -58,20 +59,23 @@ public class ChessGame {
 
         // get candidate moves before validating
         Collection<ChessMove> candidate_moves = gameBoard.getPiece(startPosition).pieceMoves(gameBoard, startPosition);
+        // initialize empty list of validated moves
         Collection<ChessMove> validated_moves = new ArrayList<>();
+        // get team of position
         TeamColor currColor = gameBoard.getPiece(startPosition).getTeamColor();
 
         // check that no moves leave king in check
+        //for each move, set temp board
+        tempBoard.setSpaces(gameBoard.getSpaces());
         for (ChessMove mov : candidate_moves) {
-            ChessBoard temp_board = gameBoard;
-            // test move
+            // test move on board
             gameBoard.movePiece(mov);
             if (!isInCheck(currColor)) {
                 // doesn't leave in check, add to valid moves
                 validated_moves.add(mov);
             }
-            // set board back to how it was
-            gameBoard = temp_board;
+            // reset board back to how it was
+            gameBoard.setSpaces(tempBoard.getSpaces());
         }
         return validated_moves;
     }
@@ -85,9 +89,21 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         // test move
         ChessPosition start = move.getStartPosition();
-        Collection<ChessMove> valid_moves = validMoves(start);
-        boolean found_move = false;
+        Collection<ChessMove> valid_moves;
 
+        // only test move if there is a piece and it is current team
+        if (gameBoard.getPiece(start) != null) {
+            if (gameBoard.getPiece(start).getTeamColor() == currTeam) {
+                valid_moves = validMoves(start);
+            } else {
+                throw new InvalidMoveException("Not team turn's piece");
+            }
+        } else {
+            throw new InvalidMoveException("No piece");
+        }
+
+        // correct team piece is chosen, test if move is in list of valid moves
+        boolean found_move = false;
         for (ChessMove m : valid_moves) {
             // move is a valid move
             if (m == move) {
@@ -118,8 +134,18 @@ public class ChessGame {
         // get all opponent pieces
         TeamColor oppColor = TeamColor.WHITE;
         if (teamColor == TeamColor.WHITE) { oppColor = TeamColor.BLACK; }
-
         Collection<ChessPosition> oppTeamPositions = gameBoard.teamPositions(oppColor);
+
+        // Find the king's position first
+        ChessPosition kingPosition = null;
+        Collection<ChessPosition> teamPositions = gameBoard.teamPositions(teamColor);
+        for (ChessPosition pos : teamPositions) {
+            ChessPiece piece = gameBoard.getPiece(pos);
+            if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+                kingPosition = pos;
+                break;
+            }
+        }
 
         // check that no opponent can take king
         for (ChessPosition pos : oppTeamPositions) {
@@ -130,11 +156,9 @@ public class ChessGame {
             for (ChessMove mov : oppMoves) {
                 // get the end position
                 ChessPosition end = mov.getEndPosition();
-                // check if it is curr team king
-                if (gameBoard.getPiece(end) != null) {
-                    if ((gameBoard.getPiece(end).getTeamColor() == teamColor) && (gameBoard.getPiece(end).getPieceType() == ChessPiece.PieceType.KING)) {
-                        return true;
-                    }
+                // if end position is the kings spot, it is in check
+                if (end == kingPosition) {
+                    return true;
                 }
             }
         }
@@ -173,10 +197,7 @@ public class ChessGame {
         // at this point, no moves are possible to avoid check
 
         // current team must be in check
-        if (isInCheck(teamColor)) {
-            return true;
-        }
-        return false;
+        return isInCheck(teamColor);
     }
 
     /**

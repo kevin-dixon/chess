@@ -27,7 +27,7 @@ public class ChessBoard {
         return Arrays.deepHashCode(spaces);
     }
 
-    private final ChessPiece[][] spaces = new ChessPiece[9][9];
+    private ChessPiece[][] spaces = new ChessPiece[9][9];
 
     public ChessBoard() {
 
@@ -54,12 +54,24 @@ public class ChessBoard {
         return spaces[position.getRow()][position.getColumn()];
     }
 
+    public void setSpaces(ChessPiece[][] newSpaces){
+        spaces = newSpaces;
+    }
+
+    public ChessPiece[][] getSpaces(){
+        return spaces;
+    }
+
     public void movePiece(ChessMove move) {
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
 
-        spaces[end.getRow()][end.getColumn()] = spaces[start.getRow()][start.getColumn()];
-        spaces[start.getRow()][start.getColumn()] = null;
+        // only move if a piece is there
+        if (spaces[start.getRow()][start.getColumn()] != null) {
+            ChessPiece pieceToMove = spaces[start.getRow()][start.getColumn()];
+            spaces[end.getRow()][end.getColumn()] = pieceToMove;
+            spaces[start.getRow()][start.getColumn()] = null;
+        }
     }
 
     public void swapPiece(ChessMove move) {
