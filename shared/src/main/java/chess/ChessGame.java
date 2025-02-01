@@ -51,7 +51,29 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        //no piece
+        if (gameBoard.getPiece(startPosition) == null) {
+            return null;
+        }
+
+        // get candidate moves before validating
+        Collection<ChessMove> candidate_moves = gameBoard.getPiece(startPosition).pieceMoves(gameBoard, startPosition);
+        Collection<ChessMove> validated_moves = new ArrayList<>();
+        TeamColor currColor = gameBoard.getPiece(startPosition).getTeamColor();
+
+        // check that no moves leave king in check
+        for (ChessMove mov : candidate_moves) {
+            ChessBoard temp_board = gameBoard;
+            // test move
+            gameBoard.movePiece(mov);
+            if (!isInCheck(currColor)) {
+                // doesn't leave in check, add to valid moves
+                validated_moves.add(mov);
+            }
+            // set board back to how it was
+            gameBoard = temp_board;
+        }
+        return validated_moves;
     }
 
     /**
@@ -82,46 +104,6 @@ public class ChessGame {
      * @param teamColor which team to check for check
      * @return True if the specified team is in check
      */
-/*    public boolean isInCheck(TeamColor teamColor) {
-
-        ChessPosition king_pos;
-        Collection<ChessPosition> opp_pos = new ArrayList<>();
-
-        //scan all spaces
-        for (int i = 1; i < 9; i++) {
-            for (int j = 1; j < 9; j++) {
-                ChessPiece curr_piece = gameBoard.getPiece(new ChessPosition(i, j));
-                if (curr_piece != null) {
-                    // get king space
-                    if ((curr_piece.getTeamColor() == currTeam) && (curr_piece.getPieceType() == ChessPiece.PieceType.KING)) {
-                        king_pos = new ChessPosition(i, j);
-                    }
-                    // get opponent spaces
-                    if (curr_piece.getTeamColor() != currTeam) {
-                        opp_pos.add(new ChessPosition(i, j));
-                    }
-                }
-            }
-        }
-
-        // go through all moves of all opponent pieces
-        for (ChessPosition pos : opp_pos) {
-            Collection<ChessMove> curr_pos_moves = gameBoard.getPiece(pos).pieceMoves(gameBoard, pos);
-            for (ChessMove mov : curr_pos_moves) {
-                ChessPosition curr_end = mov.getEndPosition();
-                // if any capture the curr king, return true
-                if (gameBoard.getPiece(curr_end) != null) {
-                    if ((gameBoard.getPiece(curr_end).getTeamColor() == currTeam) && (gameBoard.getPiece(curr_end).getPieceType() == ChessPiece.PieceType.KING)) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        return false;
-    }*/
-
     public boolean isInCheck(TeamColor teamColor) {
         // get all opponent pieces
         TeamColor oppColor = TeamColor.WHITE;
@@ -133,7 +115,7 @@ public class ChessGame {
         for (ChessPosition pos : oppTeamPositions) {
             // get moves of opponent piece
             Collection<ChessMove> oppMoves = gameBoard.getPiece(pos).pieceMoves(gameBoard, pos);
-            
+
             // check if any moves take the king
             for (ChessMove mov : oppMoves) {
                 // get the end position
@@ -146,7 +128,6 @@ public class ChessGame {
                 }
             }
         }
-
         return false;
     }
 
