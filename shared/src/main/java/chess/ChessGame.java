@@ -93,9 +93,19 @@ public class ChessGame {
             if (m == move) {
                 gameBoard.movePiece(move);
                 found_move = true;
+                nextTeam();
             }
         }
         if (!found_move) { throw new InvalidMoveException("Invalid move"); }
+    }
+
+    public void nextTeam() {
+        if (currTeam == TeamColor.WHITE) {
+            currTeam = TeamColor.BLACK;
+        }
+        else {
+            currTeam = TeamColor.WHITE;
+        }
     }
 
     /**
