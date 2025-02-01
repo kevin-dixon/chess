@@ -49,22 +49,7 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        // get piece on board
-        ChessPiece currPiece = gameBoard.getPiece(startPosition);
-
-        // return null if no piece
-        if (gameBoard.getPiece(startPosition) == null) { return null; }
-
-        // check that all moves don't leave king in check
-        Collection<ChessMove> moves = currPiece.pieceMoves(gameBoard, startPosition);
-
-        for (ChessMove m : moves) {
-            //simulate move and test for check
-            ChessBoard test_board = new ChessBoard();
-            test_board.resetBoard();
-        }
-
-        return moves;
+        throw new RuntimeException("Not implemented");
     }
 
     /**
@@ -74,7 +59,19 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        // test move
+        ChessPosition start = move.getStartPosition();
+        Collection<ChessMove> valid_moves = validMoves(start);
+        boolean found_move = false;
+
+        for (ChessMove m : valid_moves) {
+            // move is a valid move
+            if (m == move) {
+                gameBoard.movePiece(move);
+                found_move = true;
+            }
+        }
+        if (!found_move) { throw new InvalidMoveException("Invalid move"); }
     }
 
     /**

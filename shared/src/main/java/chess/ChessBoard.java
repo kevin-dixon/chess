@@ -53,6 +53,24 @@ public class ChessBoard {
         return spaces[position.getRow()][position.getColumn()];
     }
 
+    public void movePiece(ChessMove move) {
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+
+        spaces[end.getRow()][end.getColumn()] = spaces[start.getRow()][start.getColumn()];
+        spaces[start.getRow()][start.getColumn()] = null;
+    }
+
+    public void swapPiece(ChessMove move) {
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+
+        ChessPiece temp = spaces[start.getRow()][start.getColumn()];
+
+        spaces[end.getRow()][end.getColumn()] = spaces[start.getRow()][start.getColumn()];
+        spaces[start.getRow()][start.getColumn()] = temp;
+    }
+
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
