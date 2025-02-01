@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -69,6 +70,27 @@ public class ChessBoard {
 
         spaces[end.getRow()][end.getColumn()] = spaces[start.getRow()][start.getColumn()];
         spaces[start.getRow()][start.getColumn()] = temp;
+    }
+
+    /**
+     * Gets the board positions of all pieces on the given team
+     * @param color which team to get positions of
+     * @return list of positions
+     */
+    public Collection<ChessPosition> teamPositions(ChessGame.TeamColor color) {
+        Collection<ChessPosition> positions = new ArrayList<>();
+
+        for(int i = 8; i > 0; i--) {
+            for (int j = 8; j > 0; j--) {
+                if (spaces[i][j] != null) {
+                    if (spaces[i][j].getTeamColor() == color) {
+                        positions.add(new ChessPosition(i, j));
+                    }
+                }
+            }
+        }
+
+        return positions;
     }
 
     /**

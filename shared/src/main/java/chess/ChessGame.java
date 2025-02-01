@@ -15,6 +15,8 @@ public class ChessGame {
     private ChessBoard gameBoard;
 
     public ChessGame() {
+        gameBoard = new ChessBoard();
+        currTeam = TeamColor.WHITE;
     }
 
     /**
@@ -80,7 +82,7 @@ public class ChessGame {
      * @param teamColor which team to check for check
      * @return True if the specified team is in check
      */
-    public boolean isInCheck(TeamColor teamColor) {
+/*    public boolean isInCheck(TeamColor teamColor) {
 
         ChessPosition king_pos;
         Collection<ChessPosition> opp_pos = new ArrayList<>();
@@ -116,6 +118,16 @@ public class ChessGame {
             }
             return false;
         }
+
+        return false;
+    }*/
+
+    public boolean isInCheck(TeamColor teamColor) {
+        // get all opponent pieces
+        
+
+
+        // check that no opponent can take king
 
         return false;
     }
