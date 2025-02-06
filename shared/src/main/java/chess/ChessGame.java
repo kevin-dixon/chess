@@ -63,25 +63,24 @@ public class ChessGame {
         // get team of position
         TeamColor currColor = gameBoard.getPiece(startPosition).getTeamColor();
 
-        // Create a deep copy of the board spaces
-        ChessPiece[][] originalSpaces = gameBoard.getSpaces();
-        ChessPiece[][] copySpaces = new ChessPiece[originalSpaces.length][originalSpaces[0].length];
-        for (int i = 0; i < originalSpaces.length; i++) {
-            for (int j = 0; j < originalSpaces[i].length; j++) {
-                copySpaces[i][j] = originalSpaces[i][j] != null ? originalSpaces[i][j] : null;
-            }
-        }
-
-        ChessBoard tempBoard = new ChessBoard(copySpaces);
         for (ChessMove mov : candidate_moves) {
-            // Test move on board
+            // create a deep copy of the board spaces for each move test
+            ChessPiece[][] originalSpaces = gameBoard.getSpaces();
+            ChessPiece[][] copySpaces = new ChessPiece[originalSpaces.length][originalSpaces[0].length];
+            for (int i = 0; i < originalSpaces.length; i++) {
+                for (int j = 0; j < originalSpaces[i].length; j++) {
+                    copySpaces[i][j] = originalSpaces[i][j] != null ? originalSpaces[i][j] : null;
+                }
+            }
+
+            // test move on board
             gameBoard.movePiece(mov);
             if (!isInCheck(currColor)) {
-                // Doesn't leave in check, add to valid moves
+                // doesn't leave in check, add to valid moves
                 validated_moves.add(mov);
             }
-            // Reset board back to how it was
-            gameBoard.setSpaces(tempBoard.getSpaces());
+            // reset board back to how it was
+            gameBoard.setSpaces(copySpaces);
         }
         return validated_moves;
     }
