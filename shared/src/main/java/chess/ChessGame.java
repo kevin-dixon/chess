@@ -13,7 +13,6 @@ public class ChessGame {
 
     private TeamColor currTeam;
     private ChessBoard gameBoard;
-    private ChessBoard tempBoard;
 
     public ChessGame() {
         gameBoard = new ChessBoard();
@@ -64,17 +63,24 @@ public class ChessGame {
         // get team of position
         TeamColor currColor = gameBoard.getPiece(startPosition).getTeamColor();
 
-        // check that no moves leave king in check
-        //for each move, set temp board
-        tempBoard.setSpaces(gameBoard.getSpaces());
+        // Create a deep copy of the board spaces
+        ChessPiece[][] originalSpaces = gameBoard.getSpaces();
+        ChessPiece[][] copySpaces = new ChessPiece[originalSpaces.length][originalSpaces[0].length];
+        for (int i = 0; i < originalSpaces.length; i++) {
+            for (int j = 0; j < originalSpaces[i].length; j++) {
+                copySpaces[i][j] = originalSpaces[i][j] != null ? originalSpaces[i][j] : null;
+            }
+        }
+
+        ChessBoard tempBoard = new ChessBoard(copySpaces);
         for (ChessMove mov : candidate_moves) {
-            // test move on board
+            // Test move on board
             gameBoard.movePiece(mov);
             if (!isInCheck(currColor)) {
-                // doesn't leave in check, add to valid moves
+                // Doesn't leave in check, add to valid moves
                 validated_moves.add(mov);
             }
-            // reset board back to how it was
+            // Reset board back to how it was
             gameBoard.setSpaces(tempBoard.getSpaces());
         }
         return validated_moves;

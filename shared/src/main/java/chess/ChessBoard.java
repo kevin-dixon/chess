@@ -27,10 +27,20 @@ public class ChessBoard {
         return Arrays.deepHashCode(spaces);
     }
 
-    private ChessPiece[][] spaces = new ChessPiece[9][9];
+    private ChessPiece[][] spaces;
 
+    /**
+     * new board constructor
+     */
     public ChessBoard() {
+        spaces = new ChessPiece[9][9];
+    }
 
+    /**
+     * constructor with given spaces
+     */
+    public ChessBoard(ChessPiece [][] newSpaces) {
+        this.spaces = newSpaces;
     }
 
     /**
