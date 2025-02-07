@@ -17,6 +17,7 @@ public class ChessGame {
 
     public ChessGame() {
         gameBoard = new ChessBoard();
+        gameBoard.resetBoard();
         currTeam = TeamColor.WHITE;
     }
 
@@ -160,7 +161,7 @@ public class ChessGame {
             for (ChessMove mov : oppMoves) {
                 // if end position is the kings spot, it is in check
                 assert kingPosition != null;
-                if (mov.getEndPosition().getRow() == kingPosition.getRow() && mov.getEndPosition().getColumn() == kingPosition.getColumn()) {
+                if (Objects.deepEquals(mov.getEndPosition(), kingPosition)) {
                     return true;
                 }
             }
@@ -175,32 +176,39 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        TeamColor oppColor = TeamColor.WHITE;
-        if (teamColor == TeamColor.WHITE) { oppColor = TeamColor.BLACK; }
+        // king must be in check
+        if (!isInCheck(teamColor)) {
+            return false;
+        }
 
         // get all current team positions
         Collection<ChessPosition> team_positions = gameBoard.teamPositions(teamColor);
-        Collection<ChessPosition> opp_positions = gameBoard.teamPositions(oppColor);
 
         // for each team piece, check that after each move the team is not in check
         for (ChessPosition pos : team_positions) {
             Collection<ChessMove> moves = validMoves(pos);
             for (ChessMove mov : moves) {
-                ChessBoard temp_board = gameBoard;
-                // test move
+                // create a deep copy of the board spaces for each move test
+                ChessPiece[][] originalSpaces = gameBoard.getSpaces();
+                ChessPiece[][] copySpaces = new ChessPiece[originalSpaces.length][originalSpaces[0].length];
+                for (int i = 0; i < originalSpaces.length; i++) {
+                    for (int j = 0; j < originalSpaces[i].length; j++) {
+                        copySpaces[i][j] = originalSpaces[i][j] != null ? originalSpaces[i][j] : null;
+                    }
+                }
+
+                // test move on board
                 gameBoard.movePiece(mov);
                 if (!isInCheck(teamColor)) {
-                    // doesn't leave in check, at least one move is possible to not be in checkmate
+                    // doesn't leave in check, at least one move is possible
                     return false;
                 }
-                // set board back to how it was
-                gameBoard = temp_board;
+                // reset board back to how it was
+                gameBoard.setSpaces(copySpaces);
             }
         }
         // at this point, no moves are possible to avoid check
-
-        // current team must be in check
-        return isInCheck(teamColor);
+        return true;
     }
 
     /**
@@ -211,30 +219,39 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        TeamColor oppColor = TeamColor.WHITE;
-        if (teamColor == TeamColor.WHITE) { oppColor = TeamColor.BLACK; }
+        // king must not be in check
+        if (isInCheck(teamColor)) {
+            return false;
+        }
 
         // get all current team positions
         Collection<ChessPosition> team_positions = gameBoard.teamPositions(teamColor);
-        Collection<ChessPosition> opp_positions = gameBoard.teamPositions(oppColor);
 
         // for each team piece, check that after each move the team is not in check
         for (ChessPosition pos : team_positions) {
             Collection<ChessMove> moves = validMoves(pos);
             for (ChessMove mov : moves) {
-                ChessBoard temp_board = gameBoard;
-                // test move
+                // create a deep copy of the board spaces for each move test
+                ChessPiece[][] originalSpaces = gameBoard.getSpaces();
+                ChessPiece[][] copySpaces = new ChessPiece[originalSpaces.length][originalSpaces[0].length];
+                for (int i = 0; i < originalSpaces.length; i++) {
+                    for (int j = 0; j < originalSpaces[i].length; j++) {
+                        copySpaces[i][j] = originalSpaces[i][j] != null ? originalSpaces[i][j] : null;
+                    }
+                }
+
+                // test move on board
                 gameBoard.movePiece(mov);
                 if (!isInCheck(teamColor)) {
-                    // doesn't leave in check, at least one move is possible to not be in checkmate
+                    // doesn't leave in check, at least one move is possible
                     return false;
                 }
-                // set board back to how it was
-                gameBoard = temp_board;
+                // reset board back to how it was
+                gameBoard.setSpaces(copySpaces);
             }
         }
         // at this point, no moves are possible to avoid check
-        return false;
+        return true;
     }
 
     /**
