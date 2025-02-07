@@ -137,8 +137,7 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         // get all opponent pieces
-        TeamColor oppColor = TeamColor.WHITE;
-        if (teamColor == TeamColor.WHITE) { oppColor = TeamColor.BLACK; }
+        TeamColor oppColor = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
         Collection<ChessPosition> oppTeamPositions = gameBoard.teamPositions(oppColor);
 
         // Find the king's position first
@@ -148,7 +147,6 @@ public class ChessGame {
             ChessPiece piece = gameBoard.getPiece(pos);
             if (piece.getPieceType() == ChessPiece.PieceType.KING) {
                 kingPosition = pos;
-                break;
             }
         }
 
@@ -159,10 +157,9 @@ public class ChessGame {
 
             // check if any moves take the king
             for (ChessMove mov : oppMoves) {
-                // get the end position
-                ChessPosition end = mov.getEndPosition();
                 // if end position is the kings spot, it is in check
-                if (end == kingPosition) {
+                assert kingPosition != null;
+                if (mov.getEndPosition().getRow() == kingPosition.getRow() && mov.getEndPosition().getColumn() == kingPosition.getColumn()) {
                     return true;
                 }
             }
