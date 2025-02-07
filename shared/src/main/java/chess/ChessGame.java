@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -111,8 +112,13 @@ public class ChessGame {
         boolean found_move = false;
         for (ChessMove m : valid_moves) {
             // move is a valid move
-            if (m == move) {
+            if (Objects.deepEquals(m, move)) {
+                //make move
                 gameBoard.movePiece(move);
+                if (move.getPromotionPiece() != null) {
+                    //pawn move promotion; change piece at end to promotion type
+                    gameBoard.addPiece(m.getEndPosition(), new ChessPiece(currTeam, m.getPromotionPiece()));
+                }
                 found_move = true;
                 nextTeam();
             }
@@ -121,12 +127,7 @@ public class ChessGame {
     }
 
     public void nextTeam() {
-        if (currTeam == TeamColor.WHITE) {
-            currTeam = TeamColor.BLACK;
-        }
-        else {
-            currTeam = TeamColor.WHITE;
-        }
+        currTeam = (currTeam == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
     }
 
     /**
