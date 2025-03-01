@@ -6,10 +6,10 @@ import java.util.Collection;
 import java.util.HashMap;
 
 public class AuthDAO {
-    final private HashMap<Integer, AuthData> auths = new HashMap<>();
+    final private HashMap<String, AuthData> auths = new HashMap<>();
 
     public AuthData addAuth(AuthData new_authData) {
-        auths.put(new_authData.hashCode(), new_authData);
+        auths.put(new_authData.authToken(), new_authData);
         return new_authData;
     }
 
@@ -17,12 +17,12 @@ public class AuthDAO {
         return auths.values();
     }
 
-    public AuthData getAuth(AuthData find_authData) {
-        return auths.get(find_authData.hashCode());
+    public AuthData getAuth(String authToken) {
+        return auths.get(authToken);
     }
 
-    public void deleteAuth(AuthData del_authData) {
-        auths.remove(del_authData.hashCode());
+    public void deleteAuth(String authToken) {
+        auths.remove(authToken);
     }
 
     public void deleteAllAuths() {

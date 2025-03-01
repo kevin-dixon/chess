@@ -6,10 +6,10 @@ import java.util.Collection;
 import java.util.HashMap;
 
 public class UserDAO {
-    final private HashMap<Integer, UserData> users = new HashMap<>();
+    final private HashMap<String, UserData> users = new HashMap<>();
 
     public UserData addUser(UserData new_userData) {
-        users.put(new_userData.hashCode(), new_userData);
+        users.put(new_userData.username(), new_userData);
         return new_userData;
     }
 
@@ -18,11 +18,15 @@ public class UserDAO {
     }
 
     public UserData getUser(UserData find_userData) {
-        return users.get(find_userData.hashCode());
+        return users.get(find_userData.username());
+    }
+
+    public UserData getUser(String username) {
+        return users.get(username);
     }
 
     public void deleteUser(UserData del_userData) {
-        users.remove(del_userData.hashCode());
+        users.remove(del_userData.username());
     }
 
     public void deleteAllUsers() {

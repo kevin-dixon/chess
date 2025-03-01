@@ -11,18 +11,12 @@ import model.requests.JoinGameRequest;
 import java.util.Collection;
 
 public class GameService {
-    private final AuthDAO auth_dao;
     private final GameDAO game_dao;
-    private final UserDAO user_dao;
 
     public GameService(
-            AuthDAO authDataAccess,
-            GameDAO gameDataAccess,
-            UserDAO userDataAccess
+            GameDAO gameDataAccess
     ) {
-        this.auth_dao = authDataAccess;
         this.game_dao = gameDataAccess;
-        this.user_dao = userDataAccess;
     }
 
     public Collection<GameData> getAllGames() throws DataAccessException {
@@ -56,7 +50,7 @@ public class GameService {
         //TODO: implement
     }
 
-    public GameData getGame(GameData game){
+    public GameData getGame(GameData game) throws DataAccessException {
         return game_dao.getGame(game);
     }
 

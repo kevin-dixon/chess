@@ -16,20 +16,17 @@ public class Main {
         GameDAO gameDataAccess = new GameDAO();
         UserDAO userDataAccess = new UserDAO();
 
-        //TODO: remove uneeded DAO when done
+        //TODO: remove unneeded DAO when done
         var clearService = new ClearService(
                 authDataAccess,
                 gameDataAccess,
                 userDataAccess
         );
         var gameService = new GameService(
-                authDataAccess,
-                gameDataAccess,
-                userDataAccess
+                gameDataAccess
         );
         var userService = new UserService(
                 authDataAccess,
-                gameDataAccess,
                 userDataAccess
         );
 
