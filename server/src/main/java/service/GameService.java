@@ -1,10 +1,12 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import dataaccess.UserDAO;
 import model.GameData;
+import model.requests.JoinGameRequest;
 
 import java.util.Collection;
 
@@ -28,29 +30,29 @@ public class GameService {
     }
 
     public GameData createGame(GameData game) throws DataAccessException{
-        //check for game name or id duplicates
-        String newGameName = game.gameName();
-        int newGameID = game.gameID();
-        if (getGame(newGameID) != null || getGame(newGameName) != null) {
+        if (getGame(game) != null) {
             //duplicate game
             throw new DataAccessException("Error: Game already exists");
         }
         return game_dao.addGame(game);
     }
 
-    public void verifyColor(){}
+    public boolean verifyColor(JoinGameRequest joinGameRequest, GameData game) throws DataAccessException{
+        ChessGame.TeamColor newColor = joinGameRequest.playerColor();
+        if (newColor == ChessGame.TeamColor.BLACK) {
+            return game.blackUsername() == null;
+
+        }
+        else {
+            return game.whiteUsername() == null;
+        }
+    }
+
     public void updateGameData(){}
     public void updateGame(){}
 
-
-    public GameData getGame(String gameName){
-        //TODO: implement
-        return null;
-    }
-
-    public GameData getGame(int gameID){
-        //TODO: implement
-        return null;
+    public GameData getGame(GameData game){
+        return game_dao.getGame(game);
     }
 
 }
