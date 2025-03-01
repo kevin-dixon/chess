@@ -18,4 +18,14 @@ public class ClearService {
         this.game_dao = gameDataAccess;
         this.user_dao = userDataAccess;
     }
+
+    public void deleteAllAuths() throws ResponseException {
+        auth_dao.deleteAllAuths();
+    }
+    public void deleteAllGames() throws ResponseException {
+        game_dao.deleteAllGames();
+    }
+    public void deleteAllUsers() throws ResponseException {
+        user_dao.deleteAllUsers();
+    }
 }
