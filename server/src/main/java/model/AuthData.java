@@ -1,4 +1,4 @@
-package server.models;
+package model;
 
 public class AuthData {
 }

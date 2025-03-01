@@ -1,4 +1,4 @@
-package server.dao;
+package dataaccess;
 
 public class AuthDAO {
 }
