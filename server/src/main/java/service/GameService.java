@@ -48,8 +48,13 @@ public class GameService {
         }
     }
 
-    public void updateGameData(){}
-    public void updateGame(){}
+    public void updateGameUser(GameData gameData, ChessGame.TeamColor playerColor, String username){
+        //TODO: implement
+    }
+
+    public void updateGame(GameData gameData){
+        //TODO: implement
+    }
 
     public GameData getGame(GameData game){
         return game_dao.getGame(game);
