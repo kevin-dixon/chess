@@ -11,6 +11,6 @@ public class ClearHandler implements Route {
 
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        return "\nHandling Clear...!";
+        return "\nImplement Clear Handling";
     }
 }

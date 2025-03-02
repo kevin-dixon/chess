@@ -7,6 +7,6 @@ import spark.Route;
 public class JoinGameHandler implements Route {
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        return null;
+        return "\nImplement JoinGame Handling";
     }
 }
