@@ -31,7 +31,7 @@ public class Main {
         );
 
 
-        Server myServer = new Server(userService, gameService, clearService);
+        Server myServer = new Server();
         myServer.run(8080);
     }
 }
