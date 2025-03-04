@@ -66,17 +66,4 @@ public class UserService {
         return authData != null;
     }
 
-    public AuthData createAuth(AuthData authData) throws DataAccessException {
-        return auth_dao.addAuth(authData);
-    }
-
-    public void checkPassword(){}
-
-    public void deleteAuth(String authToken) throws DataAccessException {
-        auth_dao.deleteAuth(authToken);
-    }
-
-    public AuthData getAuth(String authToken) throws DataAccessException {
-        return auth_dao.getAuth(authToken);
-    }
 }

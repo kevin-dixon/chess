@@ -35,12 +35,12 @@ public class GameService {
             throw new DataAccessException("unauthorized");
         }
 
-        /**
-         *         String gameName,
-         *         int gameID,
-         *         String whiteUsername,
-         *         String blackUsername,
-         *         ChessGame game
+        /** New GameData Created:
+         *String gameName: provided
+         *int gameID: random 6-digit integer
+         *String whiteUsername: ""
+         *String blackUsername: ""
+         *ChessGame game: provided
          */
 
         //Create new game
@@ -49,66 +49,41 @@ public class GameService {
                 "",
                 "",
                 new ChessGame(),
-                gameName);
+                gameName
+        );
         //Add new game to database
         game_dao.addGame(newGame);
         return newGame.gameID();
     }
 
-    private int newGameID(){
+    private int newGameID() {
         Random random = new Random();
         int randomNumber = 100000 + random.nextInt(900000); // Generates number between 100000 and 999999
         System.out.println(randomNumber);
         return randomNumber;
     }
 
-    public void list(Request req) {
-        //get authenticated
-        //get all games
-        //send response as array
-    }
-
-    public void create(Request req) {
-        //get authenticated
-        //create new game
-        //send response as gamedata
-    }
-
-    public void join(Request req) {
-        //get authenticated
-        //get game data by id
-        //verify color
-        //update game data
-        //update game in db
-        //send response
-    }
-
-
-    public GameData createGame(GameData game) throws DataAccessException{
-        if (getGame(game) != null) {
-            //duplicate game
-            throw new DataAccessException("Error: Game already exists");
+    public void joinGame(String authToken, int gameID, String playerColor) throws DataAccessException {
+        // Validate authToken
+        AuthData authData = auth_dao.getAuth(authToken);
+        if (authData == null) {
+            throw new DataAccessException("Unauthorized");
         }
-        return game_dao.addGame(game);
-    }
 
-    public boolean verifyColor(JoinGameRequest joinGameRequest, GameData game) throws DataAccessException{
-        ChessGame.TeamColor newColor = joinGameRequest.playerColor();
-        if (newColor == ChessGame.TeamColor.BLACK) {
-            return game.blackUsername() == null;
-
+        // Validate game existence
+        GameData gameData = game_dao.getGameByID(gameID);
+        if (gameData == null) {
+            throw new DataAccessException("Game not found");
         }
-        else {
-            return game.whiteUsername() == null;
+
+        // Check if the color is already taken
+        if (("WHITE".equals(playerColor) && gameData.whiteUsername() != null) ||
+                ("BLACK".equals(playerColor) && gameData.blackUsername() != null)) {
+            throw new DataAccessException("Already taken");
         }
-    }
 
-    public void updateGameUser(GameData gameData, ChessGame.TeamColor playerColor, String username){
-        //TODO: implement
-    }
-
-    public void updateGame(GameData gameData){
-        //TODO: implement
+        // Add player to the game
+        game_dao.addPlayerToGame(gameID, playerColor, authData.username());
     }
 
     public GameData getGame(GameData game) throws DataAccessException {

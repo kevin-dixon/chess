@@ -30,7 +30,7 @@ public class Server {
         Spark.delete("/session", new LogoutHandler(userService));
         Spark.get("/game", new ListGamesHandler(gameService));
         Spark.post("/game", new CreateGameHandler(gameService));
-        Spark.put("/game", new JoinGameHandler(gameService));
+        Spark.put("/game", new JoinGameHandler(gameService, userService));
 
         //Handle exceptions
         Spark.exception(Exception.class, (exception, req, res) -> {

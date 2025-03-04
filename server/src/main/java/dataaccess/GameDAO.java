@@ -21,11 +21,61 @@ public class GameDAO {
         return games.get(find_gameData.hashCode());
     }
 
+    public GameData getGameByID(int gameID) {
+        return games.get(gameID);
+    }
+
     public void deleteGame(GameData del_gameData) {
         games.remove(del_gameData.hashCode());
     }
 
     public void deleteAllGames() {
         games.clear();
+    }
+
+    public void addPlayerToGame(int gameID, String playerColor, String username) {
+        GameData gameData = games.get(gameID);
+        if (gameData == null) {
+            throw new IllegalArgumentException("Game not found");
+        }
+
+        /** GameData Updated:
+         *  GameID,
+         *  whiteUsername,
+         *  blackUsername,
+         *  ChessGame,
+         *  gameName
+         */
+
+        switch (playerColor.toUpperCase()) {
+            case "WHITE":
+                if (gameData.whiteUsername() != null) {
+                    throw new IllegalArgumentException("already taken");
+                }
+                gameData = new GameData(
+                        gameData.gameID(),
+                        username,
+                        gameData.blackUsername(),
+                        gameData.game(),
+                        gameData.gameName()
+                );
+                break;
+            case "BLACK":
+                if (gameData.blackUsername() != null) {
+                    throw new IllegalArgumentException("already taken");
+                }
+                gameData = new GameData(
+                        gameData.gameID(),
+                        gameData.whiteUsername(),
+                        username,
+                        gameData.game(),
+                        gameData.gameName()
+                );
+                break;
+            default:
+                throw new IllegalArgumentException("bad request");
+        }
+
+        games.put(gameID, gameData); //Update the game with the new player
     }
 }
