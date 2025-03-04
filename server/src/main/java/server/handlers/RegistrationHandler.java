@@ -1,10 +1,17 @@
 package server.handlers;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
+import model.AuthData;
+import model.UserData;
+import model.responses.RegistrationResponse;
 import service.UserService;
 import spark.Request;
 import spark.Response;
 import spark.Route;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class RegistrationHandler implements Route {
 
@@ -17,7 +24,41 @@ public class RegistrationHandler implements Route {
 
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        userService.register(request);
-        return "Registration Handler Response";
+        try {
+            // Parse the JSON request body
+            UserData userData = gson.fromJson(request.body(), UserData.class);
+
+            // Validate input
+            if (userData.username().isEmpty() || userData.password().isEmpty() || userData.email().isEmpty()) {
+                response.status(400);
+                response.type("application/json");
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("message", "Error: bad request");
+                return gson.toJson(errorResponse);
+            }
+
+            // Register the user
+            AuthData authData = userService.register(userData);
+            response.status(200);
+            response.type("application/json");
+            return gson.toJson(new RegistrationResponse(userData.username(), authData.authToken()));
+        } catch (DataAccessException e) {
+            response.type("application/json");
+            Map<String, String> errorResponse = new HashMap<>();
+            if (e.getMessage().contains("already taken")) {
+                response.status(403);
+                errorResponse.put("message", "Error: already taken");
+            } else {
+                response.status(500);
+                errorResponse.put("message", "Error: " + e.getMessage());
+            }
+            return gson.toJson(errorResponse);
+        } catch (Exception e) {
+            response.status(500);
+            response.type("application/json");
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Error: " + e.getMessage());
+            return gson.toJson(errorResponse);
+        }
     }
 }

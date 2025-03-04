@@ -6,6 +6,9 @@ import spark.Request;
 import spark.Response;
 import spark.Route;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ClearHandler implements Route {
 
     private final ClearService clearService;
@@ -25,7 +28,9 @@ public class ClearHandler implements Route {
         } catch (Exception e) {
             response.status(500);
             response.type("application/json");
-            return gson.toJson(new StandardResponse(StatusResponse.ERROR, "Error: " + e.getMessage()));
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Error: " + e.getMessage());
+            return gson.toJson(errorResponse);
         }
     }
 }

@@ -7,6 +7,8 @@ import model.AuthData;
 import model.UserData;
 import spark.Request;
 
+import java.util.UUID;
+
 public class UserService {
     private final AuthDAO auth_dao;
     private final UserDAO user_dao;
@@ -19,12 +21,23 @@ public class UserService {
         this.user_dao = userDataAccess;
     }
 
-    public void register(Request req) {
-        //get user
-            //if null create new user
-            //create auth for user
-        //else return user already exists error
+    public AuthData register(UserData userData) throws DataAccessException {
+        // Check if user already exists
+        if (user_dao.getUser(userData.username()) != null) {
+            throw new DataAccessException("already taken");
+        }
+
+        // Create new user
+        user_dao.addUser(userData);
+
+        // Generate auth token
+        String authToken = UUID.randomUUID().toString();
+        AuthData authData = new AuthData(authToken, userData.username());
+        auth_dao.addAuth(authData);
+
+        return authData;
     }
+
     public void login(Request req) {
         //get user
             //if null error username not found
@@ -34,14 +47,6 @@ public class UserService {
     }
     public void logout(Request req) {
         //delete auth
-    }
-
-    public UserData getUser(String username) throws DataAccessException {
-        return user_dao.getUser(username);
-    }
-
-    public UserData createUser(UserData userData) throws DataAccessException {
-        return user_dao.addUser(userData);
     }
 
     public AuthData createAuth(AuthData authData) throws DataAccessException {
