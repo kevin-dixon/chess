@@ -120,5 +120,26 @@ public class UserServiceTest {
         assertEquals("unauthorized", thrown.getMessage());
     }
 
-    //TODO: add more tests
+    @Test
+    public void testValidAuthToken() throws Exception {
+        UserData newUser = new UserData("username", "password", "email");
+        //Register new user
+        AuthData authData = userService.register(newUser);
+
+        //Check if authToken is valid
+        assertTrue(userService.validAuthToken(authData.authToken()));
+    }
+
+    @Test
+    public void testInvalidAuthToken() throws Exception {
+        UserData newUser = new UserData("valid-username", "password", "email");
+        //Register new user
+        AuthData authData = userService.register(newUser);
+
+        //Create Invalid AuthData
+        AuthData invalidAuthData = new AuthData("InvalidAuthToken", "valid-username");
+
+        //Check if authToken is valid
+        assertFalse(userService.validAuthToken(invalidAuthData.authToken()));
+    }
 }

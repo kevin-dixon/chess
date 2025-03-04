@@ -25,13 +25,13 @@ public class ClearService {
         deleteAllUsers();
     }
 
-    public void deleteAllAuths() throws DataAccessException {
+    private void deleteAllAuths() throws DataAccessException {
         auth_dao.deleteAllAuths();
     }
-    public void deleteAllGames() throws DataAccessException {
+    private void deleteAllGames() throws DataAccessException {
         game_dao.deleteAllGames();
     }
-    public void deleteAllUsers() throws DataAccessException {
+    private void deleteAllUsers() throws DataAccessException {
         user_dao.deleteAllUsers();
     }
 }
