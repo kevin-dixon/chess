@@ -4,6 +4,8 @@ import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import dataaccess.UserDAO;
+import model.requests.ClearRequest;
+import spark.Request;
 
 public class ClearService {
     private final AuthDAO auth_dao;
@@ -18,6 +20,12 @@ public class ClearService {
         this.auth_dao = authDataAccess;
         this.game_dao = gameDataAccess;
         this.user_dao = userDataAccess;
+    }
+
+    public void clear(Request req) throws DataAccessException {
+        deleteAllGames();
+        deleteAllAuths();
+        deleteAllUsers();
     }
 
     public void deleteAllAuths() throws DataAccessException {

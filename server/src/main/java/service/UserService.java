@@ -2,10 +2,10 @@ package service;
 
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
-import dataaccess.GameDAO;
 import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
+import spark.Request;
 
 public class UserService {
     private final AuthDAO auth_dao;
@@ -17,6 +17,23 @@ public class UserService {
     ) {
         this.auth_dao = authDataAccess;
         this.user_dao = userDataAccess;
+    }
+
+    public void register(Request req) {
+        //get user
+            //if null create new user
+            //create auth for user
+        //else return user already exists error
+    }
+    public void login(Request req) {
+        //get user
+            //if null error username not found
+        //else
+            //check password
+            //create auth for user
+    }
+    public void logout(Request req) {
+        //delete auth
     }
 
     public UserData getUser(String username) throws DataAccessException {
