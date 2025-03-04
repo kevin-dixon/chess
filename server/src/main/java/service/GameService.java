@@ -6,8 +6,6 @@ import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import model.AuthData;
 import model.GameData;
-import model.requests.JoinGameRequest;
-import spark.Request;
 
 import java.util.Collection;
 import java.util.Random;
@@ -84,10 +82,6 @@ public class GameService {
 
         // Add player to the game
         game_dao.addPlayerToGame(gameID, playerColor, authData.username());
-    }
-
-    public GameData getGame(GameData game) throws DataAccessException {
-        return game_dao.getGame(game);
     }
 
 }

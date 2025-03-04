@@ -17,16 +17,8 @@ public class UserDAO {
         return users.values();
     }
 
-    public UserData getUser(UserData find_userData) {
-        return users.get(find_userData.username());
-    }
-
     public UserData getUser(String username) {
         return users.get(username);
-    }
-
-    public void deleteUser(UserData del_userData) {
-        users.remove(del_userData.username());
     }
 
     public void deleteAllUsers() {

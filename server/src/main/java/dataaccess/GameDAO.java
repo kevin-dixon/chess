@@ -17,16 +17,8 @@ public class GameDAO {
         return games.values();
     }
 
-    public GameData getGame(GameData find_gameData) {
-        return games.get(find_gameData.hashCode());
-    }
-
     public GameData getGameByID(int gameID) {
         return games.get(gameID);
-    }
-
-    public void deleteGame(GameData del_gameData) {
-        games.remove(del_gameData.hashCode());
     }
 
     public void deleteAllGames() {
