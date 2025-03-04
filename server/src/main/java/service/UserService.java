@@ -61,6 +61,11 @@ public class UserService {
         auth_dao.deleteAuth(authToken);
     }
 
+    public boolean validAuthToken(String authToken) {
+        AuthData authData = auth_dao.getAuth(authToken);
+        return authData != null;
+    }
+
     public AuthData createAuth(AuthData authData) throws DataAccessException {
         return auth_dao.addAuth(authData);
     }

@@ -33,6 +33,15 @@ public class LogoutHandler implements Route {
                 return gson.toJson(errorResponse);
             }
 
+            //Check if the authToken exists
+            if (!userService.validAuthToken(authToken)) {
+                response.status(401);
+                response.type("application/json");
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("message", "Error: unauthorized");
+                return gson.toJson(errorResponse);
+            }
+
             //Logout user
             userService.logout(authToken);
             response.status(200);
