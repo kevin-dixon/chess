@@ -12,7 +12,7 @@ public class Server {
     UserDAO userDAO = new UserDAO();
 
     ClearService clearService = new ClearService(authDAO, gameDAO, userDAO);
-    GameService gameService = new GameService(gameDAO);
+    GameService gameService = new GameService(gameDAO, authDAO);
     UserService userService = new UserService(authDAO, userDAO);
 
     public Server() {

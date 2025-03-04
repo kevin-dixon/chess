@@ -8,9 +8,9 @@ import java.util.HashMap;
 public class GameDAO {
     final private HashMap<Integer, GameData> games = new HashMap<>();
 
-    public GameData addGame(GameData new_gameData) {
-        games.put(new_gameData.hashCode(), new_gameData);
-        return new_gameData;
+    public GameData addGame(GameData gameData) {
+        games.put(gameData.hashCode(), gameData);
+        return gameData;
     }
 
     public Collection<GameData> listGames() {

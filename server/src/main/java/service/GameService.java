@@ -4,24 +4,62 @@ import chess.ChessGame;
 import dataaccess.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
-import dataaccess.UserDAO;
+import model.AuthData;
 import model.GameData;
 import model.requests.JoinGameRequest;
 import spark.Request;
 
 import java.util.Collection;
+import java.util.Random;
 
 public class GameService {
     private final GameDAO game_dao;
+    private final AuthDAO auth_dao;
 
     public GameService(
-            GameDAO gameDataAccess
+            GameDAO gameDataAccess,
+            AuthDAO authDataAccess
     ) {
         this.game_dao = gameDataAccess;
+        this.auth_dao = authDataAccess;
     }
 
-    public Collection<GameData> getAllGames() throws DataAccessException {
+    public Collection<GameData> listGames() throws DataAccessException {
         return game_dao.listGames();
+    }
+
+    public int createGame(String authToken, String gameName) throws DataAccessException {
+        //Validate authToken
+        AuthData authData = auth_dao.getAuth(authToken);
+        if (authData == null) {
+            throw new DataAccessException("unauthorized");
+        }
+
+        /**
+         *         String gameName,
+         *         int gameID,
+         *         String whiteUsername,
+         *         String blackUsername,
+         *         ChessGame game
+         */
+
+        //Create new game
+        GameData newGame = new GameData(
+                newGameID(),
+                "",
+                "",
+                new ChessGame(),
+                gameName);
+        //Add new game to database
+        game_dao.addGame(newGame);
+        return newGame.gameID();
+    }
+
+    private int newGameID(){
+        Random random = new Random();
+        int randomNumber = 100000 + random.nextInt(900000); // Generates number between 100000 and 999999
+        System.out.println(randomNumber);
+        return randomNumber;
     }
 
     public void list(Request req) {
