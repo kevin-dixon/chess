@@ -1,10 +1,7 @@
 package service;
 
-import dataaccess.AuthDAO;
+import dataaccess.*;
 import dataaccess.DataAccessException;
-import dataaccess.GameDAO;
-import dataaccess.UserDAO;
-import model.requests.ClearRequest;
 import spark.Request;
 
 public class ClearService {

@@ -1,12 +1,8 @@
 package server;
 
-import dataaccess.AuthDAO;
-import dataaccess.GameDAO;
-import dataaccess.UserDAO;
+import dataaccess.*;
 import server.handlers.*;
-import service.ClearService;
-import service.GameService;
-import service.UserService;
+import service.*;
 import spark.*;
 
 public class Server {
@@ -29,18 +25,19 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints
-        Spark.delete("/db/clear", new ClearHandler(clearService));
-        Spark.post("/user/register", new RegistrationHandler(userService));
-        Spark.post("/session/login", new LoginHandler(userService));
-        Spark.delete("/session/logout", new LogoutHandler(userService));
-        Spark.get("/game/list", new ListGamesHandler(gameService));
-        Spark.post("/game/create", new CreateGameHandler(gameService));
-        Spark.put("/game/join", new JoinGameHandler(gameService));
+        Spark.delete("/db", new ClearHandler(clearService));
+        Spark.post("/user", new RegistrationHandler(userService));
+        Spark.post("/session", new LoginHandler(userService));
+        Spark.delete("/session", new LogoutHandler(userService));
+        Spark.get("/game", new ListGamesHandler(gameService));
+        Spark.post("/game", new CreateGameHandler(gameService));
+        Spark.put("/game", new JoinGameHandler(gameService));
 
         //Handle exceptions
         Spark.exception(Exception.class, (exception, req, res) -> {
             res.status(500);
-            res.body("Server Error: " + exception.getMessage());
+            res.type("application/json");
+            res.body("{\"message\": \"Error: " + exception.getMessage() + "\"}");
             exception.printStackTrace();
         });
 
