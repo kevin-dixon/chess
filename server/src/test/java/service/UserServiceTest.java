@@ -26,23 +26,67 @@ public class UserServiceTest {
     @Test
     public void testRegisterNewUser() throws Exception {
         UserData newUser = new UserData("username", "password", "email");
-
+        //Register new user
         AuthData authData = userService.register(newUser);
 
-        assertNotNull(authData);
-        assertEquals("username", authData.username());
-        assertNotNull(authData.authToken());
+        //Check that user exists
+        UserData retrievedUser = userDAO.getUser(newUser.username());
+        assertNotNull(retrievedUser);
+        assertEquals(newUser.username(), retrievedUser.username());
+        assertEquals(newUser.password(), retrievedUser.password());
+        assertEquals(newUser.email(), retrievedUser.email());
+
+        //Check that auth token exists
+        AuthData retrievedAuthData = authDAO.getAuth(authData.authToken());
+        assertNotNull(retrievedAuthData);
+        assertEquals(authData.authToken(), retrievedAuthData.authToken());
+        assertEquals(authData.username(), retrievedAuthData.username());
     }
 
     @Test
     public void testRegisterExistingUser() throws Exception {
         UserData dupUser = new UserData("username-duplicate", "password1234", "email@gmail.com");
-        //add user
+        //Register new user
         userDAO.addUser(dupUser);
 
-        //check message if adding duplicate user
+        //Check message if adding duplicate user
         DataAccessException thrown = assertThrows(DataAccessException.class, () -> userService.register(dupUser));
         assertEquals("already taken", thrown.getMessage());
+    }
+
+    @Test
+    public void testLoginUser() throws Exception {
+        UserData newUser = new UserData("username", "password", "email");
+        //Register new user
+        AuthData authData = userService.register(newUser);
+
+        //Check that user exists
+        assertNotNull(authData);
+
+        //Attempt login authentication
+        AuthData loginAuthData = userService.login(newUser);
+        assertNotNull(loginAuthData);
+        assertEquals(newUser.username(), loginAuthData.username());
+
+        //Check that auth token exists in the database
+        AuthData retrievedAuthData = authDAO.getAuth(loginAuthData.authToken());
+        assertNotNull(retrievedAuthData);
+        assertEquals(loginAuthData.authToken(), retrievedAuthData.authToken());
+        assertEquals(loginAuthData.username(), retrievedAuthData.username());
+    }
+
+    @Test
+    public void testWrongPasswordLogin() throws Exception {
+        UserData newUser = new UserData("username", "password", "email");
+        //Register new user
+        AuthData authData = userService.register(newUser);
+
+        //Create wrong password user data
+        UserData wrongPassword = new UserData("username", "wrong-password", "email");
+
+        //Check wrong password result message
+        DataAccessException thrown = assertThrows(DataAccessException.class, () -> userService.login(wrongPassword));
+        assertEquals("unauthorized", thrown.getMessage());
     }
 
     //TODO: add more tests

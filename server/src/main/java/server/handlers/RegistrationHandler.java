@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.UserData;
-import model.responses.RegistrationResponse;
+import model.responses.UserAuthResponse;
 import service.UserService;
 import spark.Request;
 import spark.Response;
@@ -41,7 +41,7 @@ public class RegistrationHandler implements Route {
             AuthData authData = userService.register(userData);
             response.status(200);
             response.type("application/json");
-            return gson.toJson(new RegistrationResponse(userData.username(), authData.authToken()));
+            return gson.toJson(new UserAuthResponse(userData.username(), authData.authToken()));
         } catch (DataAccessException e) {
             response.type("application/json");
             Map<String, String> errorResponse = new HashMap<>();
