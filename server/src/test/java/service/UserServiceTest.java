@@ -89,5 +89,36 @@ public class UserServiceTest {
         assertEquals("unauthorized", thrown.getMessage());
     }
 
+    @Test
+    public void testLogoutUser() throws Exception {
+        UserData newUser = new UserData("username", "password", "email");
+        //Register new user
+        AuthData authData = userService.register(newUser);
+
+        //Check that user exists
+        assertNotNull(authData);
+
+        //Attempt login
+        AuthData loginAuthData = userService.login(newUser);
+        assertNotNull(loginAuthData);
+        assertEquals(newUser.username(), loginAuthData.username());
+
+        //Attempt logout
+        userService.logout(loginAuthData.authToken());
+
+        //Verify the auth token is removed from the database
+        AuthData retrievedAuthData = authDAO.getAuth(loginAuthData.authToken());
+        assertNull(retrievedAuthData);
+    }
+
+    @Test
+    public void testLogoutWithInvalidToken() {
+        //Attempt logout with invalid token
+        String invalidToken = "invalidAuthToken";
+
+        DataAccessException thrown = assertThrows(DataAccessException.class, () -> userService.logout(invalidToken));
+        assertEquals("unauthorized", thrown.getMessage());
+    }
+
     //TODO: add more tests
 }

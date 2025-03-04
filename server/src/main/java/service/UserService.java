@@ -53,8 +53,12 @@ public class UserService {
         return authData;
     }
 
-    public void logout(Request req) {
-        //delete auth
+    public void logout(String authToken) throws DataAccessException {
+        AuthData authData = auth_dao.getAuth(authToken);
+        if (authData == null) {
+            throw new DataAccessException("unauthorized");
+        }
+        auth_dao.deleteAuth(authToken);
     }
 
     public AuthData createAuth(AuthData authData) throws DataAccessException {
