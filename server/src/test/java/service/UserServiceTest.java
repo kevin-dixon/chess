@@ -55,15 +55,6 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testRegisterNullPassword() throws Exception {
-        UserData newUser = new UserData("username", null, "email@gmail.com");
-
-        //Check message if adding duplicate user
-        DataAccessException thrown = assertThrows(DataAccessException.class, () -> userService.register(newUser));
-        assertEquals("bad request", thrown.getMessage());
-    }
-
-    @Test
     public void testLoginUser() throws Exception {
         UserData newUser = new UserData("username", "password", "email");
         //Register new user

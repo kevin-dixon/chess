@@ -84,19 +84,19 @@ public class GameServiceTest {
         assertEquals("unauthorized", thrown.getMessage());
     }
 
+
     @Test
     public void testJoinGameValid() throws Exception {
         String authToken = "validAuthToken";
-        int gameID = 123456;
         String playerColor = "WHITE";
 
         AuthData authData = new AuthData(authToken, "username");
         authDAO.addAuth(authData);
 
-        //Create new game
-        gameService.createGame(authToken, "NewGame");
+        // Create new game and get the generated gameID
+        int gameID = gameService.createGame(authToken, "NewGame");
 
-        //Attempt join game
+        // Attempt to join the game
         gameService.joinGame(authToken, gameID, playerColor);
 
         GameData updatedGameData = gameDAO.getGameByID(gameID);
