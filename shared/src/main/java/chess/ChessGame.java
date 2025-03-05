@@ -96,12 +96,12 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         // test move
         ChessPosition start = move.getStartPosition();
-        Collection<ChessMove> valid_moves;
+        Collection<ChessMove> validMov;
 
         // only test move if there is a piece and it is current team
         if (gameBoard.getPiece(start) != null) {
             if (gameBoard.getPiece(start).getTeamColor() == currTeam) {
-                valid_moves = validMoves(start);
+                validMov = validMoves(start);
             } else {
                 throw new InvalidMoveException("Not team turn's piece");
             }
@@ -111,7 +111,7 @@ public class ChessGame {
 
         // correct team piece is chosen, test if move is in list of valid moves
         boolean foundMove = false;
-        for (ChessMove m : valid_moves) {
+        for (ChessMove m : validMov) {
             // move is a valid move
             if (Objects.deepEquals(m, move)) {
                 //make move
