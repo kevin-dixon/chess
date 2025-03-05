@@ -4,12 +4,13 @@ import model.GameData;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class GameDAO {
     final private HashMap<Integer, GameData> games = new HashMap<>();
 
     public GameData addGame(GameData gameData) {
-        games.put(gameData.hashCode(), gameData);
+        games.put(gameData.gameID(), gameData); // Use gameID as the key
         return gameData;
     }
 
@@ -26,50 +27,71 @@ public class GameDAO {
     }
 
     public void addPlayerToGame(int gameID, String playerColor, String username) {
-        //TODO: fix this with new record update functions
-
         GameData gameData = games.get(gameID);
         if (gameData == null) {
-            throw new IllegalArgumentException("Game not found");
+            throw new IllegalArgumentException("bad request");
         }
 
-        /** GameData Updated:
-         *  GameID,
-         *  whiteUsername,
-         *  blackUsername,
-         *  ChessGame,
-         *  gameName
-         */
-
-        switch (playerColor.toUpperCase()) {
-            case "WHITE":
-                if (gameData.whiteUsername() != null) {
-                    throw new IllegalArgumentException("already taken");
-                }
-                gameData = new GameData(
-                        gameData.gameID(),
-                        username,
-                        gameData.blackUsername(),
-                        gameData.game(),
-                        gameData.gameName()
-                );
-                break;
-            case "BLACK":
-                if (gameData.blackUsername() != null) {
-                    throw new IllegalArgumentException("already taken");
-                }
-                gameData = new GameData(
-                        gameData.gameID(),
-                        gameData.whiteUsername(),
-                        username,
-                        gameData.game(),
-                        gameData.gameName()
-                );
-                break;
-            default:
-                throw new IllegalArgumentException("bad request");
+        // Update player username
+        GameData updatedGame;
+        if (Objects.equals(playerColor, "BLACK")) {
+            updatedGame = gameData.updateBlackUser(username);
+        } else if (Objects.equals(playerColor, "WHITE")) {
+            updatedGame = gameData.updateWhiteUser(username);
+        } else {
+            throw new IllegalArgumentException("bad request");
         }
 
-        games.put(gameID, gameData); //Update the game with the new player
+        // Swap out new gameData
+        games.put(updatedGame.gameID(), updatedGame); // Use gameID as the key
     }
 }
+
+/*package dataaccess;
+
+import model.GameData;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Objects;
+
+public class GameDAO {
+    final private HashMap<Integer, GameData> games = new HashMap<>();
+
+    public GameData addGame(GameData gameData) {
+        games.put(gameData.hashCode(), gameData);
+        return gameData;
+    }
+
+    public Collection<GameData> listGames() throws DataAccessException{
+        return games.values();
+    }
+
+    public GameData getGameByID(int gameID) {
+        return games.get(gameID);
+    }
+
+    public void deleteAllGames() {
+        games.clear();
+    }
+
+    public void addPlayerToGame(int gameID, String playerColor, String username) {
+        GameData gameData = games.get(gameID);
+        GameData updatedGame;
+        if (gameData == null) {
+            throw new IllegalArgumentException("bad request");
+        }
+        //Update player username
+        if (Objects.equals(playerColor, "BLACK")) {
+            updatedGame = gameData.updateBlackUser(username);
+        } else if (Objects.equals(playerColor, "WHITE")) {
+            updatedGame = gameData.updateWhiteUser(username);
+        } else {
+            throw new IllegalArgumentException("bad request");
+        }
+        //Swap out new gameData
+        games.put(updatedGame.hashCode(), updatedGame);
+        //games.remove(gameData.hashCode());
+
+    }
+}*/

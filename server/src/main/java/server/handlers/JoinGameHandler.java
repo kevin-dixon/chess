@@ -11,6 +11,8 @@ import spark.Route;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.lang.Integer.parseInt;
+
 public class JoinGameHandler implements Route {
 
     private final GameService gameService;
@@ -29,15 +31,7 @@ public class JoinGameHandler implements Route {
             String authToken = request.headers("authorization");
 
             //Validate authToken
-            if (authToken == null || authToken.isEmpty()) {
-                response.status(401);
-                response.type("application/json");
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("message", "Error: unauthorized");
-                return gson.toJson(errorResponse);
-            }
-            //Check if the authToken exists
-            if (!userService.validAuthToken(authToken)) {
+            if (authToken == null || authToken.isEmpty() || !userService.validAuthToken(authToken)) {
                 response.status(401);
                 response.type("application/json");
                 Map<String, String> errorResponse = new HashMap<>();
@@ -45,10 +39,10 @@ public class JoinGameHandler implements Route {
                 return gson.toJson(errorResponse);
             }
 
-            //Parse the JSON request body
-            Map<String, String> requestBody = gson.fromJson(request.body(), Map.class);
-            String playerColor = requestBody.get("playerColor");
-            Integer gameID = requestBody.get("gameID") != null ? Integer.parseInt(requestBody.get("gameID")) : null;
+            // Parse the JSON request body
+            Map<String, Object> requestBody = gson.fromJson(request.body(), Map.class);
+            String playerColor = (String) requestBody.get("playerColor");
+            Integer gameID = requestBody.get("gameID") != null ? ((Double) requestBody.get("gameID")).intValue() : null;
 
             //Validate input
             if (playerColor == null || playerColor.isEmpty() || gameID == null) {
@@ -63,27 +57,21 @@ public class JoinGameHandler implements Route {
             gameService.joinGame(authToken, gameID, playerColor);
             response.status(200);
             response.type("application/json");
-            return "";
+            return "{}";
         } catch (DataAccessException e) {
             String message = e.getMessage();
             response.type("application/json");
             Map<String, String> errorResponse = new HashMap<>();
-            if ("Unauthorized".equals(message)) {
+            if ("unauthorized".equals(message)) {
                 response.status(401);
                 errorResponse.put("message", "Error: unauthorized");
-            } else if ("Already taken".equals(message)) {
+            } else if ("already taken".equals(message)) {
                 response.status(403);
                 errorResponse.put("message", "Error: already taken");
             } else {
                 response.status(500);
                 errorResponse.put("message", "Error: " + message);
             }
-            return gson.toJson(errorResponse);
-        } catch (Exception e) {
-            response.status(500);
-            response.type("application/json");
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Error: " + e.getMessage());
             return gson.toJson(errorResponse);
         }
     }

@@ -9,13 +9,13 @@ public record GameData (
         ChessGame game,
         String gameName
 ) {
-    GameData updateGameName(String newName) {
+    public GameData updateGameName(String newName) {
         return new GameData((gameID), (whiteUsername), (blackUsername), (game), newName);
     }
-    GameData updateWhiteUser(String newUsername) {
+    public GameData updateWhiteUser(String newUsername) {
         return new GameData((gameID), newUsername, (blackUsername), (game), (gameName));
     }
-    GameData updateBlackUser(String newUsername) {
+    public GameData updateBlackUser(String newUsername) {
         return new GameData((gameID), (whiteUsername), newUsername, (game), (gameName));
     }
 }

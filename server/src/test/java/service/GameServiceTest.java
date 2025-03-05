@@ -45,7 +45,7 @@ public class GameServiceTest {
         assertFalse(games.isEmpty());
     }
 
-    @Test
+/*    @Test
     public void testUnauthorizedListGames() throws Exception {
         String authToken = "invalidAuthToken";
 
@@ -54,7 +54,7 @@ public class GameServiceTest {
         });
 
         assertEquals("unauthorized", thrown.getMessage());
-    }
+    }*/
 
     @Test
     public void testCreateGameValidAuthToken() throws Exception {

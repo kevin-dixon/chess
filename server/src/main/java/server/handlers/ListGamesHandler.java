@@ -29,15 +29,7 @@ public class ListGamesHandler implements Route {
             String authToken = request.headers("authorization");
 
             //Validate authToken
-            if (authToken == null || authToken.isEmpty()) {
-                response.status(401);
-                response.type("application/json");
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("message", "Error: unauthorized");
-                return gson.toJson(errorResponse);
-            }
-            //Check if the authToken exists
-            if (!userService.validAuthToken(authToken)) {
+            if (authToken == null || authToken.isEmpty() || !userService.validAuthToken(authToken)) {
                 response.status(401);
                 response.type("application/json");
                 Map<String, String> errorResponse = new HashMap<>();

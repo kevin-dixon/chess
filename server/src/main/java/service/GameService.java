@@ -14,10 +14,7 @@ public class GameService {
     private final GameDAO game_dao;
     private final AuthDAO auth_dao;
 
-    public GameService(
-            GameDAO gameDataAccess,
-            AuthDAO authDataAccess
-    ) {
+    public GameService(GameDAO gameDataAccess, AuthDAO authDataAccess) {
         this.game_dao = gameDataAccess;
         this.auth_dao = authDataAccess;
     }
@@ -32,20 +29,11 @@ public class GameService {
         if (authData == null) {
             throw new DataAccessException("unauthorized");
         }
-
-        /** New GameData Created:
-         *String gameName: provided
-         *int gameID: random 6-digit integer
-         *String whiteUsername: ""
-         *String blackUsername: ""
-         *ChessGame game: provided
-         */
-
         //Create new game
         GameData newGame = new GameData(
                 newGameID(),
-                "",
-                "",
+                null,
+                null,
                 new ChessGame(),
                 gameName
         );
@@ -56,9 +44,8 @@ public class GameService {
 
     private int newGameID() {
         Random random = new Random();
-        int randomNumber = 100000 + random.nextInt(900000); // Generates number between 100000 and 999999
-        System.out.println(randomNumber);
-        return randomNumber;
+        //System.out.println(randomNumber);
+        return 100000 + random.nextInt(900000);
     }
 
     public void joinGame(String authToken, int gameID, String playerColor) throws DataAccessException {
@@ -75,13 +62,12 @@ public class GameService {
         }
 
         // Check if the color is already taken
-        if (("WHITE".equals(playerColor) && gameData.whiteUsername() != null) ||
-                ("BLACK".equals(playerColor) && gameData.blackUsername() != null)) {
+        if (("WHITE".equals(playerColor) && !gameData.whiteUsername().isEmpty()) ||
+                ("BLACK".equals(playerColor) && !gameData.blackUsername().isEmpty())) {
             throw new DataAccessException("already taken");
         }
 
         // Add player to the game
         game_dao.addPlayerToGame(gameID, playerColor, authData.username());
     }
-
 }
