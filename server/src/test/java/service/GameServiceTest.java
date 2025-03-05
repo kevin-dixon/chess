@@ -86,9 +86,10 @@ public class GameServiceTest {
         AuthData authData = new AuthData(authToken, "username");
         authDAO.addAuth(authData);
 
-        GameData gameData = new GameData(gameID, "", "", new ChessGame(), "Test Game");
-        gameDAO.addGame(gameData);
+        //Create new game
+        gameService.createGame(authToken, "NewGame");
 
+        //Attempt join game
         gameService.joinGame(authToken, gameID, playerColor);
 
         GameData updatedGameData = gameDAO.getGameByID(gameID);

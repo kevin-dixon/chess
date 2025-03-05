@@ -36,6 +36,14 @@ public class JoinGameHandler implements Route {
                 errorResponse.put("message", "Error: unauthorized");
                 return gson.toJson(errorResponse);
             }
+            //Check if the authToken exists
+            if (!userService.validAuthToken(authToken)) {
+                response.status(401);
+                response.type("application/json");
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("message", "Error: unauthorized");
+                return gson.toJson(errorResponse);
+            }
 
             //Parse the JSON request body
             Map<String, String> requestBody = gson.fromJson(request.body(), Map.class);
@@ -51,20 +59,11 @@ public class JoinGameHandler implements Route {
                 return gson.toJson(errorResponse);
             }
 
-            //Check if the authToken exists
-            if (!userService.validAuthToken(authToken)) {
-                response.status(401);
-                response.type("application/json");
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("message", "Error: unauthorized");
-                return gson.toJson(errorResponse);
-            }
-
             //Join the game
             gameService.joinGame(authToken, gameID, playerColor);
             response.status(200);
             response.type("application/json");
-            return "{}";
+            return "";
         } catch (DataAccessException e) {
             String message = e.getMessage();
             response.type("application/json");

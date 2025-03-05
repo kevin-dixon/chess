@@ -23,7 +23,7 @@ public class RegistrationHandler implements Route {
     }
 
     @Override
-    public Object handle(Request request, Response response) throws Exception {
+    public Object handle(Request request, Response response) throws DataAccessException {
         try {
             //Parse the JSON request body
             UserData userData = gson.fromJson(request.body(), UserData.class);

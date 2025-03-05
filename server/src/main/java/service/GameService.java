@@ -65,19 +65,19 @@ public class GameService {
         // Validate authToken
         AuthData authData = auth_dao.getAuth(authToken);
         if (authData == null) {
-            throw new DataAccessException("Unauthorized");
+            throw new DataAccessException("unauthorized");
         }
 
         // Validate game existence
         GameData gameData = game_dao.getGameByID(gameID);
         if (gameData == null) {
-            throw new DataAccessException("Game not found");
+            throw new DataAccessException("bad request");
         }
 
         // Check if the color is already taken
         if (("WHITE".equals(playerColor) && gameData.whiteUsername() != null) ||
                 ("BLACK".equals(playerColor) && gameData.blackUsername() != null)) {
-            throw new DataAccessException("Already taken");
+            throw new DataAccessException("already taken");
         }
 
         // Add player to the game
