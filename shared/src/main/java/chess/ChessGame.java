@@ -59,13 +59,13 @@ public class ChessGame {
         }
 
         // get candidate moves before validating
-        Collection<ChessMove> candidate_moves = gameBoard.getPiece(startPosition).pieceMoves(gameBoard, startPosition);
+        Collection<ChessMove> candidateMoves = gameBoard.getPiece(startPosition).pieceMoves(gameBoard, startPosition);
         // initialize empty list of validated moves
-        Collection<ChessMove> validated_moves = new ArrayList<>();
+        Collection<ChessMove> validatedMoves = new ArrayList<>();
         // get team of position
         TeamColor currColor = gameBoard.getPiece(startPosition).getTeamColor();
 
-        for (ChessMove mov : candidate_moves) {
+        for (ChessMove mov : candidateMoves) {
             // create a deep copy of the board spaces for each move test
             ChessPiece[][] originalSpaces = gameBoard.getSpaces();
             ChessPiece[][] copySpaces = new ChessPiece[originalSpaces.length][originalSpaces[0].length];
@@ -79,12 +79,12 @@ public class ChessGame {
             gameBoard.movePiece(mov);
             if (!isInCheck(currColor)) {
                 // doesn't leave in check, add to valid moves
-                validated_moves.add(mov);
+                validatedMoves.add(mov);
             }
             // reset board back to how it was
             gameBoard.setSpaces(copySpaces);
         }
-        return validated_moves;
+        return validatedMoves;
     }
 
     /**
@@ -110,7 +110,7 @@ public class ChessGame {
         }
 
         // correct team piece is chosen, test if move is in list of valid moves
-        boolean found_move = false;
+        boolean foundMove = false;
         for (ChessMove m : valid_moves) {
             // move is a valid move
             if (Objects.deepEquals(m, move)) {
@@ -120,11 +120,11 @@ public class ChessGame {
                     //pawn move promotion; change piece at end to promotion type
                     gameBoard.addPiece(m.getEndPosition(), new ChessPiece(currTeam, m.getPromotionPiece()));
                 }
-                found_move = true;
+                foundMove = true;
                 nextTeam();
             }
         }
-        if (!found_move) { throw new InvalidMoveException("Invalid move"); }
+        if (!foundMove) { throw new InvalidMoveException("Invalid move"); }
     }
 
     public void nextTeam() {
@@ -182,10 +182,10 @@ public class ChessGame {
         }
 
         // get all current team positions
-        Collection<ChessPosition> team_positions = gameBoard.teamPositions(teamColor);
+        Collection<ChessPosition> teamPos = gameBoard.teamPositions(teamColor);
 
         // for each team piece, check that after each move the team is not in check
-        for (ChessPosition pos : team_positions) {
+        for (ChessPosition pos : teamPos) {
             Collection<ChessMove> moves = validMoves(pos);
             for (ChessMove mov : moves) {
                 // create a deep copy of the board spaces for each move test
@@ -225,10 +225,10 @@ public class ChessGame {
         }
 
         // get all current team positions
-        Collection<ChessPosition> team_positions = gameBoard.teamPositions(teamColor);
+        Collection<ChessPosition> teamPos = gameBoard.teamPositions(teamColor);
 
         // for each team piece, check that after each move the team is not in check
-        for (ChessPosition pos : team_positions) {
+        for (ChessPosition pos : teamPos) {
             Collection<ChessMove> moves = validMoves(pos);
             for (ChessMove mov : moves) {
                 // create a deep copy of the board spaces for each move test

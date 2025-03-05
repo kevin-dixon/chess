@@ -5,18 +5,18 @@ import dataaccess.DataAccessException;
 import spark.Request;
 
 public class ClearService {
-    private final AuthDAO auth_dao;
-    private final GameDAO game_dao;
-    private final UserDAO user_dao;
+    private final AuthDAO authDao;
+    private final GameDAO gameDao;
+    private final UserDAO userDao;
 
     public ClearService(
             AuthDAO authDataAccess,
             GameDAO gameDataAccess,
             UserDAO userDataAccess
             ) {
-        this.auth_dao = authDataAccess;
-        this.game_dao = gameDataAccess;
-        this.user_dao = userDataAccess;
+        this.authDao = authDataAccess;
+        this.gameDao = gameDataAccess;
+        this.userDao = userDataAccess;
     }
 
     public void clear(Request req) throws DataAccessException {
@@ -26,12 +26,12 @@ public class ClearService {
     }
 
     private void deleteAllAuths() throws DataAccessException {
-        auth_dao.deleteAllAuths();
+        authDao.deleteAllAuths();
     }
     private void deleteAllGames() throws DataAccessException {
-        game_dao.deleteAllGames();
+        gameDao.deleteAllGames();
     }
     private void deleteAllUsers() throws DataAccessException {
-        user_dao.deleteAllUsers();
+        userDao.deleteAllUsers();
     }
 }

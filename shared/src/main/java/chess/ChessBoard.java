@@ -84,16 +84,6 @@ public class ChessBoard {
         }
     }
 
-    public void swapPiece(ChessMove move) {
-        ChessPosition start = move.getStartPosition();
-        ChessPosition end = move.getEndPosition();
-
-        ChessPiece temp = spaces[start.getRow()][start.getColumn()];
-
-        spaces[end.getRow()][end.getColumn()] = spaces[start.getRow()][start.getColumn()];
-        spaces[start.getRow()][start.getColumn()] = temp;
-    }
-
     /**
      * Gets the board positions of all pieces on the given team
      * @param color which team to get positions of

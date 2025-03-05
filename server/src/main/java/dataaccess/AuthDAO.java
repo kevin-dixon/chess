@@ -8,9 +8,9 @@ import java.util.HashMap;
 public class AuthDAO {
     final private HashMap<String, AuthData> auths = new HashMap<>();
 
-    public AuthData addAuth(AuthData new_authData) {
-        auths.put(new_authData.authToken(), new_authData);
-        return new_authData;
+    public AuthData addAuth(AuthData newAuthData) {
+        auths.put(newAuthData.authToken(), newAuthData);
+        return newAuthData;
     }
 
     public Collection<AuthData> listAuths() {

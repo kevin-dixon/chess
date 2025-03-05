@@ -5,42 +5,41 @@ import dataaccess.DataAccessException;
 import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
-import spark.Request;
 
 import java.util.UUID;
 
 public class UserService {
-    private final AuthDAO auth_dao;
-    private final UserDAO user_dao;
+    private final AuthDAO authDao;
+    private final UserDAO userDao;
 
     public UserService(
             AuthDAO authDataAccess,
             UserDAO userDataAccess
     ) {
-        this.auth_dao = authDataAccess;
-        this.user_dao = userDataAccess;
+        this.authDao = authDataAccess;
+        this.userDao = userDataAccess;
     }
 
     public AuthData register(UserData userData) throws DataAccessException {
         //Check if user already exists
-        if (user_dao.getUser(userData.username()) != null) {
+        if (userDao.getUser(userData.username()) != null) {
             throw new DataAccessException("already taken");
         }
 
         //Create new user
-        user_dao.addUser(userData);
+        userDao.addUser(userData);
 
         //Generate auth token
         String authToken = UUID.randomUUID().toString();
         AuthData authData = new AuthData(authToken, userData.username());
-        auth_dao.addAuth(authData);
+        authDao.addAuth(authData);
 
         return authData;
     }
 
     public AuthData login(UserData userData) throws DataAccessException {
         //Check if user exists or wrong password
-        UserData existingUser = user_dao.getUser(userData.username());
+        UserData existingUser = userDao.getUser(userData.username());
         if (existingUser == null || !existingUser.password().equals(userData.password())) {
             throw new DataAccessException("unauthorized");
         }
@@ -48,21 +47,21 @@ public class UserService {
         //Generate auth token
         String authToken = UUID.randomUUID().toString();
         AuthData authData = new AuthData(authToken, userData.username());
-        auth_dao.addAuth(authData);
+        authDao.addAuth(authData);
 
         return authData;
     }
 
     public void logout(String authToken) throws DataAccessException {
-        AuthData authData = auth_dao.getAuth(authToken);
+        AuthData authData = authDao.getAuth(authToken);
         if (authData == null) {
             throw new DataAccessException("unauthorized");
         }
-        auth_dao.deleteAuth(authToken);
+        authDao.deleteAuth(authToken);
     }
 
     public boolean validAuthToken(String authToken) {
-        AuthData authData = auth_dao.getAuth(authToken);
+        AuthData authData = authDao.getAuth(authToken);
         return authData != null;
     }
 

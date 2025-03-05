@@ -12,26 +12,26 @@ import java.util.Objects;
 import java.util.Random;
 
 public class GameService {
-    private final GameDAO game_dao;
-    private final AuthDAO auth_dao;
+    private final GameDAO gameDao;
+    private final AuthDAO authDao;
 
     public GameService(GameDAO gameDataAccess, AuthDAO authDataAccess) {
-        this.game_dao = gameDataAccess;
-        this.auth_dao = authDataAccess;
+        this.gameDao = gameDataAccess;
+        this.authDao = authDataAccess;
     }
 
     public Collection<GameData> listGames(String authToken) throws DataAccessException {
         // Validate authToken
-        AuthData authData = auth_dao.getAuth(authToken);
+        AuthData authData = authDao.getAuth(authToken);
         if (authData == null) {
             throw new DataAccessException("unauthorized");
         }
-        return game_dao.listGames();
+        return gameDao.listGames();
     }
 
     public int createGame(String authToken, String gameName) throws DataAccessException {
         //Validate authToken
-        AuthData authData = auth_dao.getAuth(authToken);
+        AuthData authData = authDao.getAuth(authToken);
         if (authData == null) {
             throw new DataAccessException("unauthorized");
         }
@@ -44,7 +44,7 @@ public class GameService {
                 gameName
         );
         //Add new game to database
-        game_dao.addGame(newGame);
+        gameDao.addGame(newGame);
         return newGame.gameID();
     }
 
@@ -56,13 +56,13 @@ public class GameService {
 
     public void joinGame(String authToken, int gameID, String playerColor) throws DataAccessException {
         //Validate authToken
-        AuthData authData = auth_dao.getAuth(authToken);
+        AuthData authData = authDao.getAuth(authToken);
         if (authData == null) {
             throw new DataAccessException("unauthorized");
         }
 
         //Validate input and game existence
-        GameData gameData = game_dao.getGameByID(gameID);
+        GameData gameData = gameDao.getGameByID(gameID);
         if (gameData == null || (!Objects.equals(playerColor, "WHITE") && !Objects.equals(playerColor, "BLACK"))) {
             throw new DataAccessException("bad request");
         }
@@ -74,6 +74,6 @@ public class GameService {
         }
 
         //Add player to the game
-        game_dao.addPlayerToGame(gameID, playerColor, authData.username());
+        gameDao.addPlayerToGame(gameID, playerColor, authData.username());
     }
 }

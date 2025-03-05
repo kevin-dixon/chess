@@ -9,9 +9,6 @@ public record GameData (
         ChessGame game,
         String gameName
 ) {
-    public GameData updateGameName(String newName) {
-        return new GameData((gameID), (whiteUsername), (blackUsername), (game), newName);
-    }
     public GameData updateWhiteUser(String newUsername) {
         return new GameData((gameID), newUsername, (blackUsername), (game), (gameName));
     }
