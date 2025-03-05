@@ -62,13 +62,13 @@ public class GameService {
             throw new DataAccessException("bad request");
         }
 
-        // Check if the color is already taken
+        //Check if the color is already taken
         if (("WHITE".equals(playerColor) && gameData.whiteUsername() != null) ||
                 ("BLACK".equals(playerColor) && gameData.blackUsername() != null)) {
             throw new DataAccessException("already taken");
         }
 
-        // Add player to the game
+        //Add player to the game
         game_dao.addPlayerToGame(gameID, playerColor, authData.username());
     }
 }

@@ -35,8 +35,7 @@ public class RegistrationHandler implements Route {
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("message", "Error: bad request");
                 return gson.toJson(errorResponse);
-            }
-            else if (userData.username().isEmpty() || userData.password().isEmpty() || userData.email().isEmpty()) {
+            } else if (userData.username().isEmpty() || userData.password().isEmpty() || userData.email().isEmpty()) {
                 response.status(400);
                 response.type("application/json");
                 Map<String, String> errorResponse = new HashMap<>();

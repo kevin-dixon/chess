@@ -27,6 +27,7 @@ public class ListGamesHandler implements Route {
         try {
             //Get authToken
             String authToken = request.headers("authorization");
+
             //Validate authToken
             if (authToken == null || authToken.isEmpty() || !userService.validAuthToken(authToken)) {
                 response.status(401);

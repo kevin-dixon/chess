@@ -23,7 +23,7 @@ public class Server {
 
         Spark.staticFiles.location("web");
 
-        // Register your endpoints
+        //Register your endpoints
         Spark.delete("/db", new ClearHandler(clearService));
         Spark.post("/user", new RegistrationHandler(userService));
         Spark.post("/session", new LoginHandler(userService));
