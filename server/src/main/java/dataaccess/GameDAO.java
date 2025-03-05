@@ -26,6 +26,8 @@ public class GameDAO {
     }
 
     public void addPlayerToGame(int gameID, String playerColor, String username) {
+        //TODO: fix this with new record update functions
+
         GameData gameData = games.get(gameID);
         if (gameData == null) {
             throw new IllegalArgumentException("Game not found");

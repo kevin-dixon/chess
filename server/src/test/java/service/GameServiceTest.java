@@ -28,15 +28,16 @@ public class GameServiceTest {
 
     @Test
     public void testListGames() throws Exception {
-        Collection<GameData> games = gameService.listGames();
+        String authToken = "validAuthToken";
+        AuthData authData = new AuthData(authToken, "username");
+        authDAO.addAuth(authData);
+
+        Collection<GameData> games = gameService.listGames(authToken);
         assertNotNull(games);
 
         //Add some Games
-        String authToken = "validAuthToken";
         String gameName = "Test Game";
         String gameName2 = "Test Game 2";
-        AuthData authData = new AuthData(authToken, "username");
-        authDAO.addAuth(authData);
         gameService.createGame(authToken, gameName);
         gameService.createGame(authToken, gameName2);
 
@@ -46,7 +47,13 @@ public class GameServiceTest {
 
     @Test
     public void testUnauthorizedListGames() throws Exception {
-        //TODO: add authentication to ListGames
+        String authToken = "invalidAuthToken";
+
+        DataAccessException thrown = assertThrows(DataAccessException.class, () -> {
+            gameService.listGames(authToken);
+        });
+
+        assertEquals("unauthorized", thrown.getMessage());
     }
 
     @Test

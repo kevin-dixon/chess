@@ -22,7 +22,7 @@ public class GameService {
         this.auth_dao = authDataAccess;
     }
 
-    public Collection<GameData> listGames() throws DataAccessException {
+    public Collection<GameData> listGames(String authToken) throws DataAccessException {
         return game_dao.listGames();
     }
 
