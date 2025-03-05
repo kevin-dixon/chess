@@ -25,11 +25,18 @@ public class RegistrationHandler implements Route {
     @Override
     public Object handle(Request request, Response response) throws Exception {
         try {
-            // Parse the JSON request body
+            //Parse the JSON request body
             UserData userData = gson.fromJson(request.body(), UserData.class);
 
-            // Validate input
-            if (userData.username().isEmpty() || userData.password().isEmpty() || userData.email().isEmpty()) {
+            //Validate input
+            if (userData.password() == null)  {
+                response.status(400);
+                response.type("application/json");
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("message", "Error: bad request");
+                return gson.toJson(errorResponse);
+            }
+            else if (userData.username().isEmpty() || userData.password().isEmpty() || userData.email().isEmpty()) {
                 response.status(400);
                 response.type("application/json");
                 Map<String, String> errorResponse = new HashMap<>();
@@ -37,7 +44,7 @@ public class RegistrationHandler implements Route {
                 return gson.toJson(errorResponse);
             }
 
-            // Register the user
+            //Register user
             AuthData authData = userService.register(userData);
             response.status(200);
             response.type("application/json");
