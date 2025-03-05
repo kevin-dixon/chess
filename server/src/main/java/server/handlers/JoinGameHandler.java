@@ -68,6 +68,9 @@ public class JoinGameHandler implements Route {
             } else if ("already taken".equals(message)) {
                 response.status(403);
                 errorResponse.put("message", "Error: already taken");
+            } else if ("bad request".equals(message)) {
+                response.status(400);
+                errorResponse.put("message", "Error: bad request");
             } else {
                 response.status(500);
                 errorResponse.put("message", "Error: " + message);

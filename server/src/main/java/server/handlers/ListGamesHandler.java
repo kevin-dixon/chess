@@ -27,7 +27,6 @@ public class ListGamesHandler implements Route {
         try {
             //Get authToken
             String authToken = request.headers("authorization");
-
             //Validate authToken
             if (authToken == null || authToken.isEmpty() || !userService.validAuthToken(authToken)) {
                 response.status(401);
@@ -39,15 +38,17 @@ public class ListGamesHandler implements Route {
 
             //Get games list
             var gamesList = gameService.listGames(authToken).stream()
-                    .map(game -> Map.of(
-                            "gameID", game.gameID(),
-                            "whiteUsername", game.whiteUsername(),
-                            "blackUsername", game.blackUsername(),
-                            "gameName", game.gameName()
-                    ))
+                    .map(game -> {
+                        Map<String, Object> gameMap = new HashMap<>();
+                        gameMap.put("gameID", game.gameID());
+                        gameMap.put("whiteUsername", game.whiteUsername());
+                        gameMap.put("blackUsername", game.blackUsername());
+                        gameMap.put("gameName", game.gameName());
+                        return gameMap;
+                    })
                     .collect(Collectors.toList());
 
-            //Parse games into response
+            //Parse Message
             Map<String, Object> successResponse = new HashMap<>();
             successResponse.put("games", gamesList);
             response.status(200);

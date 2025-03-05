@@ -8,6 +8,7 @@ import model.AuthData;
 import model.GameData;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Random;
 
 public class GameService {
@@ -49,15 +50,15 @@ public class GameService {
     }
 
     public void joinGame(String authToken, int gameID, String playerColor) throws DataAccessException {
-        // Validate authToken
+        //Validate authToken
         AuthData authData = auth_dao.getAuth(authToken);
         if (authData == null) {
             throw new DataAccessException("unauthorized");
         }
 
-        // Validate game existence
+        //Validate input and game existence
         GameData gameData = game_dao.getGameByID(gameID);
-        if (gameData == null) {
+        if (gameData == null || (!Objects.equals(playerColor, "WHITE") && !Objects.equals(playerColor, "BLACK"))) {
             throw new DataAccessException("bad request");
         }
 
