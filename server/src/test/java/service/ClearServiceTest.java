@@ -56,6 +56,4 @@ public class ClearServiceTest {
         assertTrue(gameDAO.listGames().isEmpty());
         assertTrue(authDAO.listAuths().isEmpty());
     }
-
-    //TODO: add more tests
 }
