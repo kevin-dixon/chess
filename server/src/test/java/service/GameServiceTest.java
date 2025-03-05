@@ -45,7 +45,7 @@ public class GameServiceTest {
         assertFalse(games.isEmpty());
     }
 
-/*    @Test
+    @Test
     public void testUnauthorizedListGames() throws Exception {
         String authToken = "invalidAuthToken";
 
@@ -54,7 +54,7 @@ public class GameServiceTest {
         });
 
         assertEquals("unauthorized", thrown.getMessage());
-    }*/
+    }
 
     @Test
     public void testCreateGameValidAuthToken() throws Exception {
@@ -113,7 +113,7 @@ public class GameServiceTest {
             gameService.joinGame(authToken, gameID, playerColor);
         });
 
-        assertEquals("Unauthorized", thrown.getMessage());
+        assertEquals("unauthorized", thrown.getMessage());
     }
 
     @Test
@@ -129,7 +129,7 @@ public class GameServiceTest {
             gameService.joinGame(authToken, gameID, playerColor);
         });
 
-        assertEquals("Game not found", thrown.getMessage());
+        assertEquals("bad request", thrown.getMessage());
     }
 
     @Test
@@ -148,6 +148,6 @@ public class GameServiceTest {
             gameService.joinGame(authToken, gameID, playerColor);
         });
 
-        assertEquals("Already taken", thrown.getMessage());
+        assertEquals("already taken", thrown.getMessage());
     }
 }
