@@ -9,6 +9,31 @@ public class DatabaseManager {
     private static final String PASSWORD;
     private static final String CONNECTION_URL;
 
+    private final String[] createStatements = {
+            """
+            CREATE TABLE IF NOT EXISTS auths (
+                authToken VARCHAR(255) PRIMARY KEY,
+                username VARCHAR(255) NOT NULL
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS games (
+                gameID INT PRIMARY KEY,
+                whiteUsername VARCHAR(255),
+                blackUsername VARCHAR(255),
+                game BLOB,
+                gameName VARCHAR(255)
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                username VARCHAR(255) PRIMARY KEY,
+                password VARCHAR(255) NOT NULL,
+                email VARCHAR(255) NOT NULL
+            )
+            """
+    };
+
     /*
      * Load the database information for the db.properties file.
      */
@@ -67,6 +92,23 @@ public class DatabaseManager {
             return conn;
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    /**
+     * Set up the database using statements
+     * @throws DataAccessException
+     */
+    public void configureDatabase() throws DataAccessException{
+        DatabaseManager.createDatabase();
+        try (var connection = DatabaseManager.getConnection()) {
+            for (var statement : createStatements) {
+                try (var preparedStatement = connection.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("Unable to configure database: %s", e.getMessage()));
         }
     }
 }
