@@ -61,7 +61,7 @@ public class DatabaseManager {
     /**
      * Creates the database if it does not already exist.
      */
-    static void createDatabase() throws DataAccessException {
+    static void createDatabase() throws SQLException {
         try {
             var statement = "CREATE DATABASE IF NOT EXISTS " + DATABASE_NAME;
             var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
@@ -69,7 +69,7 @@ public class DatabaseManager {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new SQLException(e.getMessage());
         }
     }
 
@@ -85,21 +85,21 @@ public class DatabaseManager {
      * }
      * </code>
      */
-    public static Connection getConnection() throws DataAccessException {
+    public static Connection getConnection() throws SQLException {
         try {
             var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
             conn.setCatalog(DATABASE_NAME);
             return conn;
         } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
+            throw new SQLException(e.getMessage());
         }
     }
 
     /**
      * Set up the database using statements
-     * @throws DataAccessException
+     * @throws SQLException
      */
-    public void configureDatabase() throws DataAccessException{
+    public void configureDatabase() throws SQLException {
         DatabaseManager.createDatabase();
         try (var connection = DatabaseManager.getConnection()) {
             for (var statement : createStatements) {
@@ -108,7 +108,7 @@ public class DatabaseManager {
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("Unable to configure database: %s", e.getMessage()));
+            throw new SQLException(String.format("Unable to configure database: %s", e.getMessage()));
         }
     }
 }

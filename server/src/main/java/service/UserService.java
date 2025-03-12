@@ -3,24 +3,30 @@ package service;
 import dataaccess.localmemory.AuthDAO;
 import dataaccess.DataAccessException;
 import dataaccess.localmemory.UserDAO;
+import dataaccess.sqldatabase.AuthSqlDAO;
+import dataaccess.sqldatabase.UserSqlDAO;
 import model.AuthData;
 import model.UserData;
 
+import java.sql.SQLException;
 import java.util.UUID;
 
 public class UserService {
-    private final AuthDAO authDao;
-    private final UserDAO userDao;
+    //private final AuthDAO authDao;
+    //private final UserDAO userDao;
+
+    private final AuthSqlDAO authDao;
+    private final UserSqlDAO userDao;
 
     public UserService(
-            AuthDAO authDataAccess,
-            UserDAO userDataAccess
+            AuthSqlDAO authDataAccess,
+            UserSqlDAO userDataAccess
     ) {
         this.authDao = authDataAccess;
         this.userDao = userDataAccess;
     }
 
-    public AuthData register(UserData userData) throws DataAccessException {
+    public AuthData register(UserData userData) throws DataAccessException, SQLException {
         //Check if user already exists
         if (userDao.getUser(userData.username()) != null) {
             throw new DataAccessException("already taken");
@@ -37,7 +43,7 @@ public class UserService {
         return authData;
     }
 
-    public AuthData login(UserData userData) throws DataAccessException {
+    public AuthData login(UserData userData) throws DataAccessException, SQLException {
         //Check if user exists or wrong password
         UserData existingUser = userDao.getUser(userData.username());
         if (existingUser == null || !existingUser.password().equals(userData.password())) {
@@ -60,7 +66,7 @@ public class UserService {
         authDao.deleteAuth(authToken);
     }
 
-    public boolean validAuthToken(String authToken) {
+    public boolean validAuthToken(String authToken) throws DataAccessException {
         AuthData authData = authDao.getAuth(authToken);
         return authData != null;
     }

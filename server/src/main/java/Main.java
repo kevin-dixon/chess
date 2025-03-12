@@ -4,6 +4,8 @@ import dataaccess.DataAccessException;
 import dataaccess.DatabaseManager;
 import server.Server;
 
+import java.sql.SQLException;
+
 public class Main {
     public static void main(String[] args) {
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
@@ -14,7 +16,7 @@ public class Main {
         try {
             dbManager.configureDatabase();
             System.out.println("Database configured successfully.");
-        } catch (DataAccessException e) {
+        } catch (SQLException e) {
             System.err.println("Database configuration failed: " + e.getMessage());
             return;
         }

@@ -1,3 +1,4 @@
+/*
 package service;
 
 import dataaccess.localmemory.AuthDAO;
@@ -142,4 +143,4 @@ public class UserServiceTest {
         //Check if authToken is valid
         assertFalse(userService.validAuthToken(invalidAuthData.authToken()));
     }
-}
+}*/

@@ -4,6 +4,9 @@ import dataaccess.DatabaseManager;
 import dataaccess.localmemory.AuthDAO;
 import dataaccess.localmemory.GameDAO;
 import dataaccess.localmemory.UserDAO;
+import dataaccess.sqldatabase.AuthSqlDAO;
+import dataaccess.sqldatabase.GameSqlDAO;
+import dataaccess.sqldatabase.UserSqlDAO;
 import server.handlers.*;
 import service.*;
 import spark.*;
@@ -12,9 +15,13 @@ import javax.xml.crypto.Data;
 
 public class Server {
 
-    AuthDAO authDAO = new AuthDAO();
-    GameDAO gameDAO = new GameDAO();
-    UserDAO userDAO = new UserDAO();
+    //AuthDAO authDAO = new AuthDAO();
+    //GameDAO gameDAO = new GameDAO();
+    //UserDAO userDAO = new UserDAO();
+
+    AuthSqlDAO authDAO = new AuthSqlDAO();
+    GameSqlDAO gameDAO = new GameSqlDAO();
+    UserSqlDAO userDAO = new UserSqlDAO();
 
     ClearService clearService = new ClearService(authDAO, gameDAO, userDAO);
     GameService gameService = new GameService(gameDAO, authDAO);
