@@ -1,10 +1,11 @@
 package dataaccess.sqldatabase;
 
-import dataaccess.DataAccessException;
 import dataaccess.DatabaseManager;
 import model.UserData;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class UserSqlDAO {
 
@@ -24,7 +25,22 @@ public class UserSqlDAO {
         return newUserData;
     }
 
-    public void listUsers() throws DataAccessException {
+    public Collection<UserData> listUsers() throws SQLException {
+        Collection<UserData> users = new ArrayList<>();
+        String sql = "SELECT * FROM users";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String username = rs.getString("username");
+                String password = rs.getString("password");
+                String email = rs.getString("email");
+                users.add(new UserData(username, password, email));
+            }
+        }
+        return users;
     }
 
     public UserData getUser(String username) throws SQLException {
@@ -46,6 +62,12 @@ public class UserSqlDAO {
         return userData;
     }
 
-    public void deleteAllUsers() throws DataAccessException {
+    public void deleteAllUsers() throws SQLException {
+        String sql = "DELETE FROM users";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.executeUpdate();
+        }
     }
 }

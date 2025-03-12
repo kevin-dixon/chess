@@ -1,26 +1,27 @@
 package service;
 
 import chess.ChessGame;
-import dataaccess.localmemory.AuthDAO;
 import dataaccess.DataAccessException;
-import dataaccess.localmemory.GameDAO;
+import dataaccess.sqldatabase.AuthSqlDAO;
+import dataaccess.sqldatabase.GameSqlDAO;
 import model.AuthData;
 import model.GameData;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Random;
 
 public class GameService {
-    private final GameDAO gameDao;
-    private final AuthDAO authDao;
+    private final GameSqlDAO gameDao;
+    private final AuthSqlDAO authDao;
 
-    public GameService(GameDAO gameDataAccess, AuthDAO authDataAccess) {
+    public GameService(GameSqlDAO gameDataAccess, AuthSqlDAO authDataAccess) {
         this.gameDao = gameDataAccess;
         this.authDao = authDataAccess;
     }
 
-    public Collection<GameData> listGames(String authToken) throws DataAccessException {
+    public Collection<GameData> listGames(String authToken) throws DataAccessException, SQLException {
         // Validate authToken
         AuthData authData = authDao.getAuth(authToken);
         if (authData == null) {
@@ -29,7 +30,7 @@ public class GameService {
         return gameDao.listGames();
     }
 
-    public int createGame(String authToken, String gameName) throws DataAccessException {
+    public int createGame(String authToken, String gameName) throws DataAccessException, SQLException {
         //Validate authToken
         AuthData authData = authDao.getAuth(authToken);
         if (authData == null) {
@@ -54,7 +55,7 @@ public class GameService {
         return 100000 + random.nextInt(900000);
     }
 
-    public void joinGame(String authToken, int gameID, String playerColor) throws DataAccessException {
+    public void joinGame(String authToken, int gameID, String playerColor) throws DataAccessException, SQLException {
         //Validate authToken
         AuthData authData = authDao.getAuth(authToken);
         if (authData == null) {

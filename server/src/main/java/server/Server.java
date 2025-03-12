@@ -1,9 +1,7 @@
 package server;
 
 import dataaccess.DatabaseManager;
-import dataaccess.localmemory.AuthDAO;
-import dataaccess.localmemory.GameDAO;
-import dataaccess.localmemory.UserDAO;
+
 import dataaccess.sqldatabase.AuthSqlDAO;
 import dataaccess.sqldatabase.GameSqlDAO;
 import dataaccess.sqldatabase.UserSqlDAO;
@@ -14,10 +12,6 @@ import spark.*;
 import javax.xml.crypto.Data;
 
 public class Server {
-
-    //AuthDAO authDAO = new AuthDAO();
-    //GameDAO gameDAO = new GameDAO();
-    //UserDAO userDAO = new UserDAO();
 
     AuthSqlDAO authDAO = new AuthSqlDAO();
     GameSqlDAO gameDAO = new GameSqlDAO();

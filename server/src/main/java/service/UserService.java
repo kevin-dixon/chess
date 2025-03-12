@@ -1,8 +1,6 @@
 package service;
 
-import dataaccess.localmemory.AuthDAO;
 import dataaccess.DataAccessException;
-import dataaccess.localmemory.UserDAO;
 import dataaccess.sqldatabase.AuthSqlDAO;
 import dataaccess.sqldatabase.UserSqlDAO;
 import model.AuthData;
@@ -12,8 +10,6 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 public class UserService {
-    //private final AuthDAO authDao;
-    //private final UserDAO userDao;
 
     private final AuthSqlDAO authDao;
     private final UserSqlDAO userDao;
@@ -58,7 +54,7 @@ public class UserService {
         return authData;
     }
 
-    public void logout(String authToken) throws DataAccessException {
+    public void logout(String authToken) throws DataAccessException, SQLException {
         AuthData authData = authDao.getAuth(authToken);
         if (authData == null) {
             throw new DataAccessException("unauthorized");
@@ -66,7 +62,7 @@ public class UserService {
         authDao.deleteAuth(authToken);
     }
 
-    public boolean validAuthToken(String authToken) throws DataAccessException {
+    public boolean validAuthToken(String authToken) throws DataAccessException, SQLException {
         AuthData authData = authDao.getAuth(authToken);
         return authData != null;
     }

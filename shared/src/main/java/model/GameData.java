@@ -15,4 +15,11 @@ public record GameData (
     public GameData updateBlackUser(String newUsername) {
         return new GameData((gameID), (whiteUsername), newUsername, (game), (gameName));
     }
+
+    public String getBlackUsername() {
+        return blackUsername;
+    }
+    public String getWhiteUsername() {
+        return whiteUsername;
+    }
 }
