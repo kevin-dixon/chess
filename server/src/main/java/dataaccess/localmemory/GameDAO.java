@@ -1,4 +1,4 @@
-package dataaccess;
+package dataaccess.localmemory;
 
 import model.GameData;
 

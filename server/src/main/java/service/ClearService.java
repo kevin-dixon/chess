@@ -1,7 +1,9 @@
 package service;
 
-import dataaccess.*;
 import dataaccess.DataAccessException;
+import dataaccess.localmemory.AuthDAO;
+import dataaccess.localmemory.GameDAO;
+import dataaccess.localmemory.UserDAO;
 import spark.Request;
 
 public class ClearService {

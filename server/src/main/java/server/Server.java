@@ -1,6 +1,8 @@
 package server;
 
-import dataaccess.*;
+import dataaccess.localmemory.AuthDAO;
+import dataaccess.localmemory.GameDAO;
+import dataaccess.localmemory.UserDAO;
 import server.handlers.*;
 import service.*;
 import spark.*;
