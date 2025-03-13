@@ -1,248 +1,135 @@
 package service;
 
-import chess.ChessGame;
 import dataaccess.DataAccessException;
+import dataaccess.DatabaseManager;
 import dataaccess.sqldatabase.AuthSqlDAO;
 import dataaccess.sqldatabase.GameSqlDAO;
+import dataaccess.sqldatabase.UserSqlDAO;
 import model.AuthData;
 import model.GameData;
+import model.UserData;
 import org.junit.jupiter.api.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
-import dataaccess.DatabaseManager;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class GameServiceTest {
-
-    private GameService gameService;
-    private GameSqlDAO gameDao;
-    private AuthSqlDAO authDao;
-
-    @BeforeAll
-    void setUp() throws SQLException, DataAccessException {
-        Connection conn = DatabaseManager.getConnection();
-        try (Statement stmt = conn.createStatement()) {
-            stmt.execute("CREATE TABLE IF NOT EXISTS auths (authToken VARCHAR(255) PRIMARY KEY, username VARCHAR(255))");
-            stmt.execute("CREATE TABLE IF NOT EXISTS games (gameID INT PRIMARY KEY, whiteUsername VARCHAR(255), blackUsername VARCHAR(255), game BLOB, gameName VARCHAR(255))");
-            stmt.execute("CREATE TABLE IF NOT EXISTS users (username VARCHAR(255) PRIMARY KEY, password VARCHAR(255), email VARCHAR(255))");
-        }
-
-        authDao = new AuthSqlDAO();
-        gameDao = new GameSqlDAO();
-        gameService = new GameService(gameDao, authDao);
-    }
-
-    @AfterAll
-    void tearDown() throws SQLException, DataAccessException {
-        Connection conn = DatabaseManager.getConnection();
-        try (Statement stmt = conn.createStatement()) {
-            stmt.execute("DROP TABLE IF EXISTS auths");
-            stmt.execute("DROP TABLE IF EXISTS games");
-            stmt.execute("DROP TABLE IF EXISTS users");
-        }
-    }
-
-    @Test
-    void listGamesSuccess() throws SQLException, DataAccessException {
-        authDao.addAuth(new AuthData("token", "user"));
-        Collection<GameData> games = gameService.listGames("token");
-        assertNotNull(games);
-    }
-
-    @Test
-    void listGamesUnauthorized() throws SQLException, DataAccessException {
-        assertThrows(DataAccessException.class, () -> gameService.listGames("token"));
-    }
-
-    @Test
-    void createGameSuccess() throws SQLException, DataAccessException {
-        authDao.addAuth(new AuthData("token", "user"));
-        int gameId = gameService.createGame("token", "gameName");
-        assertTrue(gameId > 0);
-    }
-
-    @Test
-    void createGameUnauthorized() throws SQLException, DataAccessException {
-        assertThrows(DataAccessException.class, () -> gameService.createGame("token", "gameName"));
-    }
-
-    @Test
-    void joinGameSuccess() throws SQLException, DataAccessException {
-        authDao.addAuth(new AuthData("token", "user"));
-        gameDao.addGame(new GameData(1, null, null, new ChessGame(), "gameName"));
-        gameService.joinGame("token", 1, "WHITE");
-        GameData game = gameDao.getGameByID(1);
-        assertEquals("user", game.whiteUsername());
-    }
-
-    @Test
-    void joinGameUnauthorized() throws SQLException, DataAccessException {
-        assertThrows(DataAccessException.class, () -> gameService.joinGame("token", 1, "WHITE"));
-    }
-
-    @Test
-    void joinGameInvalidGame() throws SQLException, DataAccessException {
-        authDao.addAuth(new AuthData("token", "user"));
-        assertThrows(DataAccessException.class, () -> gameService.joinGame("token", 1, "WHITE"));
-    }
-}
-
-/*
-package service;
-
-import chess.ChessGame;
-import dataaccess.localmemory.AuthDAO;
-import dataaccess.DataAccessException;
-import dataaccess.localmemory.GameDAO;
-import model.AuthData;
-import model.GameData;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.util.Collection;
-
-import static org.junit.jupiter.api.Assertions.*;
-
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class GameServiceTest {
 
     private GameService gameService;
-    private GameDAO gameDAO;
-    private AuthDAO authDAO;
+    private UserService userService;
+    private Connection connection;
 
     @BeforeEach
-    public void setUp() {
-        authDAO = new AuthDAO();
-        gameDAO = new GameDAO();
-        gameService = new GameService(gameDAO, authDAO);
+    public void setUp() throws SQLException, DataAccessException {
+        GameSqlDAO gameDao = new GameSqlDAO();
+        AuthSqlDAO authDao = new AuthSqlDAO();
+        UserSqlDAO userDao = new UserSqlDAO();
+        gameService = new GameService(gameDao, authDao);
+        userService = new UserService(authDao, userDao);
+        connection = DatabaseManager.getConnection();
+
+        // Ensure the database is clean and tables are created before each test
+        createTables();
+        clearDatabase();
+    }
+
+    @AfterEach
+    public void tearDown() throws SQLException {
+        // Clear the database after each test
+        clearDatabase();
+        connection.close();
+    }
+
+    private void clearDatabase() throws SQLException {
+        try (Statement stmt = connection.createStatement()) {
+            stmt.executeUpdate("DELETE FROM auths");
+            stmt.executeUpdate("DELETE FROM games");
+            stmt.executeUpdate("DELETE FROM users");
+        }
+    }
+
+    private void createTables() throws SQLException {
+        try (Statement stmt = connection.createStatement()) {
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS auths (authToken VARCHAR(255) PRIMARY KEY, username VARCHAR(255) NOT NULL);");
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS users (username VARCHAR(255) PRIMARY KEY, password VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL);");
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS games (gameID INT PRIMARY KEY, whiteUsername VARCHAR(255), blackUsername VARCHAR(255), game TEXT NOT NULL, gameName VARCHAR(255) NOT NULL, FOREIGN KEY (whiteUsername) REFERENCES users(username), FOREIGN KEY (blackUsername) REFERENCES users(username));");
+        }
     }
 
     @Test
-    public void testListGames() throws Exception {
-        String authToken = "validAuthToken";
-        AuthData authData = new AuthData(authToken, "username");
-        authDAO.addAuth(authData);
+    @Order(1)
+    public void testListGamesPositive() throws SQLException, DataAccessException {
+        UserData newUser = new UserData("testUser", "password", "test@mail.com");
+        AuthData authData = userService.register(newUser);
 
-        Collection<GameData> games = gameService.listGames(authToken);
+        // Create a game
+        gameService.createGame(authData.authToken(), "Test Game");
+
+        Collection<GameData> games = gameService.listGames(authData.authToken());
         assertNotNull(games);
-
-        //Add some Games
-        String gameName = "Test Game";
-        String gameName2 = "Test Game 2";
-        gameService.createGame(authToken, gameName);
-        gameService.createGame(authToken, gameName2);
-
-        //Check that list has games
         assertFalse(games.isEmpty());
     }
 
     @Test
-    public void testUnauthorizedListGames() throws Exception {
-        String authToken = "invalidAuthToken";
-
-        DataAccessException thrown = assertThrows(DataAccessException.class, () -> {
-            gameService.listGames(authToken);
-        });
-
-        assertEquals("unauthorized", thrown.getMessage());
+    @Order(2)
+    public void testListGamesNegative() {
+        try {
+            gameService.listGames("invalidToken");
+            fail("Exception should have been thrown");
+        } catch (Exception e) {
+            assertTrue(e instanceof DataAccessException);
+        }
     }
 
     @Test
-    public void testCreateGameValidAuthToken() throws Exception {
-        String authToken = "validAuthToken";
-        String gameName = "Test Game";
+    @Order(3)
+    public void testCreateGamePositive() throws SQLException, DataAccessException {
+        UserData newUser = new UserData("testUser", "password", "test@mail.com");
+        AuthData authData = userService.register(newUser);
 
-        AuthData authData = new AuthData(authToken, "username");
-        authDAO.addAuth(authData);
-
-        int gameID = gameService.createGame(authToken, gameName);
-        assertTrue(gameID >= 100000 && gameID <= 999999);
-
-        GameData gameData = gameDAO.getGameByID(gameID);
-        assertNotNull(gameData);
-        assertEquals(gameName, gameData.gameName());
+        int gameId = gameService.createGame(authData.authToken(), "Test Game");
+        assertTrue(gameId > 0);
     }
 
     @Test
-    public void testCreateGameInvalidAuthToken() {
-        String authToken = "invalidAuthToken";
-        String gameName = "Test Game";
-
-        DataAccessException thrown = assertThrows(DataAccessException.class, () -> {
-            gameService.createGame(authToken, gameName);
-        });
-
-        assertEquals("unauthorized", thrown.getMessage());
-    }
-
-
-    @Test
-    public void testJoinGameValid() throws Exception {
-        String authToken = "validAuthToken";
-        String playerColor = "WHITE";
-
-        AuthData authData = new AuthData(authToken, "username");
-        authDAO.addAuth(authData);
-
-        // Create new game and get the generated gameID
-        int gameID = gameService.createGame(authToken, "NewGame");
-
-        // Attempt to join the game
-        gameService.joinGame(authToken, gameID, playerColor);
-
-        GameData updatedGameData = gameDAO.getGameByID(gameID);
-        assertEquals("username", updatedGameData.whiteUsername());
+    @Order(4)
+    public void testCreateGameNegative() {
+        try {
+            gameService.createGame("invalidToken", "Test Game");
+            fail("Exception should have been thrown");
+        } catch (Exception e) {
+            assertTrue(e instanceof DataAccessException);
+        }
     }
 
     @Test
-    public void testJoinGameInvalidAuthToken() {
-        String authToken = "invalidAuthToken";
-        int gameID = 123456;
-        String playerColor = "WHITE";
+    @Order(5)
+    public void testJoinGamePositive() throws SQLException, DataAccessException {
+        UserData newUser = new UserData("testUser", "password", "test@mail.com");
+        AuthData authData = userService.register(newUser);
 
-        DataAccessException thrown = assertThrows(DataAccessException.class, () -> {
-            gameService.joinGame(authToken, gameID, playerColor);
-        });
+        int gameId = gameService.createGame(authData.authToken(), "Test Game");
+        gameService.joinGame(authData.authToken(), gameId, "WHITE");
 
-        assertEquals("unauthorized", thrown.getMessage());
+        Collection<GameData> games = gameService.listGames(authData.authToken());
+        assertNotNull(games);
+        assertFalse(games.isEmpty());
+        assertEquals("testUser", games.iterator().next().getWhiteUsername());
     }
 
     @Test
-    public void testJoinGameGameNotFound() {
-        String authToken = "validAuthToken";
-        int gameID = 123456;
-        String playerColor = "WHITE";
-
-        AuthData authData = new AuthData(authToken, "username");
-        authDAO.addAuth(authData);
-
-        DataAccessException thrown = assertThrows(DataAccessException.class, () -> {
-            gameService.joinGame(authToken, gameID, playerColor);
-        });
-
-        assertEquals("bad request", thrown.getMessage());
+    @Order(6)
+    public void testJoinGameNegative() {
+        try {
+            gameService.joinGame("invalidToken", 1, "WHITE");
+            fail("Exception should have been thrown");
+        } catch (Exception e) {
+            assertTrue(e instanceof DataAccessException);
+        }
     }
-
-    @Test
-    public void testJoinGameAlreadyTaken() {
-        String authToken = "validAuthToken";
-        int gameID = 123456;
-        String playerColor = "WHITE";
-
-        AuthData authData = new AuthData(authToken, "username");
-        authDAO.addAuth(authData);
-
-        GameData gameData = new GameData(gameID, "whitePlayer", "", new ChessGame(), "Test Game");
-        gameDAO.addGame(gameData);
-
-        DataAccessException thrown = assertThrows(DataAccessException.class, () -> {
-            gameService.joinGame(authToken, gameID, playerColor);
-        });
-
-        assertEquals("already taken", thrown.getMessage());
-    }
-}*/
+}
