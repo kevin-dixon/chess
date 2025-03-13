@@ -5,8 +5,6 @@ import dataaccess.DatabaseManager;
 import model.AuthData;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collection;
 
 public class AuthSqlDAO {
 

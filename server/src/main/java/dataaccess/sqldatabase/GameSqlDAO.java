@@ -74,6 +74,10 @@ public class GameSqlDAO {
     }
 
     public void addPlayerToGame(int gameID, String playerColor, String username) throws SQLException, DataAccessException {
+        if (getGameByID(gameID) == null) {
+            throw new DataAccessException("Invalid GameID");
+        }
+        
         String sql = "UPDATE games SET " + (playerColor.equals("WHITE") ? "whiteUsername" : "blackUsername") + " = ? WHERE gameID = ?";
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql)) {

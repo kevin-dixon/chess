@@ -6,12 +6,14 @@ import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collection;
 
 public class UserSqlDAO {
 
     public UserData addUser(UserData newUser) throws SQLException, DataAccessException {
+        if (newUser.password() == null) {
+            throw new DataAccessException("Password cannot be null");
+        }
+        
         String sql = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
         String hashedPassword = BCrypt.hashpw(newUser.password(), BCrypt.gensalt());
 
