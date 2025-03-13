@@ -1,3 +1,104 @@
+package service;
+
+import dataaccess.DataAccessException;
+import dataaccess.sqldatabase.AuthSqlDAO;
+import dataaccess.sqldatabase.UserSqlDAO;
+import model.AuthData;
+import model.UserData;
+import org.junit.jupiter.api.*;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import dataaccess.DatabaseManager;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class UserServiceTest {
+
+    private UserService userService;
+    private AuthSqlDAO authDao;
+    private UserSqlDAO userDao;
+
+    @BeforeAll
+    void setUp() throws SQLException {
+        Connection conn = DatabaseManager.getConnection();
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute("CREATE TABLE IF NOT EXISTS auths (authToken VARCHAR(255) PRIMARY KEY, username VARCHAR(255))");
+            stmt.execute("CREATE TABLE IF NOT EXISTS games (gameID INT PRIMARY KEY, whiteUsername VARCHAR(255), blackUsername VARCHAR(255), game BLOB, gameName VARCHAR(255))");
+            stmt.execute("CREATE TABLE IF NOT EXISTS users (username VARCHAR(255) PRIMARY KEY, password VARCHAR(255), email VARCHAR(255))");
+        }
+
+        authDao = new AuthSqlDAO();
+        userDao = new UserSqlDAO();
+        userService = new UserService(authDao, userDao);
+    }
+
+    @AfterAll
+    void tearDown() throws SQLException {
+        Connection conn = DatabaseManager.getConnection();
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute("DROP TABLE IF EXISTS auths");
+            stmt.execute("DROP TABLE IF EXISTS games");
+            stmt.execute("DROP TABLE IF EXISTS users");
+        }
+    }
+
+    @Test
+    void registerSuccess() throws SQLException, DataAccessException {
+        UserData userData = new UserData("user", "password", "email@example.com");
+        AuthData authData = userService.register(userData);
+        assertNotNull(authData);
+    }
+
+    @Test
+    void registerUserExists() throws SQLException, DataAccessException {
+        UserData userData = new UserData("user", "password", "email@example.com");
+        userDao.addUser(userData);
+        assertThrows(DataAccessException.class, () -> userService.register(userData));
+    }
+
+    @Test
+    void loginSuccess() throws SQLException, DataAccessException {
+        UserData userData = new UserData("user", "password", "email@example.com");
+        userDao.addUser(userData);
+        AuthData authData = userService.login(userData);
+        assertNotNull(authData);
+    }
+
+    @Test
+    void loginUnauthorized() throws SQLException, DataAccessException {
+        UserData userData = new UserData("user", "password", "email@example.com");
+        assertThrows(DataAccessException.class, () -> userService.login(userData));
+    }
+
+    @Test
+    void logoutSuccess() throws SQLException, DataAccessException {
+        AuthData authData = new AuthData("token", "user");
+        authDao.addAuth(authData);
+        userService.logout("token");
+        assertNull(authDao.getAuth("token"));
+    }
+
+    @Test
+    void logoutUnauthorized() throws SQLException, DataAccessException {
+        assertThrows(DataAccessException.class, () -> userService.logout("token"));
+    }
+
+    @Test
+    void validAuthTokenValid() throws SQLException, DataAccessException {
+        AuthData authData = new AuthData("token", "user");
+        authDao.addAuth(authData);
+        assertTrue(userService.validAuthToken("token"));
+    }
+
+    @Test
+    void validAuthTokenInvalid() throws SQLException, DataAccessException {
+        assertFalse(userService.validAuthToken("token"));
+    }
+}
+
 /*
 package service;
 
