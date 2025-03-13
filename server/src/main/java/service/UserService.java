@@ -23,15 +23,15 @@ public class UserService {
     }
 
     public AuthData register(UserData userData) throws DataAccessException, SQLException {
-        //Check if user already exists
+        // Check if user already exists
         if (userDao.getUser(userData.username()) != null) {
             throw new DataAccessException("already taken");
         }
 
-        //Create new user
+        // Create new user
         userDao.addUser(userData);
 
-        //Generate auth token
+        // Generate auth token
         String authToken = UUID.randomUUID().toString();
         AuthData authData = new AuthData(authToken, userData.username());
         authDao.addAuth(authData);
@@ -40,13 +40,13 @@ public class UserService {
     }
 
     public AuthData login(UserData userData) throws DataAccessException, SQLException {
-        //Check if user exists or wrong password
+        // Check if user exists or wrong password
         UserData existingUser = userDao.getUser(userData.username());
-        if (existingUser == null || !existingUser.password().equals(userData.password())) {
+        if (existingUser == null || !userDao.verifyUser(userData.username(), userData.password())) {
             throw new DataAccessException("unauthorized");
         }
 
-        //Generate auth token
+        // Generate auth token
         String authToken = UUID.randomUUID().toString();
         AuthData authData = new AuthData(authToken, userData.username());
         authDao.addAuth(authData);

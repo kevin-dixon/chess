@@ -31,12 +31,12 @@ public class GameService {
     }
 
     public int createGame(String authToken, String gameName) throws DataAccessException, SQLException {
-        //Validate authToken
+        // Validate authToken
         AuthData authData = authDao.getAuth(authToken);
         if (authData == null) {
             throw new DataAccessException("unauthorized");
         }
-        //Create new game
+        // Create new game
         GameData newGame = new GameData(
                 newGameID(),
                 null,
@@ -44,7 +44,7 @@ public class GameService {
                 new ChessGame(),
                 gameName
         );
-        //Add new game to database
+        // Add new game to database
         gameDao.addGame(newGame);
         return newGame.gameID();
     }
@@ -56,25 +56,25 @@ public class GameService {
     }
 
     public void joinGame(String authToken, int gameID, String playerColor) throws DataAccessException, SQLException {
-        //Validate authToken
+        // Validate authToken
         AuthData authData = authDao.getAuth(authToken);
         if (authData == null) {
             throw new DataAccessException("unauthorized");
         }
 
-        //Validate input and game existence
+        // Validate input and game existence
         GameData gameData = gameDao.getGameByID(gameID);
         if (gameData == null || (!Objects.equals(playerColor, "WHITE") && !Objects.equals(playerColor, "BLACK"))) {
             throw new DataAccessException("bad request");
         }
 
-        //Check if the color is already taken
+        // Check if the color is already taken
         if (("WHITE".equals(playerColor) && gameData.whiteUsername() != null) ||
                 ("BLACK".equals(playerColor) && gameData.blackUsername() != null)) {
             throw new DataAccessException("already taken");
         }
 
-        //Add player to the game
+        // Add player to the game
         gameDao.addPlayerToGame(gameID, playerColor, authData.username());
     }
 }
