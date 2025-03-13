@@ -21,7 +21,7 @@ public class DatabaseManager {
                 gameID INT PRIMARY KEY,
                 whiteUsername VARCHAR(255),
                 blackUsername VARCHAR(255),
-                game BLOB,
+                game JSON,
                 gameName VARCHAR(255)
             )
             """,

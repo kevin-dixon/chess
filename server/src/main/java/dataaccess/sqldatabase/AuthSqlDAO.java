@@ -10,10 +10,10 @@ import java.util.Collection;
 public class AuthSqlDAO {
 
     public AuthData addAuth(AuthData newAuthData) throws SQLException {
-        String sql = "INSERT INTO auths (authToken, userID) VALUES (?, ?)";
+        String sql = "INSERT INTO auths (authToken, username) VALUES (?, ?)";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (var conn = DatabaseManager.getConnection();
+             var stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, newAuthData.authToken());
             stmt.setString(2, newAuthData.username());
             stmt.executeUpdate();
@@ -26,14 +26,14 @@ public class AuthSqlDAO {
         Collection<AuthData> auths = new ArrayList<>();
         String sql = "SELECT * FROM auths";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+        try (var conn = DatabaseManager.getConnection();
+             var stmt = conn.prepareStatement(sql);
+             var rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 String authToken = rs.getString("authToken");
-                String userID = rs.getString("userID");
-                auths.add(new AuthData(authToken, userID));
+                String username = rs.getString("username");
+                auths.add(new AuthData(authToken, username));
             }
         }
 
@@ -44,13 +44,13 @@ public class AuthSqlDAO {
         AuthData authData = null;
         String sql = "SELECT * FROM auths WHERE authToken = ?";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (var conn = DatabaseManager.getConnection();
+             var stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, authToken);
-            try (ResultSet rs = stmt.executeQuery()) {
+            try (var rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    String userID = rs.getString("userID");
-                    authData = new AuthData(authToken, userID);
+                    String username = rs.getString("username");
+                    authData = new AuthData(authToken, username);
                 }
             }
         }
@@ -61,8 +61,8 @@ public class AuthSqlDAO {
     public void deleteAuth(String authToken) throws SQLException {
         String sql = "DELETE FROM auths WHERE authToken = ?";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (var conn = DatabaseManager.getConnection();
+             var stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, authToken);
             stmt.executeUpdate();
         }
@@ -71,8 +71,8 @@ public class AuthSqlDAO {
     public void deleteAllAuths() throws SQLException {
         String sql = "DELETE FROM auths";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (var conn = DatabaseManager.getConnection();
+             var stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
         }
     }

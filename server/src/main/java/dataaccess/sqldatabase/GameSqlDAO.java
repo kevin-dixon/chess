@@ -1,5 +1,8 @@
 package dataaccess.sqldatabase;
 
+import chess.ChessGame;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import dataaccess.DatabaseManager;
 import model.GameData;
 
@@ -8,26 +11,47 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class GameSqlDAO {
+    private final Gson gson;
 
-    public GameData addGame(GameData gameData) throws SQLException {
-        String sql = "INSERT INTO games (gameID, blackUser, whiteUser) VALUES (?, ?, ?)";
+    public GameSqlDAO() {
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapter(ChessGame.class, new ChessGameAdapter());
+        this.gson = builder.create();
+    }
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, gameData.gameID());
-            stmt.setString(2, gameData.getBlackUsername());
-            stmt.setString(3, gameData.getWhiteUsername());
+    public GameData addGame(GameData newGameData) throws SQLException {
+        String sql = "INSERT INTO games (gameID, whiteUsername, blackUsername, game, gameName) VALUES (?, ?, ?, ?, ?)";
+
+        try (var conn = DatabaseManager.getConnection();
+             var stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, newGameData.gameID());
+            stmt.setString(2, newGameData.whiteUsername());
+            stmt.setString(3, newGameData.blackUsername());
+            stmt.setString(4, gson.toJson(newGameData.game()));
+            stmt.setString(5, newGameData.gameName());
             stmt.executeUpdate();
         }
 
-        return gameData;
+        return newGameData;
     }
 
     public Collection<GameData> listGames() throws SQLException {
         Collection<GameData> games = new ArrayList<>();
         String sql = "SELECT * FROM games";
 
-        //TODO: add string parsing
+        try (var conn = DatabaseManager.getConnection();
+             var stmt = conn.prepareStatement(sql);
+             var rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int gameID = rs.getInt("gameID");
+                String whiteUsername = rs.getString("whiteUsername");
+                String blackUsername = rs.getString("blackUsername");
+                ChessGame game = gson.fromJson(rs.getString("game"), ChessGame.class);
+                String gameName = rs.getString("gameName");
+                games.add(new GameData(gameID, whiteUsername, blackUsername, game, gameName));
+            }
+        }
 
         return games;
     }
@@ -36,35 +60,41 @@ public class GameSqlDAO {
         GameData gameData = null;
         String sql = "SELECT * FROM games WHERE gameID = ?";
 
-        //TODO: add string parsing
+        try (var conn = DatabaseManager.getConnection();
+             var stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, gameID);
+            try (var rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String whiteUsername = rs.getString("whiteUsername");
+                    String blackUsername = rs.getString("blackUsername");
+                    ChessGame game = gson.fromJson(rs.getString("game"), ChessGame.class);
+                    String gameName = rs.getString("gameName");
+                    gameData = new GameData(gameID, whiteUsername, blackUsername, game, gameName);
+                }
+            }
+        }
 
         return gameData;
     }
 
-    public void deleteAllGames() throws SQLException {
-        String sql = "DELETE FROM games";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.executeUpdate();
-        }
-    }
-
     public void addPlayerToGame(int gameID, String playerColor, String username) throws SQLException {
-        String sql;
-        if ("BLACK".equals(playerColor)) {
-            sql = "UPDATE games SET blackUser = ? WHERE gameID = ?";
-        } else if ("WHITE".equals(playerColor)) {
-            sql = "UPDATE games SET whiteUser = ? WHERE gameID = ?";
-        } else {
-            throw new IllegalArgumentException("bad request");
-        }
+        String sql = "UPDATE games SET " + (playerColor.equals("WHITE") ? "whiteUsername" : "blackUsername") + " = ? WHERE gameID = ?";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (var conn = DatabaseManager.getConnection();
+             var stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, username);
             stmt.setInt(2, gameID);
             stmt.executeUpdate();
         }
     }
+
+    public void deleteAllGames() throws SQLException {
+        String sql = "DELETE FROM games";
+
+        try (var conn = DatabaseManager.getConnection();
+             var stmt = conn.prepareStatement(sql)) {
+            stmt.executeUpdate();
+        }
+    }
+
 }
