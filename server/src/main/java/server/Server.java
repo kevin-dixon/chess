@@ -1,5 +1,6 @@
 package server;
 
+import dataaccess.DataAccessException;
 import dataaccess.DatabaseManager;
 
 import dataaccess.sqldatabase.AuthSqlDAO;
@@ -8,8 +9,6 @@ import dataaccess.sqldatabase.UserSqlDAO;
 import server.handlers.*;
 import service.*;
 import spark.*;
-
-import javax.xml.crypto.Data;
 
 public class Server {
 
@@ -25,6 +24,14 @@ public class Server {
     }
 
     public int run(int desiredPort) {
+
+        try {
+            // Ensure the database is created before starting the server
+            DatabaseManager.createDatabase();
+        } catch (DataAccessException e) {
+            throw new RuntimeException("Failed to create database: " + e.getMessage(), e);
+        }
+
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");

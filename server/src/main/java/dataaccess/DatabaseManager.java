@@ -36,13 +36,16 @@ public class DatabaseManager {
     /**
      * Creates the database if it does not already exist.
      */
-    static void createDatabase() throws DataAccessException {
-        try {
+    public static void createDatabase() throws DataAccessException {
+        try (var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD)) {
             var statement = "CREATE DATABASE IF NOT EXISTS " + DATABASE_NAME;
-            var conn = DriverManager.getConnection(CONNECTION_URL, USER, PASSWORD);
             try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.executeUpdate();
             }
+
+            // Set catalog and create tables
+            conn.setCatalog(DATABASE_NAME);
+            createTables(conn);
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }
@@ -67,6 +70,36 @@ public class DatabaseManager {
             return conn;
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    private static void createTables(Connection conn) throws SQLException {
+        String createAuthTable = """
+                CREATE TABLE IF NOT EXISTS auths (
+                    authToken VARCHAR(255) PRIMARY KEY,
+                    username VARCHAR(255) NOT NULL
+                )""";
+        String createUsersTable = """
+                CREATE TABLE IF NOT EXISTS users (
+                    username VARCHAR(255) PRIMARY KEY,
+                    password VARCHAR(255) NOT NULL,
+                    email VARCHAR(255) NOT NULL
+                )""";
+        String createGamesTable = """
+                CREATE TABLE IF NOT EXISTS games (
+                    gameID INT PRIMARY KEY,
+                    whiteUsername VARCHAR(255),
+                    blackUsername VARCHAR(255),
+                    game TEXT NOT NULL,
+                    gameName VARCHAR(255) NOT NULL,
+                    FOREIGN KEY (whiteUsername) REFERENCES users(username),
+                    FOREIGN KEY (blackUsername) REFERENCES users(username)
+                )""";
+
+        try (var stmt = conn.createStatement()) {
+            stmt.execute(createAuthTable);
+            stmt.execute(createUsersTable);
+            stmt.execute(createGamesTable);
         }
     }
 }

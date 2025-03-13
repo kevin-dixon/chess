@@ -50,8 +50,6 @@ public class GameSqlDAO {
                 String gameName = rs.getString("gameName");
                 games.add(new GameData(gameID, whiteUsername, blackUsername, game, gameName));
             }
-        } catch (DataAccessException e) {
-            throw new DataAccessException(e.toString());
         }
         return games;
     }
