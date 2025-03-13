@@ -49,9 +49,24 @@ public class UserServiceTest {
 
     private void createTables() throws SQLException {
         try (Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS auths (authToken VARCHAR(255) PRIMARY KEY, username VARCHAR(255) NOT NULL);");
-            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS users (username VARCHAR(255) PRIMARY KEY, password VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL);");
-            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS games (gameID INT PRIMARY KEY, whiteUsername VARCHAR(255), blackUsername VARCHAR(255), game TEXT NOT NULL, gameName VARCHAR(255) NOT NULL, FOREIGN KEY (whiteUsername) REFERENCES users(username), FOREIGN KEY (blackUsername) REFERENCES users(username));");
+            stmt.executeUpdate(
+                    "CREATE TABLE IF NOT EXISTS auths (" +
+                            "authToken VARCHAR(255) PRIMARY KEY, " +
+                            "username VARCHAR(255) NOT NULL);");
+            stmt.executeUpdate(
+                    "CREATE TABLE IF NOT EXISTS users (" +
+                            "username VARCHAR(255) PRIMARY KEY, " +
+                            "password VARCHAR(255) NOT NULL, " +
+                            "email VARCHAR(255) NOT NULL);");
+            stmt.executeUpdate(
+                    "CREATE TABLE IF NOT EXISTS games (" +
+                            "gameID INT PRIMARY KEY, " +
+                            "whiteUsername VARCHAR(255), " +
+                            "blackUsername VARCHAR(255), " +
+                            "game TEXT NOT NULL, " +
+                            "gameName VARCHAR(255) NOT NULL, " +
+                            "FOREIGN KEY (whiteUsername) REFERENCES users(username), " +
+                            "FOREIGN KEY (blackUsername) REFERENCES users(username));");
         }
     }
 

@@ -10,7 +10,6 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
-import spark.Request;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -55,10 +54,26 @@ public class ClearServiceTest {
 
     private void createTables() throws SQLException {
         try (Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS auths (authToken VARCHAR(255) PRIMARY KEY, username VARCHAR(255) NOT NULL);");
-            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS users (username VARCHAR(255) PRIMARY KEY, password VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL);");
-            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS games (gameID INT PRIMARY KEY, whiteUsername VARCHAR(255), blackUsername VARCHAR(255), game TEXT NOT NULL, gameName VARCHAR(255) NOT NULL, FOREIGN KEY (whiteUsername) REFERENCES users(username), FOREIGN KEY (blackUsername) REFERENCES users(username));");
-        }
+            stmt.executeUpdate(
+                    "CREATE TABLE IF NOT EXISTS auths (" +
+                            "authToken VARCHAR(255) PRIMARY KEY, " +
+                            "username VARCHAR(255) NOT NULL);");
+            stmt.executeUpdate(
+                    "CREATE TABLE IF NOT EXISTS users (" +
+                            "username VARCHAR(255) PRIMARY KEY, " +
+                            "password VARCHAR(255) NOT NULL, " +
+                            "email VARCHAR(255) NOT NULL);");
+            stmt.executeUpdate(
+                    "CREATE TABLE IF NOT EXISTS games (" +
+                            "gameID INT PRIMARY KEY, " +
+                            "whiteUsername VARCHAR(255), " +
+                            "blackUsername VARCHAR(255), " +
+                            "game TEXT NOT NULL, " +
+                            "gameName VARCHAR(255) NOT NULL, " +
+                            "FOREIGN KEY (whiteUsername) REFERENCES users(username), " +
+                            "FOREIGN KEY (blackUsername) REFERENCES users(username)" +
+                            ");"
+            );        }
     }
 
     @Test
@@ -91,7 +106,8 @@ public class ClearServiceTest {
         try {
             // Temporarily rename the auths table to simulate a failure
             try (Statement stmt = connection.createStatement()) {
-                stmt.executeUpdate("RENAME TABLE auths TO auths_backup");
+                stmt.executeUpdate(
+                        "RENAME TABLE auths TO auths_backup");
             }
 
             clearService.clear(null);
@@ -101,7 +117,8 @@ public class ClearServiceTest {
         } finally {
             // Restore the auths table
             try (Statement stmt = connection.createStatement()) {
-                stmt.executeUpdate("RENAME TABLE auths_backup TO auths");
+                stmt.executeUpdate(
+                        "RENAME TABLE auths_backup TO auths");
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
