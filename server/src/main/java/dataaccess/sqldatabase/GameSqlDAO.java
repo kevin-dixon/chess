@@ -22,7 +22,6 @@ public class GameSqlDAO {
 
     public GameData addGame(GameData newGameData) throws SQLException, DataAccessException {
         String sql = "INSERT INTO games (gameID, whiteUsername, blackUsername, game, gameName) VALUES (?, ?, ?, ?, ?)";
-
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, newGameData.gameID());
@@ -32,11 +31,10 @@ public class GameSqlDAO {
             stmt.setString(5, newGameData.gameName());
             stmt.executeUpdate();
         }
-
         return newGameData;
     }
 
-    public Collection<GameData> listGames() throws SQLException {
+    public Collection<GameData> listGames() throws SQLException, DataAccessException {
         Collection<GameData> games = new ArrayList<>();
         String sql = "SELECT * FROM games";
 
@@ -53,16 +51,14 @@ public class GameSqlDAO {
                 games.add(new GameData(gameID, whiteUsername, blackUsername, game, gameName));
             }
         } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException(e.toString());
         }
-
         return games;
     }
 
     public GameData getGameByID(int gameID) throws SQLException, DataAccessException {
         GameData gameData = null;
         String sql = "SELECT * FROM games WHERE gameID = ?";
-
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, gameID);
@@ -76,26 +72,21 @@ public class GameSqlDAO {
                 }
             }
         }
-
         return gameData;
     }
 
-    public void addPlayerToGame(int gameID, String playerColor, String username) throws SQLException {
+    public void addPlayerToGame(int gameID, String playerColor, String username) throws SQLException, DataAccessException {
         String sql = "UPDATE games SET " + (playerColor.equals("WHITE") ? "whiteUsername" : "blackUsername") + " = ? WHERE gameID = ?";
-
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, username);
             stmt.setInt(2, gameID);
             stmt.executeUpdate();
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
         }
     }
 
     public void deleteAllGames() throws SQLException, DataAccessException {
         String sql = "DELETE FROM games";
-
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();

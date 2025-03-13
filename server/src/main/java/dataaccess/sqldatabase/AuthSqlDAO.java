@@ -10,18 +10,14 @@ import java.util.Collection;
 
 public class AuthSqlDAO {
 
-    public AuthData addAuth(AuthData newAuthData) throws SQLException {
+    public AuthData addAuth(AuthData newAuthData) throws SQLException, DataAccessException {
         String sql = "INSERT INTO auths (authToken, username) VALUES (?, ?)";
-
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, newAuthData.authToken());
             stmt.setString(2, newAuthData.username());
             stmt.executeUpdate();
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
         }
-
         return newAuthData;
     }
 
@@ -39,11 +35,10 @@ public class AuthSqlDAO {
                 auths.add(new AuthData(authToken, username));
             }
         }
-
         return auths;
     }
 
-    public AuthData getAuth(String authToken) throws SQLException {
+    public AuthData getAuth(String authToken) throws SQLException, DataAccessException {
         AuthData authData = null;
         String sql = "SELECT * FROM auths WHERE authToken = ?";
 
@@ -56,16 +51,12 @@ public class AuthSqlDAO {
                     authData = new AuthData(authToken, username);
                 }
             }
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
         }
-
         return authData;
     }
 
     public void deleteAuth(String authToken) throws SQLException, DataAccessException {
         String sql = "DELETE FROM auths WHERE authToken = ?";
-
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, authToken);
@@ -73,14 +64,11 @@ public class AuthSqlDAO {
         }
     }
 
-    public void deleteAllAuths() throws SQLException {
+    public void deleteAllAuths() throws SQLException, DataAccessException {
         String sql = "DELETE FROM auths";
-
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
         }
     }
 }

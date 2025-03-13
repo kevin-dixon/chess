@@ -11,21 +11,18 @@ import java.util.Collection;
 
 public class UserSqlDAO {
 
-    public UserData addUser(UserData newUserData) throws SQLException {
+    public UserData addUser(UserData newUser) throws SQLException, DataAccessException {
         String sql = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
-        String hashedPassword = BCrypt.hashpw(newUserData.password(), BCrypt.gensalt());
+        String hashedPassword = BCrypt.hashpw(newUser.password(), BCrypt.gensalt());
 
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, newUserData.username());
+            stmt.setString(1, newUser.username());
             stmt.setString(2, hashedPassword);
-            stmt.setString(3, newUserData.email());
+            stmt.setString(3, newUser.email());
             stmt.executeUpdate();
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
         }
-
-        return newUserData;
+        return newUser;
     }
 
     public Collection<UserData> listUsers() throws SQLException, DataAccessException {
@@ -43,14 +40,12 @@ public class UserSqlDAO {
                 users.add(new UserData(username, password, email));
             }
         }
-
         return users;
     }
 
-    public UserData getUser(String username) throws SQLException {
+    public UserData getUser(String username) throws SQLException, DataAccessException {
         UserData userData = null;
         String sql = "SELECT * FROM users WHERE username = ?";
-
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, username);
@@ -61,16 +56,12 @@ public class UserSqlDAO {
                     userData = new UserData(username, password, email);
                 }
             }
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
         }
-
         return userData;
     }
 
     public void deleteAllUsers() throws SQLException, DataAccessException {
         String sql = "DELETE FROM users";
-
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
@@ -78,7 +69,7 @@ public class UserSqlDAO {
     }
 
     //Verify user from BCrypt hash
-    public boolean verifyUser(String username, String providedClearTextPassword) throws SQLException {
+    public boolean verifyUser(String username, String providedClearTextPassword) throws SQLException, DataAccessException {
         String sql = "SELECT password FROM users WHERE username = ?";
         String hashedPassword;
 
@@ -92,10 +83,7 @@ public class UserSqlDAO {
                     return false;
                 }
             }
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
         }
-
         return BCrypt.checkpw(providedClearTextPassword, hashedPassword);
     }
 }
