@@ -77,7 +77,7 @@ public class GameSqlDAO {
         if (getGameByID(gameID) == null) {
             throw new DataAccessException("Invalid GameID");
         }
-        
+
         String sql = "UPDATE games SET " + (playerColor.equals("WHITE") ? "whiteUsername" : "blackUsername") + " = ? WHERE gameID = ?";
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql)) {
