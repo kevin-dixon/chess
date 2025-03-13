@@ -3,6 +3,7 @@ package dataaccess.sqldatabase;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import dataaccess.DataAccessException;
 import dataaccess.DatabaseManager;
 import model.GameData;
 
@@ -19,7 +20,7 @@ public class GameSqlDAO {
         this.gson = builder.create();
     }
 
-    public GameData addGame(GameData newGameData) throws SQLException {
+    public GameData addGame(GameData newGameData) throws SQLException, DataAccessException {
         String sql = "INSERT INTO games (gameID, whiteUsername, blackUsername, game, gameName) VALUES (?, ?, ?, ?, ?)";
 
         try (var conn = DatabaseManager.getConnection();
@@ -51,12 +52,14 @@ public class GameSqlDAO {
                 String gameName = rs.getString("gameName");
                 games.add(new GameData(gameID, whiteUsername, blackUsername, game, gameName));
             }
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
         }
 
         return games;
     }
 
-    public GameData getGameByID(int gameID) throws SQLException {
+    public GameData getGameByID(int gameID) throws SQLException, DataAccessException {
         GameData gameData = null;
         String sql = "SELECT * FROM games WHERE gameID = ?";
 
@@ -85,10 +88,12 @@ public class GameSqlDAO {
             stmt.setString(1, username);
             stmt.setInt(2, gameID);
             stmt.executeUpdate();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public void deleteAllGames() throws SQLException {
+    public void deleteAllGames() throws SQLException, DataAccessException {
         String sql = "DELETE FROM games";
 
         try (var conn = DatabaseManager.getConnection();

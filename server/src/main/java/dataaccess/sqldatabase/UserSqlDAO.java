@@ -1,5 +1,6 @@
 package dataaccess.sqldatabase;
 
+import dataaccess.DataAccessException;
 import dataaccess.DatabaseManager;
 import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
@@ -20,12 +21,14 @@ public class UserSqlDAO {
             stmt.setString(2, hashedPassword);
             stmt.setString(3, newUserData.email());
             stmt.executeUpdate();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
         }
 
         return newUserData;
     }
 
-    public Collection<UserData> listUsers() throws SQLException {
+    public Collection<UserData> listUsers() throws SQLException, DataAccessException {
         Collection<UserData> users = new ArrayList<>();
         String sql = "SELECT * FROM users";
 
@@ -58,12 +61,14 @@ public class UserSqlDAO {
                     userData = new UserData(username, password, email);
                 }
             }
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
         }
 
         return userData;
     }
 
-    public void deleteAllUsers() throws SQLException {
+    public void deleteAllUsers() throws SQLException, DataAccessException {
         String sql = "DELETE FROM users";
 
         try (var conn = DatabaseManager.getConnection();
@@ -87,6 +92,8 @@ public class UserSqlDAO {
                     return false;
                 }
             }
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
         }
 
         return BCrypt.checkpw(providedClearTextPassword, hashedPassword);

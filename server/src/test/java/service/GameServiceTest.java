@@ -24,7 +24,7 @@ class GameServiceTest {
     private AuthSqlDAO authDao;
 
     @BeforeAll
-    void setUp() throws SQLException {
+    void setUp() throws SQLException, DataAccessException {
         Connection conn = DatabaseManager.getConnection();
         try (Statement stmt = conn.createStatement()) {
             stmt.execute("CREATE TABLE IF NOT EXISTS auths (authToken VARCHAR(255) PRIMARY KEY, username VARCHAR(255))");
@@ -38,7 +38,7 @@ class GameServiceTest {
     }
 
     @AfterAll
-    void tearDown() throws SQLException {
+    void tearDown() throws SQLException, DataAccessException {
         Connection conn = DatabaseManager.getConnection();
         try (Statement stmt = conn.createStatement()) {
             stmt.execute("DROP TABLE IF EXISTS auths");

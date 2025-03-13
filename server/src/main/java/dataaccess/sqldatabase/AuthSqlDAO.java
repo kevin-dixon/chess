@@ -1,5 +1,6 @@
 package dataaccess.sqldatabase;
 
+import dataaccess.DataAccessException;
 import dataaccess.DatabaseManager;
 import model.AuthData;
 
@@ -17,12 +18,14 @@ public class AuthSqlDAO {
             stmt.setString(1, newAuthData.authToken());
             stmt.setString(2, newAuthData.username());
             stmt.executeUpdate();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
         }
 
         return newAuthData;
     }
 
-    public Collection<AuthData> listAuths() throws SQLException {
+    public Collection<AuthData> listAuths() throws SQLException, DataAccessException {
         Collection<AuthData> auths = new ArrayList<>();
         String sql = "SELECT * FROM auths";
 
@@ -53,12 +56,14 @@ public class AuthSqlDAO {
                     authData = new AuthData(authToken, username);
                 }
             }
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
         }
 
         return authData;
     }
 
-    public void deleteAuth(String authToken) throws SQLException {
+    public void deleteAuth(String authToken) throws SQLException, DataAccessException {
         String sql = "DELETE FROM auths WHERE authToken = ?";
 
         try (var conn = DatabaseManager.getConnection();
@@ -74,6 +79,8 @@ public class AuthSqlDAO {
         try (var conn = DatabaseManager.getConnection();
              var stmt = conn.prepareStatement(sql)) {
             stmt.executeUpdate();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
         }
     }
 }
