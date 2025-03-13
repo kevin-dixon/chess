@@ -25,24 +25,6 @@ public class UserSqlDAO {
         return newUser;
     }
 
-    public Collection<UserData> listUsers() throws SQLException, DataAccessException {
-        Collection<UserData> users = new ArrayList<>();
-        String sql = "SELECT * FROM users";
-
-        try (var conn = DatabaseManager.getConnection();
-             var stmt = conn.prepareStatement(sql);
-             var rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                String username = rs.getString("username");
-                String password = rs.getString("password");
-                String email = rs.getString("email");
-                users.add(new UserData(username, password, email));
-            }
-        }
-        return users;
-    }
-
     public UserData getUser(String username) throws SQLException, DataAccessException {
         UserData userData = null;
         String sql = "SELECT * FROM users WHERE username = ?";

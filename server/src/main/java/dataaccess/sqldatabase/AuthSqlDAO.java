@@ -21,23 +21,6 @@ public class AuthSqlDAO {
         return newAuthData;
     }
 
-    public Collection<AuthData> listAuths() throws SQLException, DataAccessException {
-        Collection<AuthData> auths = new ArrayList<>();
-        String sql = "SELECT * FROM auths";
-
-        try (var conn = DatabaseManager.getConnection();
-             var stmt = conn.prepareStatement(sql);
-             var rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                String authToken = rs.getString("authToken");
-                String username = rs.getString("username");
-                auths.add(new AuthData(authToken, username));
-            }
-        }
-        return auths;
-    }
-
     public AuthData getAuth(String authToken) throws SQLException, DataAccessException {
         AuthData authData = null;
         String sql = "SELECT * FROM auths WHERE authToken = ?";
