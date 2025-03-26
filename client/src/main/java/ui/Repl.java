@@ -1,9 +1,10 @@
 package ui;
 
 import websocket.NotificationHandler;
+import webSocketMessages.Notification;
 
 import java.util.Scanner;
-
+import static ui.EscapeSequences.*;
 import static java.awt.Color.*;
 
 public class Repl {
@@ -14,7 +15,7 @@ public class Repl {
     }
 
     public void run() {
-        System.out.println("Welcome...");
+        System.out.println("Type help to get started.");
         System.out.println(client.help());
 
         Scanner scanner = new Scanner(System.in);
@@ -26,7 +27,7 @@ public class Repl {
 
             try {
                 result = client.evaluate(line);
-                System.out.print(BLUE + result);
+                System.out.print(SET_TEXT_COLOR_MAGENTA + result);
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
@@ -36,8 +37,11 @@ public class Repl {
     }
 
     private void printPrompt() {
-        //TODO: implement
+        System.out.print("\n" + RESET_TEXT_COLOR + ">>> ");
     }
 
-    //add more command functionalities
+    private void notify(Notification notif) {
+        System.out.println(RED + notif.message());
+        printPrompt();
+    }
 }

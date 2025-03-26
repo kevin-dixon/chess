@@ -6,6 +6,7 @@ import server.Server;
 
 import java.sql.SQLException;
 
+/*
 public class Main {
     public static void main(String[] args) {
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
@@ -14,4 +15,4 @@ public class Main {
         Server myServer = new Server();
         myServer.run(8080);
     }
-}
+}*/

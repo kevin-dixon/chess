@@ -3,26 +3,43 @@ package ui;
 
 import server.ServerFacade;
 import websocket.NotificationHandler;
-import websocket.WebSocketFacade;
 
 import java.util.Arrays;
+
+import static ui.EscapeSequences.*;
 
 public class ChessClient {
     private String userName = null;
     private final ServerFacade server;
     private final String serverUrl;
     private final NotificationHandler notificationHandler;
-    private WebSocketFacade ws;
     private State state = State.SIGNEDOUT;
 
-    public ChessClient(String serverUrl, NotificationHandler notifHandler) {
+    public ChessClient(String serverUrl, NotificationHandler notifyHandler) {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
-        this.notificationHandler = notifHandler;
+        this.notificationHandler = notifyHandler;
     }
 
     public String help() {
-        return "implement help";
+        System.out.print(SET_TEXT_COLOR_MAGENTA);
+        if (state == State.SIGNEDOUT) {
+            return """
+                    register <USERNAME> <PASSWORD> <EMAIL> - to create an account
+                    login <USERNAME> <PASSWORD> - to play chess
+                    quit - playing chess
+                    help - with possible commands
+                    """;
+        }
+        return """
+                create <NAME> - a game
+                list - games
+                join <ID> [WHITE|BLACK] - a game
+                observe <ID> - a game
+                logout - when you are done
+                quit - playing chess
+                help - with possible commands
+                """;
     }
 
     public String evaluate(String in) {
@@ -32,7 +49,7 @@ public class ChessClient {
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
 
             return switch(cmd) {
-                case "signin" -> signIn(params);
+                case "register" -> register(params);
                 //add more commands here
                 case "quit" -> "quit";
                 default -> help();
@@ -42,7 +59,7 @@ public class ChessClient {
         }
     }
 
-    private String signIn(String[] params) throws ResponseException {
+    private String register(String[] params) throws ResponseException {
         return "implement sign in";
     }
 
