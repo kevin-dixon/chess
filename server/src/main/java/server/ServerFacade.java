@@ -1,3 +1,5 @@
+package server;
+
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -62,7 +64,7 @@ public class ServerFacade {
         }
     }
 
-    private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, ResponseException {
+    private void throwIfNotSuccessful(HttpURLConnection http) throws IOException {
         //TODO: implement
         var status = http.getResponseCode();
         if (!isSuccessful(status)) {
