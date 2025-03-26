@@ -1,6 +1,8 @@
 package server;
 
 import com.google.gson.Gson;
+import model.GameData;
+import model.UserData;
 import ui.ResponseException;
 
 import java.io.*;
@@ -23,12 +25,63 @@ public class ServerFacade {
      * }
      * **/
 
+    public String register(String username, String password, String email) throws Exception, ResponseException {
+        var path = "/user";
+        var request = new UserData(username, password, email);
+        return this.makeRequest("POST", path, request, String.class);
+    }
+
+    public String login(String username, String password) throws Exception, ResponseException {
+        var path = "/session";
+        var request = new UserData(username, password, null);
+        return this.makeRequest("POST", path, request, String.class);
+    }
+
+    public String logout(String authToken) throws Exception, ResponseException {
+        var path = "/session";
+        return this.makeRequestWithAuth("DELETE", path, null, String.class, authToken);
+    }
+
+    public GameData[] listGames(String authToken) throws Exception, ResponseException {
+        var path = "/game";
+        return this.makeRequestWithAuth("GET", path, null, GameData[].class, authToken);
+    }
+
+    public String createGame(String authToken, String gameName) throws Exception, ResponseException {
+        var path = "/game";
+        var request = new CreateGameRequest(gameName);
+        return this.makeRequestWithAuth("POST", path, request, String.class, authToken);
+    }
+
+    public String joinGame(String authToken, int gameID, String playerColor) throws Exception, ResponseException {
+        var path = "/game";
+        var request = new JoinGameRequest(gameID, playerColor);
+        return this.makeRequestWithAuth("PUT", path, request, String.class, authToken);
+    }
+
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws URISyntaxException, IOException, ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
             http.setDoOutput(true);
+
+            writeBody(request, http);
+            http.connect();
+            throwIfNotSuccessful(http);
+            return readBody(http, responseClass);
+        } catch (Exception e) {
+            throw new ResponseException(500, e.getMessage());
+        }
+    }
+
+    private <T> T makeRequestWithAuth(String method, String path, Object request, Class<T> responseClass, String authToken) throws URISyntaxException, IOException, ResponseException {
+        try {
+            URL url = (new URI(serverUrl + path)).toURL();
+            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            http.setRequestMethod(method);
+            http.setDoOutput(true);
+            http.setRequestProperty("authorization", authToken);
 
             writeBody(request, http);
             http.connect();
@@ -76,6 +129,24 @@ public class ServerFacade {
     private boolean isSuccessful(int status) {
         //Any non 200 value status will return failure
         return status / 100 == 2;
+    }
+
+    private static class CreateGameRequest {
+        String gameName;
+
+        CreateGameRequest(String gameName) {
+            this.gameName = gameName;
+        }
+    }
+
+    private static class JoinGameRequest {
+        int gameID;
+        String playerColor;
+
+        JoinGameRequest(int gameID, String playerColor) {
+            this.gameID = gameID;
+            this.playerColor = playerColor;
+        }
     }
 
 }

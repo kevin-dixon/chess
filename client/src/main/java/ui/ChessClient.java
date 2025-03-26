@@ -1,6 +1,7 @@
 package ui;
 
 
+import model.UserData;
 import server.ServerFacade;
 import websocket.NotificationHandler;
 
@@ -50,7 +51,11 @@ public class ChessClient {
 
             return switch(cmd) {
                 case "register" -> register(params);
-                //add more commands here
+                case "login" -> login(params);
+                case "logout" -> logout();
+                case "create" -> createGame(params);
+                case "list" -> listGames();
+                case "join" -> joinGame(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -60,9 +65,63 @@ public class ChessClient {
     }
 
     private String register(String[] params) throws ResponseException {
-        return "implement sign in";
+        if (params.length < 3) return "Error: insufficient parameters for register";
+        try {
+            return server.register(params[0], params[1], params[2]);
+        } catch (Exception e) {
+            throw new ResponseException(500, e.getMessage());
+        }
     }
 
-    //add more functions
+    private String login(String[] params) throws ResponseException {
+        if (params.length < 2) return "Error: insufficient parameters for login";
+        try {
+            String response = server.login(params[0], params[1]);
+            userName = params[0];
+            state = State.SIGNEDIN;
+            return "Logged in as " + userName + "\n" + response;
+        } catch (Exception e) {
+            throw new ResponseException(500, e.getMessage());
+        }
+    }
+
+    private String logout() throws ResponseException {
+        try {
+            String response = server.logout(userName);
+            userName = null;
+            state = State.SIGNEDOUT;
+            return "Logged out\n" + response;
+        } catch (Exception e) {
+            throw new ResponseException(500, e.getMessage());
+        }
+    }
+
+    private String createGame(String[] params) throws ResponseException {
+        if (params.length < 1) return "Error: insufficient parameters for create game";
+        try {
+            return server.createGame(userName, params[0]);
+        } catch (Exception e) {
+            throw new ResponseException(500, e.getMessage());
+        }
+    }
+
+    private String listGames() throws ResponseException {
+        try {
+            String response = Arrays.toString(server.listGames(userName));
+            return "Games:\n" + response;
+        } catch (Exception e) {
+            throw new ResponseException(500, e.getMessage());
+        }
+    }
+
+    private String joinGame(String[] params) throws ResponseException {
+        if (params.length < 2) return "Error: insufficient parameters for join game";
+        try {
+            int gameID = Integer.parseInt(params[0]);
+            return server.joinGame(userName, gameID, params[1].toUpperCase());
+        } catch (Exception e) {
+            throw new ResponseException(500, e.getMessage());
+        }
+    }
 
 }
