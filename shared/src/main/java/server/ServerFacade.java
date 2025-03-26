@@ -1,11 +1,9 @@
 package server;
 
 import com.google.gson.Gson;
+import ui.ResponseException;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.*;
 
 public class ServerFacade {
@@ -17,8 +15,15 @@ public class ServerFacade {
     }
 
     //Add a function for each api call client can make
+    /**
+     * Example api call for functionality:
+     * public User addUser(User user) throws Exception {
+     *     var path = "/user";
+     *     return this.makeRequest("POST", path, user, User.class);
+     * }
+     * **/
 
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws URISyntaxException, IOException {
+    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws URISyntaxException, IOException, ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
@@ -27,13 +32,10 @@ public class ServerFacade {
 
             writeBody(request, http);
             http.connect();
-
-            //TODO: fix this line
-            //throwIfNotSuccessful(http);
+            throwIfNotSuccessful(http);
             return readBody(http, responseClass);
         } catch (Exception e) {
-            //TODO: fix throw error
-            throw (e);
+            throw new ResponseException(500, e.getMessage());
         }
     }
 
@@ -64,11 +66,10 @@ public class ServerFacade {
         }
     }
 
-    private void throwIfNotSuccessful(HttpURLConnection http) throws IOException {
-        //TODO: implement
+    private void throwIfNotSuccessful(HttpURLConnection http) throws ResponseException, IOException {
         var status = http.getResponseCode();
         if (!isSuccessful(status)) {
-            //throw new ResponseException(status, "failure: "+status);
+            throw new ResponseException(status, "failure: "+status);
         }
     }
 
@@ -76,4 +77,5 @@ public class ServerFacade {
         //Any non 200 value status will return failure
         return status / 100 == 2;
     }
+
 }

@@ -33,6 +33,7 @@ public class ChessClient {
 
             return switch(cmd) {
                 case "signin" -> signIn(params);
+                //add more commands here
                 case "quit" -> "quit";
                 default -> help();
             };
