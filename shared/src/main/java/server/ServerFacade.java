@@ -11,9 +11,11 @@ import java.net.*;
 public class ServerFacade {
 
     private final String serverUrl;
+    private final Gson gson;
 
-    public ServerFacade(String url) {
-        serverUrl = url;
+    public ServerFacade(String serverUrl) {
+        this.serverUrl = serverUrl;
+        this.gson = new Gson();
     }
 
     //Add a function for each api call client can make
@@ -25,117 +27,115 @@ public class ServerFacade {
      * }
      * **/
 
-    public String register(String username, String password, String email) throws Exception, ResponseException {
+    public String register(String username, String password, String email) throws ResponseException {
         var path = "/user";
         var request = new UserData(username, password, email);
         return this.makeRequest("POST", path, request, String.class);
     }
 
-    public String login(String username, String password) throws Exception, ResponseException {
+    public String login(String username, String password) throws ResponseException {
         var path = "/session";
         var request = new UserData(username, password, null);
         return this.makeRequest("POST", path, request, String.class);
     }
 
-    public String logout(String authToken) throws Exception, ResponseException {
+    public void logout(String authToken) throws ResponseException {
         var path = "/session";
-        return this.makeRequestWithAuth("DELETE", path, null, String.class, authToken);
+        this.makeRequestWithAuth("DELETE", path, null, null, authToken);
     }
 
-    public GameData[] listGames(String authToken) throws Exception, ResponseException {
+    public GameData[] listGames(String authToken) throws ResponseException {
         var path = "/game";
         return this.makeRequestWithAuth("GET", path, null, GameData[].class, authToken);
     }
 
-    public String createGame(String authToken, String gameName) throws Exception, ResponseException {
+    public String createGame(String authToken, String gameName) throws ResponseException {
         var path = "/game";
         var request = new CreateGameRequest(gameName);
         return this.makeRequestWithAuth("POST", path, request, String.class, authToken);
     }
 
-    public String joinGame(String authToken, int gameID, String playerColor) throws Exception, ResponseException {
+    public String joinGame(String authToken, int gameID, String playerColor) throws ResponseException {
         var path = "/game";
         var request = new JoinGameRequest(gameID, playerColor);
         return this.makeRequestWithAuth("PUT", path, request, String.class, authToken);
     }
 
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws URISyntaxException, IOException, ResponseException {
+    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
         try {
-            URL url = (new URI(serverUrl + path)).toURL();
+            URL url = new URL(serverUrl + path);
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
             http.setDoOutput(true);
 
             writeBody(request, http);
             http.connect();
-            throwIfNotSuccessful(http);
+            //throwIfNotSuccessful(http);
             return readBody(http, responseClass);
-        } catch (Exception e) {
-            throw new ResponseException(500, e.getMessage());
+        } catch (Exception ex) {
+            throw new ResponseException(500, ex.getMessage());
         }
     }
 
-    private <T> T makeRequestWithAuth(String method, String path, Object request, Class<T> responseClass, String authToken) throws URISyntaxException, IOException, ResponseException {
+    private <T> T makeRequestWithAuth(String method, String path, Object request, Class<T> responseClass, String authToken) throws ResponseException {
         try {
-            URL url = (new URI(serverUrl + path)).toURL();
+            URL url = new URL(serverUrl + path);
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
             http.setDoOutput(true);
-            http.setRequestProperty("authorization", authToken);
+            http.setRequestProperty("Authorization", authToken);
 
             writeBody(request, http);
             http.connect();
-            throwIfNotSuccessful(http);
+            //throwIfNotSuccessful(http);
             return readBody(http, responseClass);
-        } catch (Exception e) {
-            throw new ResponseException(500, e.getMessage());
+        } catch (Exception ex) {
+            throw new ResponseException(500, ex.getMessage());
         }
     }
 
-    private <T> T readBody(HttpURLConnection http, Class<T> responseClass) {
-        T response = null;
-        if (http.getContentLength() < 0) {
-            try (InputStream respBody = http.getInputStream()) {
-                InputStreamReader reader = new InputStreamReader(respBody);
-                if (responseClass != null) {
-                    response = new Gson().fromJson(reader, responseClass);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+    private static <T> T readBody(HttpURLConnection http, Class<T> responseClass) throws IOException {
+        if (responseClass == null) {
+            return null;
         }
-        return response;
+        try (InputStream respBody = http.getInputStream()) {
+            InputStreamReader reader = new InputStreamReader(respBody);
+            return new Gson().fromJson(reader, responseClass);
+        }
     }
 
-    private void writeBody(Object request, HttpURLConnection http) {
+    private static void writeBody(Object request, HttpURLConnection http) throws IOException {
         if (request != null) {
             http.addRequestProperty("Content-Type", "application/json");
             String reqData = new Gson().toJson(request);
             try (OutputStream reqBody = http.getOutputStream()) {
                 reqBody.write(reqData.getBytes());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
         }
     }
 
-    private void throwIfNotSuccessful(HttpURLConnection http) throws ResponseException, IOException {
-        var status = http.getResponseCode();
+    private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, ResponseException {
+        int status = http.getResponseCode();
         if (!isSuccessful(status)) {
-            throw new ResponseException(status, "failure: "+status);
+            try (InputStream respErr = http.getErrorStream()) {
+                if (respErr != null) {
+                    //throw ResponseException.fromJson(respErr);
+                }
+            }
+            throw new ResponseException(status, "HTTP error: " + status);
         }
-    }
-
-    private boolean isSuccessful(int status) {
-        //Any non 200 value status will return failure
-        return status / 100 == 2;
-    }
-
-    public void observeGame(String authToken, int i) {
     }
 
     public String getServerUrl() {
         return serverUrl;
+    }
+
+
+    private boolean isSuccessful(int status) {
+        return status >= 200 && status < 300;
+    }
+
+    public void observeGame(String authToken, int i) {
     }
 
     private static class CreateGameRequest {

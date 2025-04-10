@@ -17,7 +17,7 @@ public class Repl {
     public Repl(String serverUrl) {
         this.serverUrl = serverUrl;
         this.notificationHandler = new NotificationHandler();
-        this.activeClient = new ChessClient(serverUrl, notificationHandler); // Start with ChessClient
+        this.activeClient = new ChessClient(serverUrl, notificationHandler);
     }
 
     public void run() {
@@ -52,26 +52,30 @@ public class Repl {
         if (activeClient instanceof ChessClient chessClient) {
             Object result = chessClient.evaluate(input);
             if (result instanceof UserClient) {
-                userClient = (UserClient) result; // Save the UserClient instance
-                activeClient = result; // Transition to UserClient
+
+                userClient = (UserClient) result;
+                activeClient = result;
+
                 return "Logged in successfully.";
             }
             return result.toString();
         } else if (activeClient instanceof UserClient userClient) {
             Object result = userClient.evaluate(input);
             if (result instanceof ChessClient) {
-                activeClient = result; // Transition back to ChessClient
-                this.userClient = null; // Clear the saved UserClient instance
+                activeClient = result;
+                this.userClient = null;
+
                 return "Logged out successfully.";
             } else if (result instanceof GameClient) {
-                activeClient = result; // Transition to GameClient
+                activeClient = result;
+
                 return "Joined game successfully.";
             }
             return result.toString();
         } else if (activeClient instanceof GameClient gameClient) {
             Object result = gameClient.evaluate(input);
             if (result.equals("Exiting game.")) {
-                // Use the preserved UserClient instance to transition back
+
                 activeClient = userClient;
                 return (String) result;
             }

@@ -1,12 +1,10 @@
 package ui;
 
-
+import com.google.gson.Gson;
 import model.UserData;
 import server.ServerFacade;
 import websocket.NotificationHandler;
-
 import java.util.Arrays;
-
 import static ui.EscapeSequences.*;
 
 public class ChessClient {
@@ -47,9 +45,14 @@ public class ChessClient {
     private Object register(String[] params) {
         if (params.length < 3) return "Error: insufficient parameters for register";
         try {
-            String authToken = server.register(params[0], params[1], params[2]);
-            return new UserClient(server.getServerUrl(), params[0], authToken, notificationHandler);
-        } catch (Exception | ResponseException e) {
+            String username = params[0];
+            String password = params[1];
+            String email = params[2];
+
+            // Use the simplified ServerFacade register method
+            String authToken = server.register(username, password, email);
+            return new UserClient(server.getServerUrl(), username, authToken, notificationHandler);
+        } catch (ResponseException e) {
             return "Error: " + e.getMessage();
         }
     }
@@ -57,23 +60,15 @@ public class ChessClient {
     private Object login(String[] params) {
         if (params.length < 2) return "Error: insufficient parameters for login";
         try {
-            String authToken = server.login(params[0], params[1]);
-            return new UserClient(server.getServerUrl(), params[0], authToken, notificationHandler);
-        } catch (Exception | ResponseException e) {
+            String username = params[0];
+            String password = params[1];
+
+            // Use the simplified ServerFacade login method
+            String authToken = server.login(username, password);
+            return new UserClient(server.getServerUrl(), username, authToken, notificationHandler);
+        } catch (ResponseException e) {
             return "Error: " + e.getMessage();
         }
     }
-
-    /*private String login(String[] params) throws ResponseException {
-        if (params.length < 2) return "Error: insufficient parameters for login";
-        try {
-            String response = server.login(params[0], params[1]);
-            userName = params[0];
-            state = State.SIGNEDIN;
-            return "Logged in as " + userName + "\n" + response;
-        } catch (Exception e) {
-            throw new ResponseException(500, e.getMessage());
-        }
-    }*/
 
 }
