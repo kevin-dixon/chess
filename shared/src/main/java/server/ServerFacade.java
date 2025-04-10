@@ -131,6 +131,13 @@ public class ServerFacade {
         return status / 100 == 2;
     }
 
+    public void observeGame(String authToken, int i) {
+    }
+
+    public String getServerUrl() {
+        return serverUrl;
+    }
+
     private static class CreateGameRequest {
         String gameName;
 

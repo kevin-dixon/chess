@@ -1,10 +1,17 @@
 package ui;
 
 public class ResponseException extends Throwable {
-    public ResponseException(int i, String message) {
+    private final int statusCode;
+    private final String message;
+
+    public ResponseException(int statusCode, String message) {
+        super(message);
+        this.statusCode = statusCode;
+        this.message = message;
     }
 
+    @Override
     public String getMessage() {
-        return "error";
+        return "HTTP " + statusCode + ": " + message;
     }
 }

@@ -9,25 +9,21 @@ import static ui.EscapeSequences.*;
 import static java.awt.Color.*;
 
 public class Repl {
-    private ChessClient chessClient;
-    private UserClient userClient;
-    private GameClient gameClient;
-    private String serverUrl;
-    private String authToken;
+    private Object activeClient; // Can be ChessClient, UserClient, or GameClient
+    private UserClient userClient; // Preserve the UserClient instance
+    private final String serverUrl;
+    private final NotificationHandler notificationHandler;
 
     public Repl(String serverUrl) {
         this.serverUrl = serverUrl;
-        this.chessClient = new ChessClient(serverUrl, new NotificationHandler());
-        this.userClient = new UserClient(serverUrl, new NotificationHandler());
-        this.gameClient = new GameClient(serverUrl, new NotificationHandler());
+        this.notificationHandler = new NotificationHandler();
+        this.activeClient = new ChessClient(serverUrl, notificationHandler); // Start with ChessClient
     }
 
     public void run() {
         System.out.println("Type help to get started.");
-        System.out.println(chessClient.help());
-
         Scanner scanner = new Scanner(System.in);
-        var result = "";
+        String result = "";
 
         while (!result.equals("quit")) {
             printPrompt();
@@ -35,17 +31,16 @@ public class Repl {
 
             try {
                 result = evaluate(line);
-                System.out.print(SET_TEXT_COLOR_MAGENTA + result);
+                System.out.println(SET_TEXT_COLOR_MAGENTA + result + RESET_TEXT_COLOR);
             } catch (Throwable e) {
-                var msg = e.toString();
-                System.out.print(msg);
+                System.out.println(SET_TEXT_COLOR_RED + "Error: " + e.getMessage() + RESET_TEXT_COLOR);
             }
         }
-        System.out.println();
+        System.out.println("Goodbye!");
     }
 
     private void printPrompt() {
-        System.out.print("\n" + RESET_TEXT_COLOR + ">>> ");
+        System.out.print("\n>>> ");
     }
 
     private void notify(Notification notif) {
@@ -53,41 +48,35 @@ public class Repl {
         printPrompt();
     }
 
-    private String evaluate(String in) throws Exception, ResponseException {
-        var tokens = in.toLowerCase().split(" ");
-        var cmd = (tokens.length > 0) ? tokens[0] : "help";
-        var params = Arrays.copyOfRange(tokens, 1, tokens.length);
-
-        switch (cmd) {
-            case "register":
-                if (params.length < 3) return "Error: insufficient parameters for register";
-                return userClient.register(params[0], params[1], params[2]);
-
-            case "login":
-                if (params.length < 2) return "Error: insufficient parameters for login";
-                authToken = userClient.login(params[0], params[1]);
-                return "Logged in as " + params[0];
-
-            case "logout":
-                if (authToken == null) return "Error: not logged in";
-                return userClient.logout(authToken);
-
-            case "create":
-                if (authToken == null) return "Error: not logged in";
-                if (params.length < 1) return "Error: insufficient parameters for create game";
-                return gameClient.createGame(authToken, params[0]);
-
-            case "join":
-                if (authToken == null) return "Error: not logged in";
-                if (params.length < 2) return "Error: insufficient parameters for join game";
-                int gameID = Integer.parseInt(params[0]);
-                return gameClient.joinGame(authToken, gameID, params[1].toUpperCase());
-
-            case "quit":
-                return "quit";
-
-            default:
-                return chessClient.help();
+    private String evaluate(String input) throws Exception {
+        if (activeClient instanceof ChessClient chessClient) {
+            Object result = chessClient.evaluate(input);
+            if (result instanceof UserClient) {
+                userClient = (UserClient) result; // Save the UserClient instance
+                activeClient = result; // Transition to UserClient
+                return "Logged in successfully.";
+            }
+            return result.toString();
+        } else if (activeClient instanceof UserClient userClient) {
+            Object result = userClient.evaluate(input);
+            if (result instanceof ChessClient) {
+                activeClient = result; // Transition back to ChessClient
+                this.userClient = null; // Clear the saved UserClient instance
+                return "Logged out successfully.";
+            } else if (result instanceof GameClient) {
+                activeClient = result; // Transition to GameClient
+                return "Joined game successfully.";
+            }
+            return result.toString();
+        } else if (activeClient instanceof GameClient gameClient) {
+            Object result = gameClient.evaluate(input);
+            if (result.equals("Exiting game.")) {
+                // Use the preserved UserClient instance to transition back
+                activeClient = userClient;
+                return (String) result;
+            }
+            return result.toString();
         }
+        return "Invalid state.";
     }
 }
