@@ -2,6 +2,10 @@ package server;
 
 import com.google.gson.Gson;
 import model.GameData;
+import model.requests.CreateGameRequest;
+import model.requests.JoinGameRequest;
+import model.requests.LeaveGameRequest;
+import model.requests.ObserveGameRequest;
 import model.UserData;
 import model.responses.UserAuthResponse;
 import ui.ResponseException;
@@ -55,38 +59,28 @@ public class ServerFacade {
         var path = "/game";
         var request = new CreateGameRequest(gameName);
 
-        record CreateGameResponse(String gameID) {}
-        CreateGameResponse response = this.makeRequestWithAuth("POST", path, request, CreateGameResponse.class, authToken);
-
+        this.makeRequestWithAuth("POST", path, request, null, authToken);
     }
 
     public void joinGame(String authToken, int gameID, String playerColor) throws ResponseException {
         var path = "/game";
         var request = new JoinGameRequest(gameID, playerColor);
 
-        record JoinGameResponse(String message) {}
-        JoinGameResponse response = this.makeRequestWithAuth("PUT", path, request, JoinGameResponse.class, authToken);
-
+        this.makeRequestWithAuth("PUT", path, request, null, authToken);
     }
 
     public void observeGame(String authToken, int gameID) throws ResponseException {
         var path = "/game/observe";
         var request = new ObserveGameRequest(gameID);
 
-        record ObserveGameResponse(String message) {}
-        ObserveGameResponse response = this.makeRequestWithAuth("POST", path, request, ObserveGameResponse.class, authToken);
-
-        System.out.println("Observe Game Response: " + response.message());
+        this.makeRequestWithAuth("POST", path, request, null, authToken);
     }
 
     public void leaveGame(String authToken, int gameID) throws ResponseException {
         var path = "/game/leave";
         var request = new LeaveGameRequest(gameID);
 
-        record LeaveGameResponse(String message) {}
-        LeaveGameResponse response = this.makeRequestWithAuth("POST", path, request, LeaveGameResponse.class, authToken);
-
-        System.out.println("Leave Game Response: " + response.message());
+        this.makeRequestWithAuth("POST", path, request, null, authToken);
     }
 
     public <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
@@ -115,7 +109,7 @@ public class ServerFacade {
 
             writeBody(request, http);
             http.connect();
-            //throwIfNotSuccessful(http);
+            throwIfNotSuccessful(http);
             return readBody(http, responseClass);
         } catch (Exception ex) {
             throw new ResponseException(500, ex.getMessage());
@@ -160,12 +154,11 @@ public class ServerFacade {
 
                     // Parse the error message from the JSON response
                     var errorResponse = new Gson().fromJson(responseBody.toString(), ErrorResponse.class);
-                    if (errorResponse != null && errorResponse.message() != null) {
-                        errorMessage = errorResponse.message();
+                    if (errorResponse != null && errorResponse.getMessage() != null) {
+                        errorMessage = errorResponse.getMessage();
                     }
                 }
             } catch (Exception e) {
-                // Log the exception but continue with the default error message
                 e.printStackTrace();
             }
 
@@ -173,55 +166,28 @@ public class ServerFacade {
         }
     }
 
-    public String getServerUrl() {
-        return serverUrl;
-    }
-
     private boolean isSuccessful(int status) {
         return status >= 200 && status < 300;
     }
 
-    private static class CreateGameRequest {
-        String gameName;
-
-        CreateGameRequest(String gameName) {
-            this.gameName = gameName;
-        }
+    public String getServerUrl() {
+        return serverUrl;
     }
 
-    public static class JoinGameRequest {
-        int gameID;
-        String playerColor;
+    public class ErrorResponse {
+        private String message;
 
-        JoinGameRequest(int gameID, String playerColor) {
-            this.gameID = gameID;
-            this.playerColor = playerColor;
+        public ErrorResponse(String message) {
+            this.message = message;
         }
 
-        public int getGameID(){
-            return gameID;
+        public String getMessage() {
+            return message;
         }
-        public String getPlayerColor(){
-            return playerColor;
+
+        public void setMessage(String message) {
+            this.message = message;
         }
+
     }
-
-    private static class ObserveGameRequest {
-        int gameID;
-
-        ObserveGameRequest(int gameID) {
-            this.gameID = gameID;
-        }
-    }
-
-    private static class LeaveGameRequest {
-        int gameID;
-
-        LeaveGameRequest(int gameID) {
-            this.gameID = gameID;
-        }
-    }
-
-    public record ErrorResponse(String message) {}
-
 }

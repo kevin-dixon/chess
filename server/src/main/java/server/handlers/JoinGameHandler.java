@@ -2,6 +2,7 @@ package server.handlers;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
+import model.requests.JoinGameRequest;
 import server.ServerFacade;
 import service.GameService;
 import service.UserService;
@@ -28,38 +29,20 @@ public class JoinGameHandler implements Route {
     @Override
     public Object handle(Request request, Response response) throws Exception {
         try {
-            // Get authToken
             String authToken = request.headers("authorization");
-
-            // Validate authToken
             if (authToken == null || authToken.isEmpty() || !userService.validAuthToken(authToken)) {
                 response.status(401);
-                response.type("application/json");
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("message", "Error: unauthorized - invalid or missing auth token");
-                return gson.toJson(errorResponse);
+                return gson.toJson(Map.of("message", "Error: unauthorized - invalid or missing auth token"));
             }
 
-            // Parse the JSON request body
-            ServerFacade.JoinGameRequest joinGameRequest = gson.fromJson(request.body(), ServerFacade.JoinGameRequest.class);
-
-            // Join the game
+            JoinGameRequest joinGameRequest = gson.fromJson(request.body(), JoinGameRequest.class);
             gameService.joinGame(authToken, joinGameRequest.getGameID(), joinGameRequest.getPlayerColor());
+
             response.status(200);
-            response.type("application/json");
             return gson.toJson(Map.of("message", "Successfully joined the game"));
-        } catch (DataAccessException e) {
-            response.status(400);
-            response.type("application/json");
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Error: bad request - " + e.getMessage());
-            return gson.toJson(errorResponse);
         } catch (Exception e) {
             response.status(500);
-            response.type("application/json");
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Error: " + e.getMessage());
-            return gson.toJson(errorResponse);
+            return gson.toJson(Map.of("message", "Error: " + e.getMessage()));
         }
     }
 }

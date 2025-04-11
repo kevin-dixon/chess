@@ -1,6 +1,8 @@
 package server.handlers;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccessException;
+import model.requests.LeaveGameRequest;
 import service.GameService;
 import service.UserService;
 import spark.Request;
@@ -24,7 +26,7 @@ public class LeaveGameHandler implements Route {
     @Override
     public Object handle(Request request, Response response) throws Exception {
         try {
-            // Get authToken from headers
+            // Get authToken
             String authToken = request.headers("authorization");
 
             // Validate authToken
@@ -32,23 +34,24 @@ public class LeaveGameHandler implements Route {
                 response.status(401);
                 response.type("application/json");
                 Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("message", "Error: unauthorized");
+                errorResponse.put("message", "Error: unauthorized - invalid or missing auth token");
                 return gson.toJson(errorResponse);
             }
 
-            // Parse the gameID from the request body
-            Map<String, Object> requestBody = gson.fromJson(request.body(), Map.class);
-            int gameID = ((Double) requestBody.get("gameID")).intValue();
+            // Parse the JSON request body
+            LeaveGameRequest leaveGameRequest = gson.fromJson(request.body(), LeaveGameRequest.class);
 
-            // Remove the player from the game
-            gameService.removePlayerFromGame(gameID, userService.getUsernameFromAuthToken(authToken));
-
-            // Return success response
+            // Leave the game
+            gameService.leaveGame(authToken, leaveGameRequest.getGameID());
             response.status(200);
             response.type("application/json");
-            Map<String, String> successResponse = new HashMap<>();
-            successResponse.put("message", "Player removed from game successfully.");
-            return gson.toJson(successResponse);
+            return gson.toJson(Map.of("message", "Successfully left the game"));
+        } catch (DataAccessException e) {
+            response.status(400);
+            response.type("application/json");
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Error: bad request - " + e.getMessage());
+            return gson.toJson(errorResponse);
         } catch (Exception e) {
             response.status(500);
             response.type("application/json");

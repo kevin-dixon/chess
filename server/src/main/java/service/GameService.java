@@ -93,4 +93,10 @@ public class GameService {
             throw new DataAccessException("Failed to remove player from game: " + e.getMessage());
         }
     }
+
+    public void observeGame(String authToken, int gameID) {
+    }
+
+    public void leaveGame(String authToken, int gameID) {
+    }
 }

@@ -3,6 +3,8 @@ package server.handlers;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import model.GameData;
+import model.requests.ObserveGameRequest;
+import server.ServerFacade;
 import service.GameService;
 import service.UserService;
 import spark.Request;
@@ -26,7 +28,7 @@ public class ObserveGameHandler implements Route {
     @Override
     public Object handle(Request request, Response response) throws Exception {
         try {
-            // Get authToken from headers
+            // Get authToken
             String authToken = request.headers("authorization");
 
             // Validate authToken
@@ -34,30 +36,24 @@ public class ObserveGameHandler implements Route {
                 response.status(401);
                 response.type("application/json");
                 Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("message", "Error: unauthorized");
+                errorResponse.put("message", "Error: unauthorized - invalid or missing auth token");
                 return gson.toJson(errorResponse);
             }
 
-            // Parse the gameID from the request body
-            Map<String, Object> requestBody = gson.fromJson(request.body(), Map.class);
-            int gameID = ((Double) requestBody.get("gameID")).intValue();
+            // Parse the JSON request body
+            ObserveGameRequest observeGameRequest = gson.fromJson(request.body(), ObserveGameRequest.class);
 
-            // Check if the game exists
-            GameData gameData = gameService.getGameByID(gameID);
-            if (gameData == null) {
-                response.status(404);
-                response.type("application/json");
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("message", "Error: game not found");
-                return gson.toJson(errorResponse);
-            }
-
-            // Return success response
+            // Observe the game
+            gameService.observeGame(authToken, observeGameRequest.getGameID());
             response.status(200);
             response.type("application/json");
-            Map<String, String> successResponse = new HashMap<>();
-            successResponse.put("message", "Observing game successfully");
-            return gson.toJson(successResponse);
+            return gson.toJson(Map.of("message", "Successfully observing the game"));
+        } catch (DataAccessException e) {
+            response.status(400);
+            response.type("application/json");
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Error: bad request - " + e.getMessage());
+            return gson.toJson(errorResponse);
         } catch (Exception e) {
             response.status(500);
             response.type("application/json");
