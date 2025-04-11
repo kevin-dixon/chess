@@ -1,6 +1,7 @@
 package ui;
 
 import server.ServerFacade;
+import static ui.EscapeSequences.*;
 
 public class GameClient {
     private final ServerFacade server;
@@ -16,7 +17,55 @@ public class GameClient {
     }
 
     public String drawChessBoard() {
-        return isBlackPerspective ? "Drawing board from black's perspective." : "Drawing board from white's perspective.";
+        StringBuilder board = new StringBuilder();
+
+        // Add top border
+        board.append("   +------------------------+\n");
+
+        // Loop through rows
+        for (int row = 0; row < 8; row++) {
+            int displayRow = isBlackPerspective ? row + 1 : 8 - row; // Adjust row for perspective
+            board.append(" ").append(displayRow).append(" |"); // Add row number
+
+            // Loop through columns
+            for (int col = 0; col < 8; col++) {
+                int displayCol = isBlackPerspective ? 7 - col : col; // Adjust column for perspective
+                boolean isDarkSquare = (row + col) % 2 == 1; // Determine square color
+                String squareColor = isDarkSquare ? SET_BG_COLOR_DARK_GREY : SET_BG_COLOR_LIGHT_GREY;
+
+                // Get the piece for the current square
+                String piece = getInitialPiece(row, displayCol);
+
+                // Append the square with the piece
+                board.append(squareColor).append(piece).append(RESET_BG_COLOR);
+            }
+
+            board.append(" |\n"); // End the row
+        }
+
+        // Add bottom border
+        board.append("   +------------------------+\n");
+
+        // Add column labels
+        board.append("     a  b  c  d  e  f  g  h\n");
+
+        return board.toString();
+    }
+
+    private String getInitialPiece(int row, int col) {
+        // Initial chessboard setup
+        String[][] initialBoard = {
+                {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK},
+                {BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN},
+                {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+                {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+                {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+                {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
+                {WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN},
+                {WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN, WHITE_KING, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK}
+        };
+
+        return initialBoard[row][col];
     }
 
     public String help() {
