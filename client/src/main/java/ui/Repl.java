@@ -9,8 +9,8 @@ import static ui.EscapeSequences.*;
 import static java.awt.Color.*;
 
 public class Repl {
-    private Object activeClient; // Can be ChessClient, UserClient, or GameClient
-    private UserClient userClient; // Preserve the UserClient instance
+    private Object activeClient;
+    private UserClient userClient;
     private final String serverUrl;
     private final NotificationHandler notificationHandler;
 

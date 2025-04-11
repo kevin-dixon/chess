@@ -32,21 +32,17 @@ public class ServerFacade {
         var path = "/user";
         var request = new UserData(username, password, email);
 
-        // Expect a UserAuthResponse object from the server
         UserAuthResponse response = this.makeRequest("POST", path, request, UserAuthResponse.class);
 
-        // Return only the authToken to the client
         return response.authToken();
     }
 
     public String login(String username, String password) throws ResponseException {
         var path = "/session";
-        var request = new UserData(username, password, null); // Email is null for login
+        var request = new UserData(username, password, null);
 
-        // Expect a UserAuthResponse object from the server
         UserAuthResponse response = this.makeRequest("POST", path, request, UserAuthResponse.class);
 
-        // Return only the authToken to the client
         return response.authToken();
     }
 
@@ -57,19 +53,41 @@ public class ServerFacade {
 
     public GameData[] listGames(String authToken) throws ResponseException {
         var path = "/game";
-        return this.makeRequestWithAuth("GET", path, null, GameData[].class, authToken);
+
+        record ListGamesResponse(GameData[] games) {}
+        ListGamesResponse response = this.makeRequestWithAuth("GET", path, null, ListGamesResponse.class, authToken);
+
+        return response.games();
     }
 
     public String createGame(String authToken, String gameName) throws ResponseException {
         var path = "/game";
         var request = new CreateGameRequest(gameName);
-        return this.makeRequestWithAuth("POST", path, request, String.class, authToken);
+
+        record CreateGameResponse(String gameID) {}
+        CreateGameResponse response = this.makeRequestWithAuth("POST", path, request, CreateGameResponse.class, authToken);
+
+        return response.gameID();
     }
 
     public String joinGame(String authToken, int gameID, String playerColor) throws ResponseException {
         var path = "/game";
         var request = new JoinGameRequest(gameID, playerColor);
-        return this.makeRequestWithAuth("PUT", path, request, String.class, authToken);
+
+        record JoinGameResponse(String message) {}
+        JoinGameResponse response = this.makeRequestWithAuth("PUT", path, request, JoinGameResponse.class, authToken);
+
+        return response.message();
+    }
+
+    public void observeGame(String authToken, int gameID) throws ResponseException {
+        var path = "/game/observe";
+        var request = new ObserveGameRequest(gameID);
+
+        record ObserveGameResponse(String message) {}
+        ObserveGameResponse response = this.makeRequestWithAuth("POST", path, request, ObserveGameResponse.class, authToken);
+
+        System.out.println("Observe Game Response: " + response.message());
     }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
@@ -141,9 +159,6 @@ public class ServerFacade {
         return status >= 200 && status < 300;
     }
 
-    public void observeGame(String authToken, int i) {
-    }
-
     private static class CreateGameRequest {
         String gameName;
 
@@ -159,6 +174,14 @@ public class ServerFacade {
         JoinGameRequest(int gameID, String playerColor) {
             this.gameID = gameID;
             this.playerColor = playerColor;
+        }
+    }
+
+    private static class ObserveGameRequest {
+        int gameID;
+
+        ObserveGameRequest(int gameID) {
+            this.gameID = gameID;
         }
     }
 

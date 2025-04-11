@@ -34,7 +34,7 @@ public class ChessClient {
             return switch (cmd) {
                 case "register" -> register(params);
                 case "login" -> login(params);
-                case "quit" -> "quit";
+                case "quit" -> "\n";
                 default -> help();
             };
         } catch (Exception e) {

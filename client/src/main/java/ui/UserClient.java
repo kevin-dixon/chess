@@ -2,6 +2,7 @@ package ui;
 
 import server.ServerFacade;
 import websocket.NotificationHandler;
+import model.GameData;
 
 import java.util.Arrays;
 import java.util.List;
@@ -66,7 +67,7 @@ public class UserClient {
     private String listGames() {
         try {
             var games = server.listGames(authToken);
-            lastListedGames = List.of(Arrays.toString(games));
+            lastListedGames = Arrays.stream(games).map(GameData::toString).toList();
             StringBuilder response = new StringBuilder("Available games:\n");
             for (int i = 0; i < lastListedGames.size(); i++) {
                 response.append(i + 1).append(". ").append(lastListedGames.get(i)).append("\n");
@@ -94,7 +95,7 @@ public class UserClient {
     }
 
     private Object observeGame(List<String> params) {
-        if (params.size() < 1) return "Error: insufficient parameters for observe game";
+        if (params.isEmpty()) return "Error: insufficient parameters for observe game";
         try {
             int gameIndex = Integer.parseInt(params.get(0)) - 1;
             if (gameIndex < 0 || gameIndex >= lastListedGames.size()) {
@@ -105,6 +106,8 @@ public class UserClient {
             return new GameClient(serverUrl, authToken, gameId, false);
         } catch (Exception e) {
             return "Error: " + e.getMessage();
+        } catch (ResponseException e) {
+            throw new RuntimeException(e);
         }
     }
 
