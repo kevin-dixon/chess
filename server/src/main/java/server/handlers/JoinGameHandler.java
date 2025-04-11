@@ -2,6 +2,7 @@ package server.handlers;
 
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
+import server.ServerFacade;
 import service.GameService;
 import service.UserService;
 import spark.Request;
@@ -27,54 +28,37 @@ public class JoinGameHandler implements Route {
     @Override
     public Object handle(Request request, Response response) throws Exception {
         try {
-            //Get authToken
+            // Get authToken
             String authToken = request.headers("authorization");
 
-            //Validate authToken
+            // Validate authToken
             if (authToken == null || authToken.isEmpty() || !userService.validAuthToken(authToken)) {
                 response.status(401);
                 response.type("application/json");
                 Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("message", "Error: unauthorized");
+                errorResponse.put("message", "Error: unauthorized - invalid or missing auth token");
                 return gson.toJson(errorResponse);
             }
 
             // Parse the JSON request body
-            Map<String, Object> requestBody = gson.fromJson(request.body(), Map.class);
-            String playerColor = (String) requestBody.get("playerColor");
-            Integer gameID = requestBody.get("gameID") != null ? ((Double) requestBody.get("gameID")).intValue() : null;
+            ServerFacade.JoinGameRequest joinGameRequest = gson.fromJson(request.body(), ServerFacade.JoinGameRequest.class);
 
-            //Validate input
-            if (playerColor == null || playerColor.isEmpty() || gameID == null) {
-                response.status(400);
-                response.type("application/json");
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("message", "Error: bad request");
-                return gson.toJson(errorResponse);
-            }
-
-            //Join the game
-            gameService.joinGame(authToken, gameID, playerColor);
+            // Join the game
+            gameService.joinGame(authToken, joinGameRequest.getGameID(), joinGameRequest.getPlayerColor());
             response.status(200);
             response.type("application/json");
-            return "{}";
+            return gson.toJson(Map.of("message", "Successfully joined the game"));
         } catch (DataAccessException e) {
-            String message = e.getMessage();
+            response.status(400);
             response.type("application/json");
             Map<String, String> errorResponse = new HashMap<>();
-            if ("unauthorized".equals(message)) {
-                response.status(401);
-                errorResponse.put("message", "Error: unauthorized");
-            } else if ("already taken".equals(message)) {
-                response.status(403);
-                errorResponse.put("message", "Error: already taken");
-            } else if ("bad request".equals(message)) {
-                response.status(400);
-                errorResponse.put("message", "Error: bad request");
-            } else {
-                response.status(500);
-                errorResponse.put("message", "Error: " + message);
-            }
+            errorResponse.put("message", "Error: bad request - " + e.getMessage());
+            return gson.toJson(errorResponse);
+        } catch (Exception e) {
+            response.status(500);
+            response.type("application/json");
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("message", "Error: " + e.getMessage());
             return gson.toJson(errorResponse);
         }
     }

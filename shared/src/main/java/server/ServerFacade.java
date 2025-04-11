@@ -145,7 +145,31 @@ public class ServerFacade {
     private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, ResponseException {
         int status = http.getResponseCode();
         if (!isSuccessful(status)) {
-            throw new ResponseException(status, "HTTP error: " + status);
+            String errorMessage = "HTTP error: " + status;
+
+            // Attempt to read the error message from the response body
+            try (InputStream errorStream = http.getErrorStream()) {
+                if (errorStream != null) {
+                    InputStreamReader reader = new InputStreamReader(errorStream);
+                    BufferedReader bufferedReader = new BufferedReader(reader);
+                    StringBuilder responseBody = new StringBuilder();
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        responseBody.append(line);
+                    }
+
+                    // Parse the error message from the JSON response
+                    var errorResponse = new Gson().fromJson(responseBody.toString(), ErrorResponse.class);
+                    if (errorResponse != null && errorResponse.message() != null) {
+                        errorMessage = errorResponse.message();
+                    }
+                }
+            } catch (Exception e) {
+                // Log the exception but continue with the default error message
+                e.printStackTrace();
+            }
+
+            throw new ResponseException(status, errorMessage);
         }
     }
 
@@ -165,13 +189,20 @@ public class ServerFacade {
         }
     }
 
-    private static class JoinGameRequest {
+    public static class JoinGameRequest {
         int gameID;
         String playerColor;
 
         JoinGameRequest(int gameID, String playerColor) {
             this.gameID = gameID;
             this.playerColor = playerColor;
+        }
+
+        public int getGameID(){
+            return gameID;
+        }
+        public String getPlayerColor(){
+            return playerColor;
         }
     }
 
@@ -190,5 +221,7 @@ public class ServerFacade {
             this.gameID = gameID;
         }
     }
+
+    public record ErrorResponse(String message) {}
 
 }

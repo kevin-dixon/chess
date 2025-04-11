@@ -25,19 +25,19 @@ public class ListGamesHandler implements Route {
     @Override
     public Object handle(Request request, Response response) throws Exception {
         try {
-            //Get authToken
+            // Get authToken
             String authToken = request.headers("authorization");
 
-            //Validate authToken
+            // Validate authToken
             if (authToken == null || authToken.isEmpty() || !userService.validAuthToken(authToken)) {
                 response.status(401);
                 response.type("application/json");
                 Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("message", "Error: unauthorized");
+                errorResponse.put("message", "Error: unauthorized - invalid or missing auth token");
                 return gson.toJson(errorResponse);
             }
 
-            //Get games list
+            // Get games list
             var gamesList = gameService.listGames(authToken).stream()
                     .map(game -> {
                         Map<String, Object> gameMap = new HashMap<>();
@@ -49,7 +49,7 @@ public class ListGamesHandler implements Route {
                     })
                     .collect(Collectors.toList());
 
-            //Parse Message
+            // Parse Message
             Map<String, Object> successResponse = new HashMap<>();
             successResponse.put("games", gamesList);
             response.status(200);

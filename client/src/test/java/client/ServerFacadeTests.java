@@ -41,7 +41,7 @@ public class ServerFacadeTests {
 
     @Test
     void registerFailure() {
-        Exception exception = assertThrows(Exception.class, () -> {
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
             facade.register("", "password", "player1@email.com"); // Invalid username
         });
         assertTrue(exception.getMessage().contains("bad request"));
@@ -57,10 +57,10 @@ public class ServerFacadeTests {
 
     @Test
     void loginFailure() {
-        Exception exception = assertThrows(Exception.class, () -> {
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
             facade.login("nonexistent", "password"); // Nonexistent user
         });
-        assertTrue(exception.getMessage().contains("unauthorized"));
+        assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
     }
 
     @Test
@@ -73,10 +73,10 @@ public class ServerFacadeTests {
 
     @Test
     void createGameFailure() {
-        Exception exception = assertThrows(Exception.class, () -> {
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
             facade.createGame("invalidToken", "Test Game"); // Invalid auth token
         });
-        assertTrue(exception.getMessage().contains("unauthorized"));
+        assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
     }
 
     @Test
@@ -93,10 +93,10 @@ public class ServerFacadeTests {
 
     @Test
     void listGamesFailure() {
-        Exception exception = assertThrows(Exception.class, () -> {
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
             facade.listGames("invalidToken"); // Invalid auth token
         });
-        assertTrue(exception.getMessage().contains("unauthorized"));
+        assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
     }
 
     @Test
@@ -114,10 +114,10 @@ public class ServerFacadeTests {
 
     @Test
     void joinGameFailure() {
-        Exception exception = assertThrows(Exception.class, () -> {
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
             facade.joinGame("invalidToken", 1, "WHITE"); // Invalid auth token
         });
-        assertTrue(exception.getMessage().contains("unauthorized"));
+        assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
     }
 
     @Test
@@ -135,10 +135,10 @@ public class ServerFacadeTests {
 
     @Test
     void observeGameFailure() {
-        Exception exception = assertThrows(Exception.class, () -> {
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
             facade.observeGame("invalidToken", 1); // Invalid auth token
         });
-        assertTrue(exception.getMessage().contains("unauthorized"));
+        assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
     }
 
     @Test
@@ -156,9 +156,9 @@ public class ServerFacadeTests {
 
     @Test
     void leaveGameFailure() {
-        Exception exception = assertThrows(Exception.class, () -> {
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
             facade.leaveGame("invalidToken", 1); // Invalid auth token
         });
-        assertTrue(exception.getMessage().contains("unauthorized"));
+        assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
     }
 }
