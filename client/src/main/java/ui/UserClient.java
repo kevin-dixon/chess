@@ -81,12 +81,19 @@ public class UserClient {
     private Object playGame(List<String> params) {
         if (params.size() < 2) return "Error: insufficient parameters for play game";
         try {
-            int gameIndex = Integer.parseInt(params.get(0)) - 1;
-            String color = params.get(1).toUpperCase();
-            if (gameIndex < 0 || gameIndex >= lastListedGames.size()) {
-                return "Error: invalid game number";
+            // Validate the game ID format (6 digits)
+            String gameId = params.get(0);
+            if (!gameId.matches("\\d{6}")) {
+                return "Error: invalid game ID. Game IDs must be 6 digits.";
             }
-            String gameId = lastListedGames.get(gameIndex);
+
+            // Validate the player color
+            String color = params.get(1).toUpperCase();
+            if (!color.equals("WHITE") && !color.equals("BLACK")) {
+                return "Error: invalid color. Choose either WHITE or BLACK.";
+            }
+
+            // Join the game
             server.joinGame(authToken, Integer.parseInt(gameId), color);
             return new GameClient(serverUrl, authToken, gameId, color.equals("BLACK"));
         } catch (Exception | ResponseException e) {
