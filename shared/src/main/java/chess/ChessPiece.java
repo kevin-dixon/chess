@@ -4,6 +4,7 @@ import chess.movecalculators.*;
 
 import java.util.Collection;
 import java.util.Objects;
+import static ui.EscapeSequences.*;
 
 /**
  * Represents a single chess piece
@@ -84,44 +85,44 @@ public class ChessPiece {
         switch (pieceType) {
             case BISHOP -> {
                 if (color == ChessGame.TeamColor.BLACK) {
-                    return "B";
+                    return BLACK_BISHOP;
                 } else {
-                    return "b";
+                    return WHITE_BISHOP;
                 }
             }
             case KING -> {
                 if (color == ChessGame.TeamColor.BLACK) {
-                    return "K";
+                    return BLACK_KING;
                 } else {
-                    return "k";
+                    return WHITE_KING;
                 }
             }
             case KNIGHT -> {
                 if (color == ChessGame.TeamColor.BLACK) {
-                    return "N";
+                    return BLACK_KNIGHT;
                 } else {
-                    return "n";
+                    return WHITE_KNIGHT;
                 }
             }
             case QUEEN -> {
                 if (color == ChessGame.TeamColor.BLACK) {
-                    return "Q";
+                    return BLACK_QUEEN;
                 } else {
-                    return "q";
+                    return WHITE_QUEEN;
                 }
             }
             case ROOK -> {
                 if (color == ChessGame.TeamColor.BLACK) {
-                    return "R";
+                    return BLACK_ROOK;
                 } else {
-                    return "r";
+                    return WHITE_ROOK;
                 }
             }
             case PAWN -> {
                 if (color == ChessGame.TeamColor.BLACK) {
-                    return "P";
+                    return BLACK_PAWN;
                 } else {
-                    return "p";
+                    return WHITE_PAWN;
                 }
             }
             default -> throw new RuntimeException("piece moves not implemented");

@@ -89,7 +89,7 @@ public class ServerFacade {
         System.out.println("Leave Game Response: " + response.message());
     }
 
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
+    public <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
         try {
             URL url = new URL(serverUrl + path);
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
