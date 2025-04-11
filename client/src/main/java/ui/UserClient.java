@@ -125,8 +125,10 @@ public class UserClient {
             }
 
             int gameId = lastListedGames.get(gameIndex).gameID();
+
             server.observeGame(authToken, gameId);
-            return "Observing game with ID: " + gameId;
+
+            return new GameClient(serverUrl, authToken, String.valueOf(gameId), false); // Default to white perspective
         } catch (Exception | ResponseException e) {
             return "Error: " + e.getMessage();
         }
