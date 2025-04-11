@@ -1,18 +1,18 @@
 import chess.*;
-
-import dataaccess.DataAccessException;
-import dataaccess.DatabaseManager;
 import server.Server;
+import ui.Repl;
 
-import java.sql.SQLException;
 
-/*
 public class Main {
     public static void main(String[] args) {
         var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
-        System.out.println("♕ 240 Chess Server: " + piece);
+        var serverUrl = "http://localhost:8080";
 
         Server myServer = new Server();
         myServer.run(8080);
+
+        System.out.println("♕ 240 Chess Client: " + piece);
+
+        new Repl(serverUrl).run();
     }
-}*/
+}
