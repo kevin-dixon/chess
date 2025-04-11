@@ -20,6 +20,7 @@ public class Repl {
     public void run() {
         System.out.println("Welcome to Chess Client!");
         System.out.println("Type 'help' to get started.");
+        moveCursorToCommandPrompt(); // Position the cursor for the first command
         Scanner scanner = new Scanner(System.in);
         String result = "";
 
@@ -33,6 +34,8 @@ public class Repl {
             } catch (Throwable e) {
                 System.out.println(SET_TEXT_COLOR_RED + "Error: " + e.getMessage() + RESET_TEXT_COLOR);
             }
+
+            moveCursorToCommandPrompt(); // Position the cursor for the next command
         }
         System.out.println("Goodbye!");
     }
@@ -61,12 +64,17 @@ public class Repl {
             return result.toString();
         } else if (activeClient instanceof GameClient gameClient) {
             Object result = gameClient.evaluate(input);
-            if (result.equals("Exiting game.")) {
-                activeClient = new UserClient(serverUrl, null, null, notificationHandler); // Switch back to UserClient
-                return (String) result;
+            if (result instanceof UserClient userClient) {
+                activeClient = userClient; // Switch back to UserClient
+                return "Returned to the main menu.";
             }
             return result.toString();
         }
         return "Invalid state.";
+    }
+
+    private void moveCursorToCommandPrompt() {
+        // Move the cursor to the bottom of the screen for typing commands
+        System.out.print(moveCursorToLocation(1, 30)); // Adjust the row (30) as needed
     }
 }

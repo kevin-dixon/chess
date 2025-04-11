@@ -14,6 +14,20 @@ public class GameClient {
         this.authToken = authToken;
         this.gameId = gameId;
         this.isBlackPerspective = isBlackPerspective;
+
+        // Automatically draw the board when joining the game
+        drawBoardWithCommands();
+    }
+
+    private void drawBoardWithCommands() {
+        // Clear the console
+        System.out.print(ERASE_SCREEN);
+
+        // Draw the chessboard
+        System.out.println(drawChessBoard());
+
+        // Display the possible commands
+        System.out.println(help());
     }
 
     public String drawChessBoard() {
@@ -80,27 +94,28 @@ public class GameClient {
         return """
                 draw - show example board
                 exit - exit the game
-                help - display this help text
                 """;
     }
 
     public Object evaluate(String input) {
         return switch (input.toLowerCase()) {
-            case "draw" -> drawChessBoard();
+            case "draw" -> {
+                drawBoardWithCommands();
+                yield "";
+            }
             case "exit" -> exitGame();
             default -> help();
         };
     }
 
-    private String exitGame() {
+
+    private Object exitGame() {
         try {
             // Call the server to leave the game
             server.leaveGame(authToken, Integer.parseInt(gameId));
-            return "Exiting game.";
-        } catch (Exception e) {
+            return new UserClient(server.getServerUrl(), null, authToken, null);
+        } catch (ResponseException | Exception e) {
             return "Error: " + e.getMessage();
-        } catch (ResponseException e) {
-            throw new RuntimeException(e);
         }
     }
 }
