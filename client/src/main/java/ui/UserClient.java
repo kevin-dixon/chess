@@ -22,14 +22,6 @@ public class UserClient {
         this.serverUrl = serverUrl;
     }
 
-    public String getUserName() {
-        return userName;
-    }
-
-    public String getAuthToken() {
-        return authToken;
-    }
-
     public String help() {
         return """
                 create <NAME> - create a new game
@@ -63,10 +55,11 @@ public class UserClient {
     private String createGame(List<String> params) {
         if (params.isEmpty()) return "Error: insufficient parameters for create game";
         try {
-            server.createGame(authToken, params.get(0));
+            String gameName = params.get(0);
+            server.createGame(authToken, gameName);
             return "Game created successfully.";
         } catch (Exception | ResponseException e) {
-            throw new RuntimeException(e);
+            return "Error: " + e.getMessage();
         }
     }
 

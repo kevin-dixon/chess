@@ -3,6 +3,7 @@ package server;
 import com.google.gson.Gson;
 import model.GameData;
 import model.UserData;
+import model.responses.UserAuthResponse;
 import ui.ResponseException;
 
 import java.io.*;
@@ -30,13 +31,23 @@ public class ServerFacade {
     public String register(String username, String password, String email) throws ResponseException {
         var path = "/user";
         var request = new UserData(username, password, email);
-        return this.makeRequest("POST", path, request, String.class);
+
+        // Expect a UserAuthResponse object from the server
+        UserAuthResponse response = this.makeRequest("POST", path, request, UserAuthResponse.class);
+
+        // Return only the authToken to the client
+        return response.authToken();
     }
 
     public String login(String username, String password) throws ResponseException {
         var path = "/session";
-        var request = new UserData(username, password, null);
-        return this.makeRequest("POST", path, request, String.class);
+        var request = new UserData(username, password, null); // Email is null for login
+
+        // Expect a UserAuthResponse object from the server
+        UserAuthResponse response = this.makeRequest("POST", path, request, UserAuthResponse.class);
+
+        // Return only the authToken to the client
+        return response.authToken();
     }
 
     public void logout(String authToken) throws ResponseException {
@@ -70,7 +81,7 @@ public class ServerFacade {
 
             writeBody(request, http);
             http.connect();
-            //throwIfNotSuccessful(http);
+            throwIfNotSuccessful(http);
             return readBody(http, responseClass);
         } catch (Exception ex) {
             throw new ResponseException(500, ex.getMessage());
@@ -117,11 +128,6 @@ public class ServerFacade {
     private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, ResponseException {
         int status = http.getResponseCode();
         if (!isSuccessful(status)) {
-            try (InputStream respErr = http.getErrorStream()) {
-                if (respErr != null) {
-                    //throw ResponseException.fromJson(respErr);
-                }
-            }
             throw new ResponseException(status, "HTTP error: " + status);
         }
     }
