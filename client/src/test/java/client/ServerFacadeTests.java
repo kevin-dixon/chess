@@ -35,7 +35,32 @@ public class ServerFacadeTests {
     @BeforeEach
     public void clearDatabase() throws Exception, ResponseException {
         // Clear the database before each test
-        facade.makeRequest("DELETE", "/db", null, null);
+        facade.clearDatabase();
+    }
+
+    @Test
+    void clearDatabaseSuccess() throws Exception, ResponseException {
+        facade.register("testUser", "password", "test@mail.com");
+
+        // Clear the database
+        facade.clearDatabase();
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
+            facade.listGames("invalidToken");
+        });
+        assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
+    }
+
+    @Test
+    void clearDatabaseFailure() {
+        ServerFacade invalidFacade = new ServerFacade("http://invalid-url");
+        ResponseException exception = assertThrows(ResponseException.class, invalidFacade::clearDatabase);
+        assertTrue(exception.getMessage().contains("HTTP"), "Expected error message to contain 'HTTP'");
+    }
+
+    @Test
+    void getServerUrlNegativeTest() {
+        ServerFacade invalidFacade = new ServerFacade("http://invalid-url");
+        assertEquals("http://invalid-url", invalidFacade.getServerUrl(), "Server URL should match the initialized value");
     }
 
     @Test
@@ -175,5 +200,10 @@ public class ServerFacadeTests {
             facade.logout("invalidToken"); // Invalid auth token
         });
         assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
+    }
+
+    @Test
+    void getServerUrlTest() {
+        assertEquals(SERVER_URL, facade.getServerUrl(), "Server URL should match the initialized value");
     }
 }
