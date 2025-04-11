@@ -4,6 +4,7 @@ import server.ServerFacade;
 import websocket.NotificationHandler;
 import model.GameData;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -12,8 +13,11 @@ public class UserClient {
     private final String userName;
     private final String authToken;
     private final NotificationHandler notificationHandler;
-    private List<String> lastListedGames;
     private final String serverUrl;
+
+    // Keeps track of the last listed games and their indices
+    private List<GameData> lastListedGames;
+
 
     public UserClient(String serverUrl, String userName, String authToken, NotificationHandler notificationHandler) {
         this.server = new ServerFacade(serverUrl); // Create a new ServerFacade instance
@@ -21,15 +25,16 @@ public class UserClient {
         this.authToken = authToken;
         this.notificationHandler = notificationHandler;
         this.serverUrl = serverUrl;
+        this.lastListedGames = new ArrayList<>();
     }
 
     public String help() {
         return """
-                create <NAME> - create a new game
-                list - list all available games
-                play <GAME_NUMBER> [WHITE|BLACK] - join a game as a player
-                observe <GAME_NUMBER> - observe a game
-                logout - log out of your account
+                create <NAME> - a new game
+                list - all available games
+                play <GAME_NUMBER> [WHITE|BLACK] - a game as a player
+                observe <GAME_NUMBER> - a game
+                logout - of your account
                 help - display this help text
                 """;
     }
@@ -66,11 +71,21 @@ public class UserClient {
 
     private String listGames() {
         try {
+            // Fetch games from the server
             var games = server.listGames(authToken);
-            lastListedGames = Arrays.stream(games).map(GameData::toString).toList();
+
+            // Update the lastListedGames with the fetched games
+            lastListedGames = List.of(games);
+
+            // Build the response string
             StringBuilder response = new StringBuilder("Available games:\n");
             for (int i = 0; i < lastListedGames.size(); i++) {
-                response.append(i + 1).append(". ").append(lastListedGames.get(i)).append("\n");
+                GameData game = lastListedGames.get(i);
+                response.append(i + 1).append(". ")
+                        .append("Name: ").append(game.gameName()).append(", ")
+                        .append("White: ").append(game.whiteUsername() != null ? game.whiteUsername() : "Open").append(", ")
+                        .append("Black: ").append(game.blackUsername() != null ? game.blackUsername() : "Open")
+                        .append("\n");
             }
             return response.toString();
         } catch (Exception | ResponseException e) {
@@ -81,10 +96,10 @@ public class UserClient {
     private Object playGame(List<String> params) {
         if (params.size() < 2) return "Error: insufficient parameters for play game";
         try {
-            // Validate the game ID format (6 digits)
-            String gameId = params.get(0);
-            if (!gameId.matches("\\d{6}")) {
-                return "Error: invalid game ID. Game IDs must be 6 digits.";
+            // Validate the game index
+            int gameIndex = Integer.parseInt(params.get(0)) - 1;
+            if (gameIndex < 0 || gameIndex >= lastListedGames.size()) {
+                return "Error: invalid game number.";
             }
 
             // Validate the player color
@@ -93,9 +108,12 @@ public class UserClient {
                 return "Error: invalid color. Choose either WHITE or BLACK.";
             }
 
+            // Get the game ID from the lastListedGames
+            int gameId = lastListedGames.get(gameIndex).gameID();
+
             // Join the game
-            server.joinGame(authToken, Integer.parseInt(gameId), color);
-            return new GameClient(serverUrl, authToken, gameId, color.equals("BLACK"));
+            server.joinGame(authToken, gameId, color);
+            return new GameClient(serverUrl, authToken, String.valueOf(gameId), color.equals("BLACK"));
         } catch (Exception | ResponseException e) {
             return "Error: " + e.getMessage();
         }
@@ -104,15 +122,18 @@ public class UserClient {
     private Object observeGame(List<String> params) {
         if (params.isEmpty()) return "Error: insufficient parameters for observe game";
         try {
-            // Validate the game ID format (6 digits)
-            String gameId = params.get(0);
-            if (!gameId.matches("\\d{6}")) {
-                return "Error: invalid game ID. Game IDs must be 6 digits.";
+            // Validate the game index
+            int gameIndex = Integer.parseInt(params.get(0)) - 1;
+            if (gameIndex < 0 || gameIndex >= lastListedGames.size()) {
+                return "Error: invalid game number.";
             }
 
+            // Get the game ID from the lastListedGames
+            int gameId = lastListedGames.get(gameIndex).gameID();
+
             // Call the server to observe the game
-            server.observeGame(authToken, Integer.parseInt(gameId));
-            return new GameClient(serverUrl, authToken, gameId, false);
+            server.observeGame(authToken, gameId);
+            return new GameClient(serverUrl, authToken, String.valueOf(gameId), false);
         } catch (Exception | ResponseException e) {
             return "Error: " + e.getMessage();
         }
