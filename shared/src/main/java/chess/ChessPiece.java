@@ -85,44 +85,44 @@ public class ChessPiece {
         switch (pieceType) {
             case BISHOP -> {
                 if (color == ChessGame.TeamColor.BLACK) {
-                    return BLACK_BISHOP;
+                    return "B";
                 } else {
-                    return WHITE_BISHOP;
+                    return "b";
                 }
             }
             case KING -> {
                 if (color == ChessGame.TeamColor.BLACK) {
-                    return BLACK_KING;
+                    return "K";
                 } else {
-                    return WHITE_KING;
+                    return "k";
                 }
             }
             case KNIGHT -> {
                 if (color == ChessGame.TeamColor.BLACK) {
-                    return BLACK_KNIGHT;
+                    return "N";
                 } else {
-                    return WHITE_KNIGHT;
+                    return "n";
                 }
             }
             case QUEEN -> {
                 if (color == ChessGame.TeamColor.BLACK) {
-                    return BLACK_QUEEN;
+                    return "Q";
                 } else {
-                    return WHITE_QUEEN;
+                    return "q";
                 }
             }
             case ROOK -> {
                 if (color == ChessGame.TeamColor.BLACK) {
-                    return BLACK_ROOK;
+                    return "R";
                 } else {
-                    return WHITE_ROOK;
+                    return "r";
                 }
             }
             case PAWN -> {
                 if (color == ChessGame.TeamColor.BLACK) {
-                    return BLACK_PAWN;
+                    return "P";
                 } else {
-                    return WHITE_PAWN;
+                    return "p";
                 }
             }
             default -> throw new RuntimeException("piece moves not implemented");
