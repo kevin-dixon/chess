@@ -95,4 +95,16 @@ public class GameSqlDAO {
         }
     }
 
+    public void removePlayerFromGame(int gameID, String username) throws SQLException, DataAccessException {
+        String sql = "UPDATE games SET whiteUsername = CASE WHEN whiteUsername = ? THEN NULL ELSE whiteUsername END, " +
+                "blackUsername = CASE WHEN blackUsername = ? THEN NULL ELSE blackUsername END WHERE gameID = ?";
+        try (var conn = DatabaseManager.getConnection();
+             var stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, username);
+            stmt.setString(2, username);
+            stmt.setInt(3, gameID);
+            stmt.executeUpdate();
+        }
+    }
+
 }

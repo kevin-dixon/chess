@@ -1,11 +1,8 @@
 package ui;
 
-import com.google.gson.Gson;
-import model.UserData;
 import server.ServerFacade;
 import websocket.NotificationHandler;
 import java.util.Arrays;
-import static ui.EscapeSequences.*;
 
 public class ChessClient {
     private final ServerFacade server;
@@ -34,7 +31,7 @@ public class ChessClient {
             return switch (cmd) {
                 case "register" -> register(params);
                 case "login" -> login(params);
-                case "quit" -> "\n";
+                case "quit" -> quit();
                 default -> help();
             };
         } catch (Exception e) {
@@ -69,6 +66,12 @@ public class ChessClient {
         } catch (ResponseException e) {
             return "Error: " + e.getMessage();
         }
+    }
+
+    private String quit() {
+        System.out.println("Exiting...\nGoodbye!");
+        System.exit(0);
+        return "";
     }
 
 }

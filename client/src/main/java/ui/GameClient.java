@@ -1,8 +1,6 @@
 package ui;
 
-import model.GameData;
 import server.ServerFacade;
-import websocket.NotificationHandler;
 
 public class GameClient {
     private final ServerFacade server;
@@ -32,8 +30,20 @@ public class GameClient {
     public Object evaluate(String input) {
         return switch (input.toLowerCase()) {
             case "draw" -> drawChessBoard();
-            case "exit" -> "Exiting game.";
+            case "exit" -> exitGame();
             default -> help();
         };
+    }
+
+    private String exitGame() {
+        try {
+            // Call the server to leave the game
+            server.leaveGame(authToken, Integer.parseInt(gameId));
+            return "Exiting game.";
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
+        } catch (ResponseException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

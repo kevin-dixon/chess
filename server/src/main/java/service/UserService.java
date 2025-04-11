@@ -67,4 +67,12 @@ public class UserService {
         return authData != null;
     }
 
+    public String getUsernameFromAuthToken(String authToken) throws DataAccessException, SQLException {
+        var authData = authDao.getAuth(authToken);
+        if (authData == null) {
+            throw new DataAccessException("Invalid or expired auth token.");
+        }
+        return authData.username();
+    }
+
 }

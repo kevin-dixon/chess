@@ -19,15 +19,6 @@ public class ServerFacade {
         this.gson = new Gson();
     }
 
-    //Add a function for each api call client can make
-    /**
-     * Example api call for functionality:
-     * public User addUser(User user) throws Exception {
-     *     var path = "/user";
-     *     return this.makeRequest("POST", path, user, User.class);
-     * }
-     * **/
-
     public String register(String username, String password, String email) throws ResponseException {
         var path = "/user";
         var request = new UserData(username, password, email);
@@ -60,24 +51,22 @@ public class ServerFacade {
         return response.games();
     }
 
-    public String createGame(String authToken, String gameName) throws ResponseException {
+    public void createGame(String authToken, String gameName) throws ResponseException {
         var path = "/game";
         var request = new CreateGameRequest(gameName);
 
         record CreateGameResponse(String gameID) {}
         CreateGameResponse response = this.makeRequestWithAuth("POST", path, request, CreateGameResponse.class, authToken);
 
-        return response.gameID();
     }
 
-    public String joinGame(String authToken, int gameID, String playerColor) throws ResponseException {
+    public void joinGame(String authToken, int gameID, String playerColor) throws ResponseException {
         var path = "/game";
         var request = new JoinGameRequest(gameID, playerColor);
 
         record JoinGameResponse(String message) {}
         JoinGameResponse response = this.makeRequestWithAuth("PUT", path, request, JoinGameResponse.class, authToken);
 
-        return response.message();
     }
 
     public void observeGame(String authToken, int gameID) throws ResponseException {
@@ -88,6 +77,16 @@ public class ServerFacade {
         ObserveGameResponse response = this.makeRequestWithAuth("POST", path, request, ObserveGameResponse.class, authToken);
 
         System.out.println("Observe Game Response: " + response.message());
+    }
+
+    public void leaveGame(String authToken, int gameID) throws ResponseException {
+        var path = "/game/leave";
+        var request = new LeaveGameRequest(gameID);
+
+        record LeaveGameResponse(String message) {}
+        LeaveGameResponse response = this.makeRequestWithAuth("POST", path, request, LeaveGameResponse.class, authToken);
+
+        System.out.println("Leave Game Response: " + response.message());
     }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
@@ -154,7 +153,6 @@ public class ServerFacade {
         return serverUrl;
     }
 
-
     private boolean isSuccessful(int status) {
         return status >= 200 && status < 300;
     }
@@ -181,6 +179,14 @@ public class ServerFacade {
         int gameID;
 
         ObserveGameRequest(int gameID) {
+            this.gameID = gameID;
+        }
+    }
+
+    private static class LeaveGameRequest {
+        int gameID;
+
+        LeaveGameRequest(int gameID) {
             this.gameID = gameID;
         }
     }

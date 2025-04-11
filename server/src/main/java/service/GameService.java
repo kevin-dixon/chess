@@ -85,4 +85,12 @@ public class GameService {
             throw new DataAccessException("Failed to retrieve game: " + e.getMessage());
         }
     }
+
+    public void removePlayerFromGame(int gameID, String username) throws DataAccessException {
+        try {
+            gameDao.removePlayerFromGame(gameID, username);
+        } catch (Exception e) {
+            throw new DataAccessException("Failed to remove player from game: " + e.getMessage());
+        }
+    }
 }
