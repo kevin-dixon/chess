@@ -52,11 +52,14 @@ public class ServerFacade {
         return response.games();
     }
 
-    public void createGame(String authToken, String gameName) throws ResponseException {
+    public int createGame(String authToken, String gameName) throws ResponseException {
         var path = "/game";
         var request = new CreateGameRequest(gameName);
 
-        this.makeRequestWithAuth("POST", path, request, null, authToken);
+        record CreateGameResponse(int gameID) {}
+        CreateGameResponse response = this.makeRequestWithAuth("POST", path, request, CreateGameResponse.class, authToken);
+
+        return response.gameID();
     }
 
     public void joinGame(String authToken, int gameID, String playerColor) throws ResponseException {

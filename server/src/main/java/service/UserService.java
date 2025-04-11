@@ -40,17 +40,14 @@ public class UserService {
     }
 
     public AuthData login(UserData userData) throws DataAccessException, SQLException {
-        // Check if user exists or wrong password
         UserData existingUser = userDao.getUser(userData.username());
         if (existingUser == null || !userDao.verifyUser(userData.username(), userData.password())) {
             throw new DataAccessException("unauthorized");
         }
 
-        // Generate auth token
         String authToken = UUID.randomUUID().toString();
         AuthData authData = new AuthData(authToken, userData.username());
         authDao.addAuth(authData);
-
         return authData;
     }
 

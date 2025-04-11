@@ -22,7 +22,6 @@ public class GameService {
     }
 
     public Collection<GameData> listGames(String authToken) throws DataAccessException, SQLException {
-        // Validate authToken
         AuthData authData = authDao.getAuth(authToken);
         if (authData == null) {
             throw new DataAccessException("unauthorized");
@@ -31,22 +30,19 @@ public class GameService {
     }
 
     public int createGame(String authToken, String gameName) throws DataAccessException, SQLException {
-        // Validate authToken
         AuthData authData = authDao.getAuth(authToken);
         if (authData == null) {
             throw new DataAccessException("unauthorized");
         }
-        // Create new game
-        GameData newGame = new GameData(
-                newGameID(),
-                null,
-                null,
-                new ChessGame(),
-                gameName
-        );
-        // Add new game to database
+
+        int gameID = newGameID();
+        while (gameDao.getGameByID(gameID) != null) {
+            gameID = newGameID(); // Ensure unique gameID
+        }
+
+        GameData newGame = new GameData(gameID, null, null, new ChessGame(), gameName);
         gameDao.addGame(newGame);
-        return newGame.gameID();
+        return gameID; // Return the generated gameID
     }
 
     private int newGameID() {
@@ -56,25 +52,25 @@ public class GameService {
     }
 
     public void joinGame(String authToken, int gameID, String playerColor) throws DataAccessException, SQLException {
-        // Validate authToken
         AuthData authData = authDao.getAuth(authToken);
         if (authData == null) {
             throw new DataAccessException("unauthorized");
         }
 
-        // Validate input and game existence
         GameData gameData = gameDao.getGameByID(gameID);
-        if (gameData == null || (!Objects.equals(playerColor, "WHITE") && !Objects.equals(playerColor, "BLACK"))) {
-            throw new DataAccessException("bad request");
+        if (gameData == null) {
+            throw new DataAccessException("Invalid GameID");
         }
 
-        // Check if the color is already taken
+        if (!"WHITE".equals(playerColor) && !"BLACK".equals(playerColor)) {
+            throw new DataAccessException("Invalid Team Color");
+        }
+
         if (("WHITE".equals(playerColor) && gameData.whiteUsername() != null) ||
                 ("BLACK".equals(playerColor) && gameData.blackUsername() != null)) {
-            throw new DataAccessException("already taken");
+            throw new DataAccessException("Team Color Already Taken");
         }
 
-        // Add player to the game
         gameDao.addPlayerToGame(gameID, playerColor, authData.username());
     }
 
@@ -83,14 +79,6 @@ public class GameService {
             return gameDao.getGameByID(gameID);
         } catch (Exception e) {
             throw new DataAccessException("Failed to retrieve game: " + e.getMessage());
-        }
-    }
-
-    public void removePlayerFromGame(int gameID, String username) throws DataAccessException {
-        try {
-            gameDao.removePlayerFromGame(gameID, username);
-        } catch (Exception e) {
-            throw new DataAccessException("Failed to remove player from game: " + e.getMessage());
         }
     }
 
