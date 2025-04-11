@@ -1,11 +1,12 @@
-package webSocketMessages;
+package messages;
 
 import com.google.gson.Gson;
 
-public class Action {
+public record Notification(Type type, String message) {
     public enum Type {
-        ENTER,
-        EXIT
+        ARRIVAL,
+        NOISE,
+        DEPARTURE
     }
 
     public String toString() {

@@ -4,7 +4,6 @@ import org.junit.jupiter.api.*;
 import server.Server;
 import server.ServerFacade;
 import model.GameData;
-import model.responses.UserAuthResponse;
 import ui.ResponseException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -73,9 +72,8 @@ public class ServerFacadeTests {
     @Test
     void createGameSuccess() throws Exception, ResponseException {
         var authToken = facade.register("player3", "password", "player3@email.com");
-        facade.createGame(authToken, "Test Game");
-        GameData[] games = facade.listGames(authToken);
-        assertEquals(1, games.length);
+        int gameId = facade.createGame(authToken, "Test Game");
+        assertTrue(gameId > 0, "Game ID should be greater than 0");
     }
 
     @Test
@@ -109,14 +107,11 @@ public class ServerFacadeTests {
     @Test
     void joinGameSuccess() throws Exception, ResponseException {
         var authToken = facade.register("player5", "password", "player5@email.com");
-        facade.createGame(authToken, "Joinable Game");
-
-        GameData[] games = facade.listGames(authToken);
-        int gameId = games[0].gameID();
+        int gameId = facade.createGame(authToken, "Joinable Game");
 
         facade.joinGame(authToken, gameId, "WHITE");
-        GameData updatedGame = facade.listGames(authToken)[0];
-        assertEquals("player5", updatedGame.whiteUsername(), "White player should be set to player5");
+        GameData[] games = facade.listGames(authToken);
+        assertEquals("player5", games[0].whiteUsername(), "White player should be set to player5");
     }
 
     @Test
@@ -128,16 +123,31 @@ public class ServerFacadeTests {
     }
 
     @Test
+    void observeGameSuccess() throws Exception, ResponseException {
+        var authToken = facade.register("player6", "password", "player6@email.com");
+        int gameId = facade.createGame(authToken, "Observable Game");
+
+        facade.observeGame(authToken, gameId);
+        // No exception means success
+        assertTrue(true, "Observe game should succeed without exceptions");
+    }
+
+    @Test
+    void observeGameFailure() {
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
+            facade.observeGame("invalidToken", 1); // Invalid auth token
+        });
+        assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
+    }
+
+    @Test
     void leaveGameSuccess() throws Exception, ResponseException {
         var authToken = facade.register("player7", "password", "player7@email.com");
-        facade.createGame(authToken, "Leavable Game");
-
-        GameData[] games = facade.listGames(authToken);
-        int gameId = games[0].gameID();
+        int gameId = facade.createGame(authToken, "Leavable Game");
 
         facade.leaveGame(authToken, gameId);
-        GameData updatedGame = facade.listGames(authToken)[0];
-        assertNull(updatedGame.whiteUsername(), "White player should be null after leaving the game");
+        GameData[] games = facade.listGames(authToken);
+        assertNull(games[0].whiteUsername(), "White player should be null after leaving the game");
     }
 
     @Test
@@ -150,29 +160,20 @@ public class ServerFacadeTests {
 
     @Test
     void logoutSuccess() throws Exception, ResponseException {
-        // Register and log in a user
-        var authToken = facade.register("player1", "password", "player1@email.com");
-
-        // Perform logout
+        var authToken = facade.register("player8", "password", "player8@email.com");
         facade.logout(authToken);
 
-        // Attempt to list games with the same token (should fail)
         ResponseException exception = assertThrows(ResponseException.class, () -> {
-            facade.listGames(authToken);
+            facade.listGames(authToken); // Token should no longer be valid
         });
-
-        // Verify the error message
         assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
     }
 
     @Test
     void logoutFailure() {
-        // Attempt to log out with an invalid token
         ResponseException exception = assertThrows(ResponseException.class, () -> {
-            facade.logout("invalidToken");
+            facade.logout("invalidToken"); // Invalid auth token
         });
-
-        // Verify the error message
         assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
     }
 }

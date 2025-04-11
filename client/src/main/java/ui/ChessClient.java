@@ -40,7 +40,9 @@ public class ChessClient {
     }
 
     private Object register(String[] params) {
-        if (params.length < 3) return "Error: insufficient parameters for register";
+        if (params.length < 3) {
+            return "Error: insufficient parameters for register";
+        }
         try {
             String username = params[0];
             String password = params[1];
@@ -55,7 +57,9 @@ public class ChessClient {
     }
 
     private Object login(String[] params) {
-        if (params.length < 2) return "Error: insufficient parameters for login";
+        if (params.length < 2) {
+            return "Error: insufficient parameters for login";
+        }
         try {
             String username = params[0];
             String password = params[1];

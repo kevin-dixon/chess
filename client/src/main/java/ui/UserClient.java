@@ -56,7 +56,9 @@ public class UserClient {
     }
 
     private String createGame(List<String> params) {
-        if (params.isEmpty()) return "Error: insufficient parameters for create game";
+        if (params.isEmpty()) {
+            return "Error: insufficient parameters for create game";
+        }
         try {
             String gameName = params.get(0);
             server.createGame(authToken, gameName);
@@ -91,7 +93,9 @@ public class UserClient {
     }
 
     private Object playGame(List<String> params) {
-        if (params.size() < 2) return "Error: insufficient parameters for play game";
+        if (params.size() < 2) {
+            return "Error: insufficient parameters for play game";
+        }
         try {
             // Validate the game index
             int gameIndex = Integer.parseInt(params.get(0)) - 1;
@@ -117,7 +121,9 @@ public class UserClient {
     }
 
     private Object observeGame(List<String> params) {
-        if (params.isEmpty()) return "Error: insufficient parameters for observe game";
+        if (params.isEmpty()) {
+            return "Error: insufficient parameters for observe game";
+        }
         try {
             int gameIndex = Integer.parseInt(params.get(0)) - 1;
             if (gameIndex < 0 || gameIndex >= lastListedGames.size()) {
