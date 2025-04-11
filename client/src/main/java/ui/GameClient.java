@@ -19,13 +19,16 @@ public class GameClient {
     public String drawChessBoard() {
         StringBuilder board = new StringBuilder();
 
-        // Add top border
-        board.append("   +------------------------+\n");
+        // Set text color to white
+        board.append(SET_TEXT_COLOR_WHITE);
+
+        // Add top border with color
+        board.append(SET_BG_COLOR_BORDER).append("                                   ").append(RESET_BG_COLOR).append("\n");
 
         // Loop through rows
         for (int row = 0; row < 8; row++) {
-            int displayRow = isBlackPerspective ? row + 1 : 8 - row; // Adjust row for perspective
-            board.append(" ").append(displayRow).append(" |"); // Add row number
+            int displayRow = isBlackPerspective ? 8 - row : row + 1; // Reverse the row numbers
+            board.append(SET_BG_COLOR_BORDER).append(" ").append(displayRow).append(" ").append(RESET_BG_COLOR); // Add row number with color
 
             // Loop through columns
             for (int col = 0; col < 8; col++) {
@@ -34,20 +37,26 @@ public class GameClient {
                 String squareColor = isDarkSquare ? SET_BG_COLOR_DARK_GREY : SET_BG_COLOR_LIGHT_GREY;
 
                 // Get the piece for the current square
-                String piece = getInitialPiece(row, displayCol);
+                String piece = getInitialPiece(isBlackPerspective ? row : 7 - row, isBlackPerspective ? col : 7 - col);
 
                 // Append the square with the piece
                 board.append(squareColor).append(piece).append(RESET_BG_COLOR);
             }
 
-            board.append(" |\n"); // End the row
+            board.append(SET_BG_COLOR_BORDER).append("   ").append(RESET_BG_COLOR).append("\n"); // End the row with border color
         }
 
-        // Add bottom border
-        board.append("   +------------------------+\n");
-
         // Add column labels
-        board.append("     a  b  c  d  e  f  g  h\n");
+
+        if (isBlackPerspective) {
+            board.append(SET_BG_COLOR_BORDER).append("   a   b   c   d   e   f   g   h    ").append(RESET_BG_COLOR).append("\n");
+        } else {
+            board.append(SET_BG_COLOR_BORDER).append("   h   g   f   e   d   c   b   a    ").append(RESET_BG_COLOR).append("\n");
+
+        }
+
+        // Reset text color
+        board.append(RESET_TEXT_COLOR);
 
         return board.toString();
     }
