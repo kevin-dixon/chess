@@ -11,25 +11,32 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ServerFacadeTests {
 
-    private static Server server;
-    private static ServerFacade facade;
+    private static Server server; // Server instance
+    private static ServerFacade facade; // Client-side ServerFacade
+    private static final int SERVER_PORT = 8080; // Port for the server
+    private static final String SERVER_URL = "http://localhost:" + SERVER_PORT; // Server URL
 
     @BeforeAll
     public static void init() {
+        // Start the server
         server = new Server();
-        var port = server.run(8080); // Start server on a random port
-        System.out.println("Started test HTTP server on port " + port);
-        facade = new ServerFacade("http://localhost:" + port); // Initialize ServerFacade with the server's port
+        server.run(SERVER_PORT);
+        System.out.println("Started test HTTP server on port " + SERVER_PORT);
+
+        // Initialize the ServerFacade for the client
+        facade = new ServerFacade(SERVER_URL);
     }
 
     @AfterAll
     public static void stopServer() {
-        server.stop(); // Stop the server after all tests
+        // Stop the server after all tests
+        server.stop();
     }
 
     @BeforeEach
     public void clearDatabase() throws Exception, ResponseException {
-        facade.makeRequest("DELETE", "/db", null, null); // Clear the database before each test
+        // Clear the database before each test
+        facade.makeRequest("DELETE", "/db", null, null);
     }
 
     @Test
@@ -120,27 +127,6 @@ public class ServerFacadeTests {
         assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
     }
 
-/*    @Test
-    void observeGameSuccess() throws Exception, ResponseException {
-        var authToken = facade.register("player6", "password", "player6@email.com");
-        facade.createGame(authToken, "Observable Game");
-
-        GameData[] games = facade.listGames(authToken);
-        int gameId = games[0].gameID();
-
-        facade.observeGame(authToken, gameId);
-        // No exception means success
-        assertTrue(true, "Observe game should succeed without exceptions");
-    }
-
-    @Test
-    void observeGameFailure() {
-        ResponseException exception = assertThrows(ResponseException.class, () -> {
-            facade.observeGame("invalidToken", 1); // Invalid auth token
-        });
-        assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
-    }*/
-
     @Test
     void leaveGameSuccess() throws Exception, ResponseException {
         var authToken = facade.register("player7", "password", "player7@email.com");
@@ -159,6 +145,34 @@ public class ServerFacadeTests {
         ResponseException exception = assertThrows(ResponseException.class, () -> {
             facade.leaveGame("invalidToken", 1); // Invalid auth token
         });
+        assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
+    }
+
+    @Test
+    void logoutSuccess() throws Exception, ResponseException {
+        // Register and log in a user
+        var authToken = facade.register("player1", "password", "player1@email.com");
+
+        // Perform logout
+        facade.logout(authToken);
+
+        // Attempt to list games with the same token (should fail)
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
+            facade.listGames(authToken);
+        });
+
+        // Verify the error message
+        assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
+    }
+
+    @Test
+    void logoutFailure() {
+        // Attempt to log out with an invalid token
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
+            facade.logout("invalidToken");
+        });
+
+        // Verify the error message
         assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
     }
 }
