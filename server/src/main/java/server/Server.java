@@ -1,4 +1,3 @@
-/*
 package server;
 
 import dataaccess.DataAccessException;
@@ -25,7 +24,6 @@ public class Server {
     }
 
     public int run(int desiredPort) {
-
         try {
             // Ensure the database is created before starting the server
             DatabaseManager.createDatabase();
@@ -37,7 +35,7 @@ public class Server {
 
         Spark.staticFiles.location("web");
 
-        //Register your endpoints
+        // Register endpoints
         Spark.delete("/db", new ClearHandler(clearService));
         Spark.post("/user", new RegistrationHandler(userService));
         Spark.post("/session", new LoginHandler(userService));
@@ -45,10 +43,10 @@ public class Server {
         Spark.get("/game", new ListGamesHandler(gameService, userService));
         Spark.post("/game", new CreateGameHandler(gameService, userService));
         Spark.put("/game", new JoinGameHandler(gameService, userService));
-        Spark.put("/game", new ObserveGameHandler(gameService, userService));
+        Spark.post("/game/observe", new ObserveGameHandler(gameService, userService));
         Spark.post("/game/leave", new LeaveGameHandler(gameService, userService));
 
-        //Handle exceptions
+        // Handle exceptions
         Spark.exception(Exception.class, (exception, req, res) -> {
             res.status(500);
             res.type("application/json");
@@ -56,14 +54,8 @@ public class Server {
             exception.printStackTrace();
         });
 
-        //This line initializes the server and can be removed once you have a functioning endpoint 
         Spark.init();
-
         Spark.awaitInitialization();
-        return Spark.port();
-    }
-
-    public int port() {
         return Spark.port();
     }
 
@@ -72,4 +64,3 @@ public class Server {
         Spark.awaitStop();
     }
 }
-*/
