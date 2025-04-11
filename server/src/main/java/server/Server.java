@@ -24,39 +24,36 @@ public class Server {
     }
 
     public int run(int desiredPort) {
-        try {
-            // Ensure the database is created before starting the server
-            DatabaseManager.createDatabase();
-        } catch (DataAccessException e) {
-            throw new RuntimeException("Failed to create database: " + e.getMessage(), e);
+        int port = desiredPort == 0 ? 8080 : desiredPort;
+        while (true) {
+            try {
+                DatabaseManager.createDatabase();
+                Spark.port(port);
+                Spark.staticFiles.location("web");
+
+                // Register endpoints
+                Spark.delete("/db", new ClearHandler(clearService));
+                Spark.post("/user", new RegistrationHandler(userService));
+                Spark.post("/session", new LoginHandler(userService));
+                Spark.delete("/session", new LogoutHandler(userService));
+                Spark.get("/game", new ListGamesHandler(gameService, userService));
+                Spark.post("/game", new CreateGameHandler(gameService, userService));
+                Spark.put("/game", new JoinGameHandler(gameService, userService));
+                Spark.post("/game/observe", new ObserveGameHandler(gameService, userService));
+                Spark.post("/game/leave", new LeaveGameHandler(gameService, userService));
+
+                Spark.init();
+                Spark.awaitInitialization();
+                return port;
+            } catch (Exception e) {
+                if (e.getCause() instanceof java.net.BindException) {
+                    System.err.println("Port " + port + " is in use. Trying next port...");
+                    port++;
+                } else {
+                    throw new RuntimeException("Failed to start server: " + e.getMessage(), e);
+                }
+            }
         }
-
-        Spark.port(desiredPort);
-
-        Spark.staticFiles.location("web");
-
-        // Register endpoints
-        Spark.delete("/db", new ClearHandler(clearService));
-        Spark.post("/user", new RegistrationHandler(userService));
-        Spark.post("/session", new LoginHandler(userService));
-        Spark.delete("/session", new LogoutHandler(userService));
-        Spark.get("/game", new ListGamesHandler(gameService, userService));
-        Spark.post("/game", new CreateGameHandler(gameService, userService));
-        Spark.put("/game", new JoinGameHandler(gameService, userService));
-        Spark.post("/game/observe", new ObserveGameHandler(gameService, userService));
-        Spark.post("/game/leave", new LeaveGameHandler(gameService, userService));
-
-        // Handle exceptions
-        Spark.exception(Exception.class, (exception, req, res) -> {
-            res.status(500);
-            res.type("application/json");
-            res.body("{\"message\": \"Error: " + exception.getMessage() + "\"}");
-            exception.printStackTrace();
-        });
-
-        Spark.init();
-        Spark.awaitInitialization();
-        return Spark.port();
     }
 
     public void stop() {
