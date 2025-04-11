@@ -39,31 +39,6 @@ public class ServerFacadeTests {
     }
 
     @Test
-    void clearDatabaseSuccess() throws Exception, ResponseException {
-        facade.register("testUser", "password", "test@mail.com");
-
-        // Clear the database
-        facade.clearDatabase();
-        ResponseException exception = assertThrows(ResponseException.class, () -> {
-            facade.listGames("invalidToken");
-        });
-        assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
-    }
-
-    @Test
-    void clearDatabaseFailure() {
-        ServerFacade invalidFacade = new ServerFacade("http://invalid-url");
-        ResponseException exception = assertThrows(ResponseException.class, invalidFacade::clearDatabase);
-        assertTrue(exception.getMessage().contains("HTTP"), "Expected error message to contain 'HTTP'");
-    }
-
-    @Test
-    void getServerUrlNegativeTest() {
-        ServerFacade invalidFacade = new ServerFacade("http://invalid-url");
-        assertEquals("http://invalid-url", invalidFacade.getServerUrl(), "Server URL should match the initialized value");
-    }
-
-    @Test
     void registerSuccess() throws Exception, ResponseException {
         var authToken = facade.register("player1", "password", "player1@email.com");
         assertNotNull(authToken);
@@ -95,16 +70,20 @@ public class ServerFacadeTests {
     }
 
     @Test
-    void createGameSuccess() throws Exception, ResponseException {
-        var authToken = facade.register("player3", "password", "player3@email.com");
-        int gameId = facade.createGame(authToken, "Test Game");
-        assertTrue(gameId > 0, "Game ID should be greater than 0");
+    void logoutSuccess() throws Exception, ResponseException {
+        var authToken = facade.register("player8", "password", "player8@email.com");
+        facade.logout(authToken);
+
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
+            facade.listGames(authToken); // Token should no longer be valid
+        });
+        assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
     }
 
     @Test
-    void createGameFailure() {
+    void logoutFailure() {
         ResponseException exception = assertThrows(ResponseException.class, () -> {
-            facade.createGame("invalidToken", "Test Game"); // Invalid auth token
+            facade.logout("invalidToken"); // Invalid auth token
         });
         assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
     }
@@ -125,6 +104,21 @@ public class ServerFacadeTests {
     void listGamesFailure() {
         ResponseException exception = assertThrows(ResponseException.class, () -> {
             facade.listGames("invalidToken"); // Invalid auth token
+        });
+        assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
+    }
+
+    @Test
+    void createGameSuccess() throws Exception, ResponseException {
+        var authToken = facade.register("player3", "password", "player3@email.com");
+        int gameId = facade.createGame(authToken, "Test Game");
+        assertTrue(gameId > 0, "Game ID should be greater than 0");
+    }
+
+    @Test
+    void createGameFailure() {
+        ResponseException exception = assertThrows(ResponseException.class, () -> {
+            facade.createGame("invalidToken", "Test Game"); // Invalid auth token
         });
         assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
     }
@@ -184,26 +178,32 @@ public class ServerFacadeTests {
     }
 
     @Test
-    void logoutSuccess() throws Exception, ResponseException {
-        var authToken = facade.register("player8", "password", "player8@email.com");
-        facade.logout(authToken);
+    void clearDatabaseSuccess() throws Exception, ResponseException {
+        facade.register("testUser", "password", "test@mail.com");
 
+        // Clear the database
+        facade.clearDatabase();
         ResponseException exception = assertThrows(ResponseException.class, () -> {
-            facade.listGames(authToken); // Token should no longer be valid
+            facade.listGames("invalidToken");
         });
         assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
     }
 
     @Test
-    void logoutFailure() {
-        ResponseException exception = assertThrows(ResponseException.class, () -> {
-            facade.logout("invalidToken"); // Invalid auth token
-        });
-        assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
+    void clearDatabaseFailure() {
+        ServerFacade invalidFacade = new ServerFacade("http://invalid-url");
+        ResponseException exception = assertThrows(ResponseException.class, invalidFacade::clearDatabase);
+        assertTrue(exception.getMessage().contains("HTTP"), "Expected error message to contain 'HTTP'");
     }
 
     @Test
     void getServerUrlTest() {
         assertEquals(SERVER_URL, facade.getServerUrl(), "Server URL should match the initialized value");
+    }
+
+    @Test
+    void getServerUrlNegativeTest() {
+        ServerFacade invalidFacade = new ServerFacade("http://invalid-url");
+        assertEquals("http://invalid-url", invalidFacade.getServerUrl(), "Server URL should match the initialized value");
     }
 }

@@ -7,6 +7,7 @@ import model.requests.JoinGameRequest;
 import model.requests.LeaveGameRequest;
 import model.requests.ObserveGameRequest;
 import model.UserData;
+import model.responses.ErrorResponse;
 import model.responses.UserAuthResponse;
 import ui.ResponseException;
 
@@ -87,6 +88,7 @@ public class ServerFacade {
         var path = "/db";
         this.makeRequest("DELETE", path, null, null);
     }
+
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
         try {
             URL url = new URL(serverUrl + path);
@@ -178,20 +180,4 @@ public class ServerFacade {
         return serverUrl;
     }
 
-    public static class ErrorResponse {
-        private String message;
-
-        public ErrorResponse(String message) {
-            this.message = message;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
-
-    }
 }
