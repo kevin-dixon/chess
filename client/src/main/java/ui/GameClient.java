@@ -22,35 +22,29 @@ public class GameClient {
         // Set text color to white
         board.append(SET_TEXT_COLOR_WHITE);
 
+        // Prepare the board as columns
+        String[][] boardColumns = buildBoardColumns();
+
         // Add top border with color
         board.append(SET_BG_COLOR_BORDER).append("   ").append("                                ").append(RESET_BG_COLOR).append("\n");
 
-        // Loop through rows
+        // Output the board column by column
         for (int row = 0; row < 8; row++) {
             int displayRow = isBlackPerspective ? 8 - row : row + 1; // Reverse the row numbers
             board.append(SET_BG_COLOR_BORDER).append(" ").append(displayRow).append(" ").append(RESET_BG_COLOR); // Add row number with color
 
-            // Loop through columns
             for (int col = 0; col < 8; col++) {
-                int displayCol = isBlackPerspective ? 7 - col : col; // Adjust column for perspective
-                boolean isDarkSquare = (row + col) % 2 == 1; // Determine square color
-                String squareColor = isDarkSquare ? SET_BG_COLOR_DARK_GREY : SET_BG_COLOR_LIGHT_GREY;
-
-                // Get the piece for the current square
-                String piece = getInitialPiece(isBlackPerspective ? row : 7 - row, isBlackPerspective ? col : 7 - col);
-
-                // Append the square with the piece
-                board.append(squareColor).append(piece).append(RESET_BG_COLOR);
+                board.append(boardColumns[col][row]);
             }
 
             board.append(SET_BG_COLOR_BORDER).append("   ").append(RESET_BG_COLOR).append("\n"); // End the row with border color
         }
 
-        // Add column labels with adjusted spacing
-        board.append(SET_BG_COLOR_BORDER).append("     "); // Add initial padding for alignment
+        // Add column labels as the last element in each column
+        board.append(SET_BG_COLOR_BORDER).append("    ");
         String[] columnLabels = isBlackPerspective ? new String[]{"a", "b", "c", "d", "e", "f", "g", "h"} : new String[]{"h", "g", "f", "e", "d", "c", "b", "a"};
         for (String label : columnLabels) {
-            board.append(label).append("  "); // Add extra spaces to align with chess piece columns
+            board.append(label).append("\u2007").append("\u2007").append("\u2007");
         }
         board.append("   ").append(RESET_BG_COLOR).append("\n");
 
@@ -59,6 +53,8 @@ public class GameClient {
 
         return board.toString();
     }
+
+
 
     private String getInitialPiece(int row, int col) {
         // Initial chessboard setup
