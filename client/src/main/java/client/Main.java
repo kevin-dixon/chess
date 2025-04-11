@@ -1,4 +1,5 @@
 package client;
+
 import ui.Repl;
 
 public class Main {
@@ -12,6 +13,6 @@ public class Main {
         }
 
         System.out.println("Starting Chess Client...");
-        new Repl(serverUrl).run(); // Start the client REPL
+        new Repl(serverUrl).run();
     }
 }

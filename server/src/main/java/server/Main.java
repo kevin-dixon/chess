@@ -1,5 +1,4 @@
 package server;
-import server.Server;
 
 public class Main {
     public static void main(String[] args) {
@@ -17,6 +16,6 @@ public class Main {
 
         System.out.println("Starting Chess Server on port " + port + "...");
         Server server = new Server();
-        server.run(port); // Start the server
+        server.run(port);
     }
 }

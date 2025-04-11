@@ -1,6 +1,5 @@
 package server;
 
-import dataaccess.DataAccessException;
 import dataaccess.DatabaseManager;
 
 import dataaccess.sqldatabase.AuthSqlDAO;
