@@ -1,10 +1,6 @@
 package server.handlers;
 
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
-import model.GameData;
-import model.requests.ObserveGameRequest;
-import server.ServerFacade;
 import service.GameService;
 import service.UserService;
 import spark.Request;
@@ -16,13 +12,13 @@ import java.util.Map;
 
 public class ObserveGameHandler implements Route {
 
-    private final GameService gameService;
     private final UserService userService;
+    private final GameService gameService;
     private final Gson gson = new Gson();
 
     public ObserveGameHandler(GameService gameService, UserService userService) {
-        this.gameService = gameService;
         this.userService = userService;
+        this.gameService = gameService;
     }
 
     @Override
@@ -41,19 +37,33 @@ public class ObserveGameHandler implements Route {
             }
 
             // Parse the JSON request body
-            ObserveGameRequest observeGameRequest = gson.fromJson(request.body(), ObserveGameRequest.class);
+            var observeGameRequest = gson.fromJson(request.body(), model.requests.ObserveGameRequest.class);
 
-            // Observe the game
-            gameService.observeGame(authToken, observeGameRequest.getGameID());
+            // Validate gameID
+            if (!gameService.isValidGame(observeGameRequest.getGameID())) {
+                response.status(404);
+                response.type("application/json");
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("message", "Error: game not found");
+                return gson.toJson(errorResponse);
+            }
+
+            // Return example board for now
+            String exampleBoard = """
+                    8  ♜  ♞  ♝  ♛  ♚  ♝  ♞  ♜
+                    7  ♟  ♟  ♟  ♟  ♟  ♟  ♟  ♟
+                    6                        
+                    5                        
+                    4                        
+                    3                        
+                    2  ♙  ♙  ♙  ♙  ♙  ♙  ♙  ♙
+                    1  ♖  ♘  ♗  ♕  ♔  ♗  ♘  ♖
+                       a  b  c  d  e  f  g  h
+                    """;
+
             response.status(200);
             response.type("application/json");
-            return gson.toJson(Map.of("message", "Successfully observing the game"));
-        } catch (DataAccessException e) {
-            response.status(400);
-            response.type("application/json");
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Error: bad request - " + e.getMessage());
-            return gson.toJson(errorResponse);
+            return gson.toJson(Map.of("board", exampleBoard));
         } catch (Exception e) {
             response.status(500);
             response.type("application/json");

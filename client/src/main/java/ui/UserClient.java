@@ -5,7 +5,6 @@ import websocket.NotificationHandler;
 import model.GameData;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class UserClient {
@@ -15,12 +14,10 @@ public class UserClient {
     private final NotificationHandler notificationHandler;
     private final String serverUrl;
 
-    // Keeps track of the last listed games and their indices
     private List<GameData> lastListedGames;
 
-
     public UserClient(String serverUrl, String userName, String authToken, NotificationHandler notificationHandler) {
-        this.server = new ServerFacade(serverUrl); // Create a new ServerFacade instance
+        this.server = new ServerFacade(serverUrl);
         this.userName = userName;
         this.authToken = authToken;
         this.notificationHandler = notificationHandler;
@@ -122,18 +119,14 @@ public class UserClient {
     private Object observeGame(List<String> params) {
         if (params.isEmpty()) return "Error: insufficient parameters for observe game";
         try {
-            // Validate the game index
             int gameIndex = Integer.parseInt(params.get(0)) - 1;
             if (gameIndex < 0 || gameIndex >= lastListedGames.size()) {
                 return "Error: invalid game number.";
             }
 
-            // Get the game ID from the lastListedGames
             int gameId = lastListedGames.get(gameIndex).gameID();
-
-            // Call the server to observe the game
             server.observeGame(authToken, gameId);
-            return new GameClient(serverUrl, authToken, String.valueOf(gameId), false);
+            return "Observing game with ID: " + gameId;
         } catch (Exception | ResponseException e) {
             return "Error: " + e.getMessage();
         }

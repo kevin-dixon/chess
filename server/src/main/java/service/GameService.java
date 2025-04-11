@@ -94,9 +94,10 @@ public class GameService {
         }
     }
 
-    public void observeGame(String authToken, int gameID) {
+    public void leaveGame(String authToken, int gameID) {
     }
 
-    public void leaveGame(String authToken, int gameID) {
+    public boolean isValidGame(int gameID) throws SQLException, DataAccessException {
+        return gameDao.getGameByID(gameID) != null;
     }
 }

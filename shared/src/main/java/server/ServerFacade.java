@@ -16,11 +16,9 @@ import java.net.*;
 public class ServerFacade {
 
     private final String serverUrl;
-    private final Gson gson;
 
     public ServerFacade(String serverUrl) {
         this.serverUrl = serverUrl;
-        this.gson = new Gson();
     }
 
     public String register(String username, String password, String email) throws ResponseException {
@@ -174,7 +172,7 @@ public class ServerFacade {
         return serverUrl;
     }
 
-    public class ErrorResponse {
+    public static class ErrorResponse {
         private String message;
 
         public ErrorResponse(String message) {

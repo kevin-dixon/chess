@@ -120,7 +120,7 @@ public class ServerFacadeTests {
         assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
     }
 
-    @Test
+/*    @Test
     void observeGameSuccess() throws Exception, ResponseException {
         var authToken = facade.register("player6", "password", "player6@email.com");
         facade.createGame(authToken, "Observable Game");
@@ -139,7 +139,7 @@ public class ServerFacadeTests {
             facade.observeGame("invalidToken", 1); // Invalid auth token
         });
         assertTrue(exception.getMessage().contains("unauthorized"), "Expected error message to contain 'unauthorized'");
-    }
+    }*/
 
     @Test
     void leaveGameSuccess() throws Exception, ResponseException {

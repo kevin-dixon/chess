@@ -1,19 +1,15 @@
 package server.handlers;
 
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
 import model.requests.JoinGameRequest;
-import server.ServerFacade;
 import service.GameService;
 import service.UserService;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import static java.lang.Integer.parseInt;
 
 public class JoinGameHandler implements Route {
 
