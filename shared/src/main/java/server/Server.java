@@ -1,15 +1,15 @@
-/*
 package server;
 
 import dataaccess.DataAccessException;
 import dataaccess.DatabaseManager;
-
 import dataaccess.sqldatabase.AuthSqlDAO;
 import dataaccess.sqldatabase.GameSqlDAO;
 import dataaccess.sqldatabase.UserSqlDAO;
 import server.handlers.*;
-import service.*;
-import spark.*;
+import service.ClearService;
+import service.GameService;
+import service.UserService;
+import spark.Spark;
 
 public class Server {
 
@@ -72,4 +72,3 @@ public class Server {
         Spark.awaitStop();
     }
 }
-*/
