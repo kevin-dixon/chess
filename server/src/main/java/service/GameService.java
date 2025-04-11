@@ -77,4 +77,12 @@ public class GameService {
         // Add player to the game
         gameDao.addPlayerToGame(gameID, playerColor, authData.username());
     }
+
+    public GameData getGameByID(int gameID) throws DataAccessException {
+        try {
+            return gameDao.getGameByID(gameID);
+        } catch (Exception e) {
+            throw new DataAccessException("Failed to retrieve game: " + e.getMessage());
+        }
+    }
 }

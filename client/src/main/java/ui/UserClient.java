@@ -104,17 +104,17 @@ public class UserClient {
     private Object observeGame(List<String> params) {
         if (params.isEmpty()) return "Error: insufficient parameters for observe game";
         try {
-            int gameIndex = Integer.parseInt(params.get(0)) - 1;
-            if (gameIndex < 0 || gameIndex >= lastListedGames.size()) {
-                return "Error: invalid game number";
+            // Validate the game ID format (6 digits)
+            String gameId = params.get(0);
+            if (!gameId.matches("\\d{6}")) {
+                return "Error: invalid game ID. Game IDs must be 6 digits.";
             }
-            String gameId = lastListedGames.get(gameIndex);
+
+            // Call the server to observe the game
             server.observeGame(authToken, Integer.parseInt(gameId));
             return new GameClient(serverUrl, authToken, gameId, false);
-        } catch (Exception e) {
+        } catch (Exception | ResponseException e) {
             return "Error: " + e.getMessage();
-        } catch (ResponseException e) {
-            throw new RuntimeException(e);
         }
     }
 

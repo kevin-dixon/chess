@@ -21,11 +21,19 @@ public class GameClient {
         return isBlackPerspective ? "Drawing board from black's perspective." : "Drawing board from white's perspective.";
     }
 
+    public String help() {
+        return """
+                draw - show example board
+                exit - exit the game
+                help - display this help text
+                """;
+    }
+
     public Object evaluate(String input) {
         return switch (input.toLowerCase()) {
             case "draw" -> drawChessBoard();
             case "exit" -> "Exiting game.";
-            default -> "Invalid command. Type 'draw' to redraw the board or 'exit' to leave the game.";
+            default -> help();
         };
     }
 }

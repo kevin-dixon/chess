@@ -44,6 +44,7 @@ public class Server {
         Spark.get("/game", new ListGamesHandler(gameService, userService));
         Spark.post("/game", new CreateGameHandler(gameService, userService));
         Spark.put("/game", new JoinGameHandler(gameService, userService));
+        Spark.put("/game", new ObserveGameHandler(gameService, userService));
 
         //Handle exceptions
         Spark.exception(Exception.class, (exception, req, res) -> {
