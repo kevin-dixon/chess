@@ -23,7 +23,7 @@ public class GameClient {
         board.append(SET_TEXT_COLOR_WHITE);
 
         // Add top border with color
-        board.append(SET_BG_COLOR_BORDER).append("                                   ").append(RESET_BG_COLOR).append("\n");
+        board.append(SET_BG_COLOR_BORDER).append("   ").append("                                ").append(RESET_BG_COLOR).append("\n");
 
         // Loop through rows
         for (int row = 0; row < 8; row++) {
@@ -46,14 +46,13 @@ public class GameClient {
             board.append(SET_BG_COLOR_BORDER).append("   ").append(RESET_BG_COLOR).append("\n"); // End the row with border color
         }
 
-        // Add column labels
-
-        if (isBlackPerspective) {
-            board.append(SET_BG_COLOR_BORDER).append("   a   b   c   d   e   f   g   h    ").append(RESET_BG_COLOR).append("\n");
-        } else {
-            board.append(SET_BG_COLOR_BORDER).append("   h   g   f   e   d   c   b   a    ").append(RESET_BG_COLOR).append("\n");
-
+        // Add column labels with adjusted spacing
+        board.append(SET_BG_COLOR_BORDER).append("     "); // Add initial padding for alignment
+        String[] columnLabels = isBlackPerspective ? new String[]{"a", "b", "c", "d", "e", "f", "g", "h"} : new String[]{"h", "g", "f", "e", "d", "c", "b", "a"};
+        for (String label : columnLabels) {
+            board.append(label).append("  "); // Add extra spaces to align with chess piece columns
         }
+        board.append("   ").append(RESET_BG_COLOR).append("\n");
 
         // Reset text color
         board.append(RESET_TEXT_COLOR);
