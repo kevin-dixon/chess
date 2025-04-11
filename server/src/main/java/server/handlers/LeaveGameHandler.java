@@ -46,12 +46,6 @@ public class LeaveGameHandler implements Route {
             response.status(200);
             response.type("application/json");
             return gson.toJson(Map.of("message", "Successfully left the game"));
-        } catch (DataAccessException e) {
-            response.status(400);
-            response.type("application/json");
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Error: bad request - " + e.getMessage());
-            return gson.toJson(errorResponse);
         } catch (Exception e) {
             response.status(500);
             response.type("application/json");

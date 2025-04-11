@@ -62,9 +62,12 @@ public class UserService {
         authDao.deleteAuth(authToken);
     }
 
-    public boolean validAuthToken(String authToken) throws DataAccessException, SQLException {
-        AuthData authData = authDao.getAuth(authToken);
-        return authData != null;
+    public boolean validAuthToken(String authToken) {
+        try {
+            return authDao.getAuth(authToken) != null;
+        } catch (DataAccessException | SQLException e) {
+            return false;
+        }
     }
 
     public String getUsernameFromAuthToken(String authToken) throws DataAccessException, SQLException {

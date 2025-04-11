@@ -21,23 +21,21 @@ public class LogoutHandler implements Route {
     @Override
     public Object handle(Request request, Response response) throws Exception {
         try {
-            //Get the authToken
             String authToken = request.headers("authorization");
 
-            //Validate input
             if (authToken == null || authToken.isEmpty() || !userService.validAuthToken(authToken)) {
                 response.status(401);
                 response.type("application/json");
                 Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("message", "Error: unauthorized");
+                errorResponse.put("message", "Error: unauthorized - invalid or missing auth token");
                 return gson.toJson(errorResponse);
             }
 
-            //Logout user
             userService.logout(authToken);
+
             response.status(200);
             response.type("application/json");
-            return "{}";
+            return gson.toJson(Map.of("message", "Logout successful"));
         } catch (Exception e) {
             response.status(500);
             response.type("application/json");
