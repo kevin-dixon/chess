@@ -47,12 +47,12 @@ public class GameClient {
         }
 
         // Add column labels with adjusted spacing
-        board.append(SET_BG_COLOR_BORDER).append("     "); // Add initial padding for alignment
+        board.append(SET_BG_COLOR_BORDER).append("    "); // Add initial padding for alignment
         String[] columnLabels = isBlackPerspective ? new String[]{"a", "b", "c", "d", "e", "f", "g", "h"} : new String[]{"h", "g", "f", "e", "d", "c", "b", "a"};
         for (String label : columnLabels) {
-            board.append(label).append("  "); // Add extra spaces to align with chess piece columns
+            board.append(label).append("\u2007").append("\u2007").append("\u2007"); // Add extra spaces to align with chess piece columns
         }
-        board.append("   ").append(RESET_BG_COLOR).append("\n");
+        board.append("  ").append(RESET_BG_COLOR).append("\n");
 
         // Reset text color
         board.append(RESET_TEXT_COLOR);
