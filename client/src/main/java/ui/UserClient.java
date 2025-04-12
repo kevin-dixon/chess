@@ -51,7 +51,7 @@ public class UserClient {
                 default -> help();
             };
         } catch (Exception e) {
-            return "Error: " + e.getMessage();
+            return e.getMessage();
         }
     }
 
@@ -64,7 +64,7 @@ public class UserClient {
             server.createGame(authToken, gameName);
             return "Game created successfully.";
         } catch (Exception | ResponseException e) {
-            return "Error: " + e.getMessage();
+            return e.getMessage();
         }
     }
 
@@ -88,7 +88,7 @@ public class UserClient {
             }
             return response.toString();
         } catch (Exception | ResponseException e) {
-            return "Error: " + e.getMessage();
+            return e.getMessage();
         }
     }
 
@@ -116,7 +116,7 @@ public class UserClient {
             server.joinGame(authToken, gameId, color);
             return new GameClient(serverUrl, authToken, String.valueOf(gameId), color.equals("BLACK"));
         } catch (Exception | ResponseException e) {
-            return "Error: " + e.getMessage();
+            return e.getMessage();
         }
     }
 
@@ -136,7 +136,7 @@ public class UserClient {
 
             return new GameClient(serverUrl, authToken, String.valueOf(gameId), false); // Default to white perspective
         } catch (Exception | ResponseException e) {
-            return "Error: " + e.getMessage();
+            return e.getMessage();
         }
     }
 
@@ -145,7 +145,7 @@ public class UserClient {
             server.logout(authToken);
             return new ChessClient(serverUrl, notificationHandler);
         } catch (Exception | ResponseException e) {
-            return "Error: " + e.getMessage();
+            return e.getMessage();
         }
     }
 }

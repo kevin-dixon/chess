@@ -35,7 +35,7 @@ public class ChessClient {
                 default -> help();
             };
         } catch (Exception e) {
-            return "Error: " + e.getMessage();
+            return e.getMessage();
         }
     }
 
@@ -52,7 +52,7 @@ public class ChessClient {
             String authToken = server.register(username, password, email);
             return new UserClient(server.getServerUrl(), username, authToken, notificationHandler);
         } catch (ResponseException e) {
-            return "Error: " + e.getMessage();
+            return e.getMessage();
         }
     }
 
@@ -68,7 +68,7 @@ public class ChessClient {
             String authToken = server.login(username, password);
             return new UserClient(server.getServerUrl(), username, authToken, notificationHandler);
         } catch (ResponseException e) {
-            return "Error: " + e.getMessage();
+            return e.getMessage();
         }
     }
 

@@ -37,6 +37,10 @@ public class ChessGame {
         currTeam = team;
     }
 
+    public ChessPiece getPieceAt(int i, int j) {
+        return gameBoard.getPiece(new ChessPosition(i+1, j+1));
+    }
+
     /**
      * Enum identifying the 2 possible teams in a chess game
      */

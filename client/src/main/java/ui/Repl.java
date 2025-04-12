@@ -8,18 +8,15 @@ import static ui.EscapeSequences.*;
 
 public class Repl {
     private Object activeClient;
-    private final String serverUrl;
     private final NotificationHandler notificationHandler;
 
     public Repl(String serverUrl) {
-        this.serverUrl = serverUrl;
         this.notificationHandler = new NotificationHandler();
         this.activeClient = new ChessClient(serverUrl, notificationHandler); // Initialize ChessClient
     }
 
     public void run() {
-        System.out.println("Welcome to Chess Client!");
-        System.out.println("Type 'help' to get started.");
+        System.out.println("Welcome to 240 Chess! Type 'help' to get started.");
         moveCursorToCommandPrompt(); // Position the cursor for the first command
         Scanner scanner = new Scanner(System.in);
         String result = "";
@@ -35,7 +32,7 @@ public class Repl {
                 System.out.println(SET_TEXT_COLOR_RED + "Error: " + e.getMessage() + RESET_TEXT_COLOR);
             }
 
-            moveCursorToCommandPrompt(); // Position the cursor for the next command
+            moveCursorToCommandPrompt();
         }
         System.out.println("Goodbye!");
     }
@@ -59,7 +56,11 @@ public class Repl {
                 return "Logged out successfully.";
             } else if (result instanceof GameClient gameClient) {
                 activeClient = gameClient; // Switch to GameClient
-                return "Joined game successfully.";
+                if (input.startsWith("play")) {
+                    return "Joined game successfully.";
+                } else if (input.startsWith("observe")) {
+                    return "Observing game.";
+                }
             }
             return result.toString();
         } else if (activeClient instanceof GameClient gameClient) {
@@ -74,7 +75,6 @@ public class Repl {
     }
 
     private void moveCursorToCommandPrompt() {
-        // Move the cursor to the bottom of the screen for typing commands
-        System.out.print(moveCursorToLocation(1, 30)); // Adjust the row (30) as needed
+        System.out.print(moveCursorToLocation(1, 30));
     }
 }

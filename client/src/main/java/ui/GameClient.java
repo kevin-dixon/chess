@@ -1,6 +1,10 @@
 package ui;
 
+import chess.ChessGame;
+import chess.ChessPiece;
 import server.ServerFacade;
+
+import static chess.ChessPiece.PieceType.*;
 import static ui.EscapeSequences.*;
 
 public class GameClient {
@@ -8,25 +12,26 @@ public class GameClient {
     private final String authToken;
     private final String gameId;
     private final boolean isBlackPerspective;
+    private final ChessGame chessGame; // Add a reference to the ChessGame model
 
     public GameClient(String serverUrl, String authToken, String gameId, boolean isBlackPerspective) {
-        this.server = new ServerFacade(serverUrl); // Create a new ServerFacade instance
+        this.server = new ServerFacade(serverUrl);
         this.authToken = authToken;
         this.gameId = gameId;
         this.isBlackPerspective = isBlackPerspective;
+
+        // Fetch the game state from the server (or initialize locally)
+        this.chessGame = new ChessGame(); // Replace with actual game state retrieval if needed
 
         // Automatically draw the board when joining the game
         drawBoardWithCommands();
     }
 
     private void drawBoardWithCommands() {
-        // Clear the console
         System.out.print(ERASE_SCREEN);
 
-        // Draw the chessboard
         System.out.println(drawChessBoard());
 
-        // Display the possible commands
         System.out.println(help());
     }
 
@@ -41,30 +46,33 @@ public class GameClient {
 
         // Loop through rows
         for (int row = 0; row < 8; row++) {
-            int displayRow = isBlackPerspective ? 8 - row : row + 1; // Reverse the row numbers
+            int displayRow = isBlackPerspective ? row + 1 : 8 - row; // Reverse the row numbers
             board.append(SET_BG_COLOR_BORDER).append(" ").append(displayRow).append(" ").append(RESET_BG_COLOR); // Add row number with color
 
             // Loop through columns
             for (int col = 0; col < 8; col++) {
-                int displayCol = isBlackPerspective ? 7 - col : col; // Adjust column for perspective
                 boolean isDarkSquare = (row + col) % 2 == 1; // Determine square color
                 String squareColor = isDarkSquare ? SET_BG_COLOR_DARK_GREY : SET_BG_COLOR_LIGHT_GREY;
 
-                // Get the piece for the current square
-                String piece = getInitialPiece(isBlackPerspective ? row : 7 - row, isBlackPerspective ? col : 7 - col);
+                // Get the piece for the current square from the ChessGame model
+                ChessPiece piece = chessGame.getPieceAt(isBlackPerspective ? 7 - row : row, isBlackPerspective ? 7 - col : col);
 
-                // Append the square with the piece
-                board.append(squareColor).append(piece).append(RESET_BG_COLOR);
+                // Determine the text color and symbol based on the piece type
+                String textColor = piece != null && piece.isBlack() ? SET_TEXT_COLOR_BLACK : SET_TEXT_COLOR_WHITE;
+                String pieceSymbol = getPieceSymbol(piece);
+
+                // Append the square with the piece and appropriate colors
+                board.append(squareColor).append(textColor).append(pieceSymbol).append(RESET_BG_COLOR).append(SET_TEXT_COLOR_WHITE);
             }
 
             board.append(SET_BG_COLOR_BORDER).append("   ").append(RESET_BG_COLOR).append("\n"); // End the row with border color
         }
 
         // Add column labels with adjusted spacing
-        board.append(SET_BG_COLOR_BORDER).append("    "); // Add initial padding for alignment
+        board.append(SET_BG_COLOR_BORDER).append("    ");
         String[] columnLabels = isBlackPerspective
-                ? new String[]{"a", "b", "c", "d", "e", "f", "g", "h"}
-                : new String[]{"h", "g", "f", "e", "d", "c", "b", "a"};
+                ? new String[]{"h", "g", "f", "e", "d", "c", "b", "a"}
+                : new String[]{"a", "b", "c", "d", "e", "f", "g", "h"};
         for (String label : columnLabels) {
             board.append(label).append("\u2007").append("\u2007").append("\u2007"); // Add extra spaces to align with chess piece columns
         }
@@ -76,20 +84,20 @@ public class GameClient {
         return board.toString();
     }
 
-    private String getInitialPiece(int row, int col) {
-        // Initial chessboard setup
-        String[][] initialBoard = {
-                {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK},
-                {BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN, BLACK_PAWN},
-                {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
-                {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
-                {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
-                {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY},
-                {WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN, WHITE_PAWN},
-                {WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN, WHITE_KING, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK}
-        };
+    private String getPieceSymbol(ChessPiece piece) {
+        if (piece == null) {
+            return EMPTY; // Return empty square if no piece is present
+        }
 
-        return initialBoard[row][col];
+        // Return the appropriate symbol based on the piece type
+        return switch (piece.getType()) {
+            case KING -> piece.isBlack() ? BLACK_KING : WHITE_KING;
+            case QUEEN -> piece.isBlack() ? BLACK_QUEEN : WHITE_QUEEN;
+            case BISHOP -> piece.isBlack() ? BLACK_BISHOP : WHITE_BISHOP;
+            case KNIGHT -> piece.isBlack() ? BLACK_KNIGHT : WHITE_KNIGHT;
+            case ROOK -> piece.isBlack() ? BLACK_ROOK : WHITE_ROOK;
+            case PAWN -> piece.isBlack() ? BLACK_PAWN : WHITE_PAWN;
+        };
     }
 
     public String help() {
@@ -110,14 +118,13 @@ public class GameClient {
         };
     }
 
-
     private Object exitGame() {
         try {
             // Call the server to leave the game
             server.leaveGame(authToken, Integer.parseInt(gameId));
             return new UserClient(server.getServerUrl(), null, authToken, null);
         } catch (ResponseException | Exception e) {
-            return "Error: " + e.getMessage();
+            return e.getMessage();
         }
     }
 }

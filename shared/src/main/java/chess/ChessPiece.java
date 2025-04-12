@@ -34,6 +34,14 @@ public class ChessPiece {
         pieceType = type;
     }
 
+    public PieceType getType() {
+        return pieceType;
+    }
+
+    public boolean isBlack() {
+        return color == ChessGame.TeamColor.BLACK;
+    }
+
     /**
      * The various different chess piece options
      */

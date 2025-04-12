@@ -101,7 +101,7 @@ public class ServerFacade {
             throwIfNotSuccessful(http);
             return readBody(http, responseClass);
         } catch (Exception ex) {
-            throw new ResponseException(500, ex.getMessage());
+            throw new ResponseException(ex.getMessage());
         }
     }
 
@@ -118,7 +118,7 @@ public class ServerFacade {
             throwIfNotSuccessful(http);
             return readBody(http, responseClass);
         } catch (Exception ex) {
-            throw new ResponseException(500, ex.getMessage());
+            throw new ResponseException(ex.getMessage());
         }
     }
 
@@ -145,7 +145,7 @@ public class ServerFacade {
     private void throwIfNotSuccessful(HttpURLConnection http) throws IOException, ResponseException {
         int status = http.getResponseCode();
         if (!isSuccessful(status)) {
-            String errorMessage = "HTTP error: " + status;
+            String errorMessage = "An error occurred";
 
             // Attempt to read the error message from the response body
             try (InputStream errorStream = http.getErrorStream()) {
@@ -168,7 +168,7 @@ public class ServerFacade {
                 e.printStackTrace();
             }
 
-            throw new ResponseException(status, errorMessage);
+            throw new ResponseException(errorMessage);
         }
     }
 

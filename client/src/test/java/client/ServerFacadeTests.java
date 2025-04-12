@@ -12,8 +12,6 @@ public class ServerFacadeTests {
 
     private static Server server;
     private static ServerFacade facade;
-    private static final int SERVER_PORT = 0;
-    private static final String SERVER_URL = "http://localhost:" + SERVER_PORT;
 
     @BeforeAll
     public static void init() {
