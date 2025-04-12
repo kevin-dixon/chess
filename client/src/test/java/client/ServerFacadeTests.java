@@ -12,7 +12,7 @@ public class ServerFacadeTests {
 
     private static Server server; // Server instance
     private static ServerFacade facade; // Client-side ServerFacade
-    private static final int SERVER_PORT = 8080; // Port for the server
+    private static final int SERVER_PORT = 0; // Port for the server
     private static final String SERVER_URL = "http://localhost:" + SERVER_PORT; // Server URL
 
     @BeforeAll
