@@ -112,6 +112,8 @@ public class UserClient {
             // Join the game
             server.joinGame(authToken, gameId, color);
             return new GameClient(serverUrl, authToken, String.valueOf(gameId), color.equals("BLACK"), cachedGameList);
+        } catch (NumberFormatException e) {
+            return "Error: game number must be an integer";
         } catch (Exception | ResponseException e) {
             return e.getMessage();
         }
@@ -134,6 +136,8 @@ public class UserClient {
             // Observe the game
             server.observeGame(authToken, gameId);
             return new GameClient(serverUrl, authToken, String.valueOf(gameId), false, cachedGameList);
+        } catch (NumberFormatException e) {
+            return "Error: game number must be an integer";
         } catch (Exception | ResponseException e) {
             return e.getMessage();
         }
