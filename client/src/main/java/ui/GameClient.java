@@ -46,7 +46,7 @@ public class GameClient {
 
         // Loop through rows
         for (int row = 0; row < 8; row++) {
-            int displayRow = isBlackPerspective ? row + 1 : 8 - row; // Reverse the row numbers
+            int displayRow = isBlackPerspective ? row + 1 : 8 - row; // Flip the row numbers
             board.append(SET_BG_COLOR_BORDER).append(" ").append(displayRow).append(" ").append(RESET_BG_COLOR); // Add row number with color
 
             // Loop through columns
@@ -55,7 +55,7 @@ public class GameClient {
                 String squareColor = isDarkSquare ? SET_BG_COLOR_DARK_GREY : SET_BG_COLOR_LIGHT_GREY;
 
                 // Get the piece for the current square from the ChessGame model
-                ChessPiece piece = chessGame.getPieceAt(isBlackPerspective ? 7 - row : row, isBlackPerspective ? 7 - col : col);
+                ChessPiece piece = chessGame.getPieceAt(isBlackPerspective ? row : 7 - row, isBlackPerspective ? col : 7 - col);
 
                 // Determine the text color and symbol based on the piece type
                 String textColor = piece != null && piece.isBlack() ? SET_TEXT_COLOR_BLACK : SET_TEXT_COLOR_WHITE;
