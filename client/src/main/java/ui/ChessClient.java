@@ -2,6 +2,8 @@ package ui;
 
 import server.ServerFacade;
 import websocket.NotificationHandler;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ChessClient {
@@ -50,7 +52,7 @@ public class ChessClient {
 
             // Use the simplified ServerFacade register method
             String authToken = server.register(username, password, email);
-            return new UserClient(server.getServerUrl(), username, authToken, notificationHandler);
+            return new UserClient(server.getServerUrl(), username, authToken, notificationHandler, new ArrayList<>());
         } catch (ResponseException e) {
             return e.getMessage();
         }
@@ -66,7 +68,7 @@ public class ChessClient {
 
             // Use the simplified ServerFacade login method
             String authToken = server.login(username, password);
-            return new UserClient(server.getServerUrl(), username, authToken, notificationHandler);
+            return new UserClient(server.getServerUrl(), username, authToken, notificationHandler, new ArrayList<>());
         } catch (ResponseException e) {
             return e.getMessage();
         }

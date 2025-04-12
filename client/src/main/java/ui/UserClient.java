@@ -9,20 +9,18 @@ import java.util.List;
 
 public class UserClient {
     private final ServerFacade server;
-    private final String userName;
     private final String authToken;
     private final NotificationHandler notificationHandler;
     private final String serverUrl;
 
-    private List<GameData> lastListedGames;
+    private List<GameData> cachedGameList; // Cached list of games
 
-    public UserClient(String serverUrl, String userName, String authToken, NotificationHandler notificationHandler) {
+    public UserClient(String serverUrl, String userName, String authToken, NotificationHandler notificationHandler, List<GameData> cachedGameList) {
         this.server = new ServerFacade(serverUrl);
-        this.userName = userName;
         this.authToken = authToken;
         this.notificationHandler = notificationHandler;
         this.serverUrl = serverUrl;
-        this.lastListedGames = new ArrayList<>();
+        this.cachedGameList = cachedGameList != null ? cachedGameList : new ArrayList<>(); // Use the provided list or initialize a new one
     }
 
     public String help() {
@@ -73,18 +71,17 @@ public class UserClient {
             // Fetch games from the server
             var games = server.listGames(authToken);
 
-            // Update the lastListedGames with the fetched games
-            lastListedGames = List.of(games);
+            // Update the cached game list
+            cachedGameList = List.of(games);
 
             // Build the response string
             StringBuilder response = new StringBuilder("Available games:\n");
-            for (int i = 0; i < lastListedGames.size(); i++) {
-                GameData game = lastListedGames.get(i);
-                response.append(i + 1).append(". ")
-                        .append("Name: ").append(game.gameName()).append(", ")
-                        .append("White: ").append(game.whiteUsername() != null ? game.whiteUsername() : "Open").append(", ")
-                        .append("Black: ").append(game.blackUsername() != null ? game.blackUsername() : "Open")
-                        .append("\n");
+            for (int i = 0; i < cachedGameList.size(); i++) {
+                GameData game = cachedGameList.get(i);
+                response.append(i + 1).append(". ").append(game.gameName())
+                        .append(" (White: ").append(game.getWhiteUsername() == null ? "Open" : game.getWhiteUsername())
+                        .append(", Black: ").append(game.getBlackUsername() == null ? "Open" : game.getBlackUsername())
+                        .append(")\n");
             }
             return response.toString();
         } catch (Exception | ResponseException e) {
@@ -99,22 +96,22 @@ public class UserClient {
         try {
             // Validate the game index
             int gameIndex = Integer.parseInt(params.get(0)) - 1;
-            if (gameIndex < 0 || gameIndex >= lastListedGames.size()) {
-                return "Error: invalid game number.";
+            if (gameIndex < 0 || gameIndex >= cachedGameList.size()) {
+                return "Error: invalid game number";
             }
 
             // Validate the player color
             String color = params.get(1).toUpperCase();
             if (!color.equals("WHITE") && !color.equals("BLACK")) {
-                return "Error: invalid color. Choose either WHITE or BLACK.";
+                return "Error: invalid player color (must be WHITE or BLACK)";
             }
 
-            // Get the game ID from the lastListedGames
-            int gameId = lastListedGames.get(gameIndex).gameID();
+            // Get the game ID from the cached game list
+            int gameId = cachedGameList.get(gameIndex).gameID();
 
             // Join the game
             server.joinGame(authToken, gameId, color);
-            return new GameClient(serverUrl, authToken, String.valueOf(gameId), color.equals("BLACK"));
+            return new GameClient(serverUrl, authToken, String.valueOf(gameId), color.equals("BLACK"), cachedGameList);
         } catch (Exception | ResponseException e) {
             return e.getMessage();
         }
@@ -125,16 +122,18 @@ public class UserClient {
             return "Error: insufficient parameters for observe game";
         }
         try {
+            // Validate the game index
             int gameIndex = Integer.parseInt(params.get(0)) - 1;
-            if (gameIndex < 0 || gameIndex >= lastListedGames.size()) {
-                return "Error: invalid game number.";
+            if (gameIndex < 0 || gameIndex >= cachedGameList.size()) {
+                return "Error: invalid game number";
             }
 
-            int gameId = lastListedGames.get(gameIndex).gameID();
+            // Get the game ID from the cached game list
+            int gameId = cachedGameList.get(gameIndex).gameID();
 
+            // Observe the game
             server.observeGame(authToken, gameId);
-
-            return new GameClient(serverUrl, authToken, String.valueOf(gameId), false); // Default to white perspective
+            return new GameClient(serverUrl, authToken, String.valueOf(gameId), false, cachedGameList);
         } catch (Exception | ResponseException e) {
             return e.getMessage();
         }

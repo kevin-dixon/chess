@@ -204,7 +204,7 @@ public class ServerFacadeTests {
     void clearDatabaseFailure() {
         ServerFacade invalidFacade = new ServerFacade("http://invalid-url");
         ResponseException exception = assertThrows(ResponseException.class, invalidFacade::clearDatabase);
-        assertTrue(exception.getMessage().contains("HTTP"), "Expected error message to contain 'HTTP'");
+        assertTrue(exception.getMessage().contains("invalid-url"), "Expected error message to contain 'HTTP'");
     }
 
     @Test

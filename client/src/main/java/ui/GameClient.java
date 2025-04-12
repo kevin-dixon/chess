@@ -3,6 +3,9 @@ package ui;
 import chess.ChessGame;
 import chess.ChessPiece;
 import server.ServerFacade;
+import model.GameData;
+
+import java.util.List;
 
 import static chess.ChessPiece.PieceType.*;
 import static ui.EscapeSequences.*;
@@ -13,12 +16,14 @@ public class GameClient {
     private final String gameId;
     private final boolean isBlackPerspective;
     private final ChessGame chessGame; // Add a reference to the ChessGame model
+    private final List<GameData> cachedGameList; // Cached list of games
 
-    public GameClient(String serverUrl, String authToken, String gameId, boolean isBlackPerspective) {
+    public GameClient(String serverUrl, String authToken, String gameId, boolean isBlackPerspective, List<GameData> cachedGameList) {
         this.server = new ServerFacade(serverUrl);
         this.authToken = authToken;
         this.gameId = gameId;
         this.isBlackPerspective = isBlackPerspective;
+        this.cachedGameList = cachedGameList;
 
         // Fetch the game state from the server (or initialize locally)
         this.chessGame = new ChessGame(); // Replace with actual game state retrieval if needed
@@ -122,7 +127,7 @@ public class GameClient {
         try {
             // Call the server to leave the game
             server.leaveGame(authToken, Integer.parseInt(gameId));
-            return new UserClient(server.getServerUrl(), null, authToken, null);
+            return new UserClient(server.getServerUrl(), null, authToken, null, cachedGameList);
         } catch (ResponseException | Exception e) {
             return e.getMessage();
         }
