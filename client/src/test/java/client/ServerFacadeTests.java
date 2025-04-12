@@ -19,11 +19,10 @@ public class ServerFacadeTests {
     public static void init() {
         // Start the server
         server = new Server();
-        server.run(SERVER_PORT);
-        System.out.println("Started test HTTP server on port " + SERVER_PORT);
+        int port = server.run(0);
+        System.out.println("Started test HTTP server on port " + port);
 
-        // Initialize the ServerFacade for the client
-        facade = new ServerFacade(SERVER_URL);
+        facade = new ServerFacade("http://localhost:" + port);
     }
 
     @AfterAll
@@ -198,7 +197,12 @@ public class ServerFacadeTests {
 
     @Test
     void getServerUrlTest() {
-        assertEquals(SERVER_URL, facade.getServerUrl(), "Server URL should match the initialized value");
+        String actualUrl = facade.getServerUrl();
+        assertNotNull(actualUrl, "Server URL should not be null");
+        assertTrue(actualUrl.startsWith("http://localhost:"), "Server URL should start with 'http://localhost:'");
+
+        String[] urlParts = actualUrl.split(":");
+        assertEquals(3, urlParts.length, "Server URL should contain a valid port");
     }
 
     @Test

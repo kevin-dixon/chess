@@ -23,10 +23,10 @@ public class Server {
     }
 
     public int run(int desiredPort) {
-        int port = desiredPort == 0 ? 0 : desiredPort; // Use 0 to let Spark select a random available port
+        int port = desiredPort == 0 ? 0 : desiredPort;
         try {
-            DatabaseManager.createDatabase();
             Spark.port(port);
+            DatabaseManager.createDatabase();
             Spark.staticFiles.location("web");
 
             // Register endpoints
