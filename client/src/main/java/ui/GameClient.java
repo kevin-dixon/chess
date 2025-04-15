@@ -1,7 +1,9 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import chess.ChessPiece;
+import chess.ChessPosition;
 import server.ServerFacade;
 import model.GameData;
 
@@ -9,27 +11,68 @@ import java.util.List;
 
 import static chess.ChessPiece.PieceType.*;
 import static ui.EscapeSequences.*;
+import websocket.ChessWebSocketClient;
+import websocket.commands.UserGameCommand;
 
 public class GameClient {
     private final ServerFacade server;
     private final String authToken;
     private final String gameId;
     private final boolean isBlackPerspective;
-    private final ChessGame chessGame; // Add a reference to the ChessGame model
-    private final List<GameData> cachedGameList; // Cached list of games
+    private final ChessGame chessGame;
+    private final List<GameData> cachedGameList;
+    private final ChessWebSocketClient webSocketClient;
 
-    public GameClient(String serverUrl, String authToken, String gameId, boolean isBlackPerspective, List<GameData> cachedGameList) {
+    public GameClient(String serverUrl, String authToken, String gameId, boolean isBlackPerspective, List<GameData> cachedGameList) throws Exception {
         this.server = new ServerFacade(serverUrl);
         this.authToken = authToken;
         this.gameId = gameId;
         this.isBlackPerspective = isBlackPerspective;
         this.cachedGameList = cachedGameList;
+        this.webSocketClient = new ChessWebSocketClient(serverUrl + "/ws");
 
         // Fetch the game state from the server (or initialize locally)
         this.chessGame = new ChessGame(); // Replace with actual game state retrieval if needed
 
         // Automatically draw the board when joining the game
         drawBoardWithCommands();
+    }
+
+    public void makeMove(String move) {
+        try {
+            String[] parts = move.split(" ");
+            if (parts.length != 2) {
+                throw new IllegalArgumentException("Invalid move format. Use 'start end' (e.g., 'e2 e4').");
+            }
+
+            ChessPosition start = parsePosition(parts[0]);
+            ChessPosition end = parsePosition(parts[1]);
+            ChessMove chessMove = new ChessMove(start, end, null);
+
+            // Send the command
+            UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, Integer.parseInt(gameId), chessMove);
+            webSocketClient.sendCommand(command);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private ChessPosition parsePosition(String pos) {
+        if (pos.length() != 2) {
+            throw new IllegalArgumentException("Invalid position format. Use 'e2', 'd4', etc.");
+        }
+
+        char col = pos.charAt(0);
+        char row = pos.charAt(1);
+
+        int colIndex = col - 'a' + 1;
+        int rowIndex = row - '1' + 1;
+
+        if (colIndex < 1 || colIndex > 8 || rowIndex < 1 || rowIndex > 8) {
+            throw new IllegalArgumentException("Position out of bounds. Use 'a1' to 'h8'.");
+        }
+
+        return new ChessPosition(rowIndex, colIndex);
     }
 
     private void drawBoardWithCommands() {
