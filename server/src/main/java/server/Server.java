@@ -8,6 +8,7 @@ import dataaccess.sqldatabase.UserSqlDAO;
 import server.handlers.*;
 import service.*;
 import spark.*;
+import websocket.ChessWebSocket;
 
 public class Server {
 
@@ -29,7 +30,10 @@ public class Server {
             DatabaseManager.createDatabase();
             Spark.staticFiles.location("web");
 
-            // Register endpoints
+            // Register WebSocket endpoint
+            Spark.webSocket("/ws", ChessWebSocket.class);
+
+            // Register HTTP endpoints
             Spark.delete("/db", new ClearHandler(clearService));
             Spark.post("/user", new RegistrationHandler(userService));
             Spark.post("/session", new LoginHandler(userService));
