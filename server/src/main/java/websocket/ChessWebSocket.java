@@ -1,9 +1,11 @@
 package websocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
+import service.GameService;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
@@ -13,65 +15,126 @@ import java.util.concurrent.ConcurrentHashMap;
 @WebSocket
 public class ChessWebSocket {
 
-    private static final Map<Session, String> clients = new ConcurrentHashMap<>();
+    private static final Map<Session, Integer> sessionGameMap = new ConcurrentHashMap<>();
+    private static final Map<Integer, ChessGame> games = new ConcurrentHashMap<>();
     private final Gson gson = new Gson();
+    private final GameService gameService = new GameService(new dataaccess.sqldatabase.GameSqlDAO(), new dataaccess.sqldatabase.AuthSqlDAO());
 
     @OnWebSocketConnect
     public void onConnect(Session session) {
-        clients.put(session, null);
         System.out.println("Client connected: " + session);
     }
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) {
-        System.out.println("Received: " + message);
-        // Deserialize message and handle commands
-        UserGameCommand command = gson.fromJson(message, UserGameCommand.class);
-        handleCommand(session, command);
+        try {
+            UserGameCommand command = gson.fromJson(message, UserGameCommand.class);
+            handleCommand(session, command);
+        } catch (Exception e) {
+            sendError(session, "Invalid command format: " + e.getMessage());
+        }
     }
 
     @OnWebSocketClose
     public void onClose(Session session, int statusCode, String reason) {
-        clients.remove(session);
+        Integer gameID = sessionGameMap.remove(session);
+        if (gameID != null) {
+            broadcastNotification(gameID, "A player has disconnected.");
+        }
         System.out.println("Client disconnected: " + session);
     }
 
     private void handleCommand(Session session, UserGameCommand command) {
         switch (command.getCommandType()) {
-            case CONNECT -> sendLoadGame(session, command.getGameID());
-            case MAKE_MOVE -> broadcastMove(command);
-            case LEAVE -> clients.remove(session);
-            case RESIGN -> broadcastResignation(command);
+            case CONNECT -> handleConnect(session, command);
+            case MAKE_MOVE -> handleMakeMove(session, command);
+            case LEAVE -> handleLeave(session, command);
+            case RESIGN -> handleResign(session, command);
+            default -> sendError(session, "Unknown command type.");
         }
     }
 
-    private void sendLoadGame(Session session, Integer gameID) {
-        ChessGame game = new ChessGame(); // Fetch game from database
+    private void handleConnect(Session session, UserGameCommand command) {
+        try {
+            ChessGame game = gameService.getGameByID(command.getGameID()).game();
+            sessionGameMap.put(session, command.getGameID());
+            games.putIfAbsent(command.getGameID(), game);
+
+            sendLoadGame(session, game);
+            broadcastNotification(command.getGameID(), command.getAuthToken() + " has joined the game.");
+        } catch (Exception e) {
+            sendError(session, "Failed to connect: " + e.getMessage());
+        }
+    }
+
+    private void handleMakeMove(Session session, UserGameCommand command) {
+        Integer gameID = sessionGameMap.get(session);
+        if (gameID == null || !gameID.equals(command.getGameID())) {
+            sendError(session, "Invalid game ID.");
+            return;
+        }
+
+        ChessGame game = games.get(gameID);
+        try {
+            game.makeMove(command.getMove());
+            broadcastLoadGame(gameID, game);
+            broadcastNotification(gameID, command.getAuthToken() + " made a move: " + command.getMove());
+        } catch (Exception e) {
+            sendError(session, "Invalid move: " + e.getMessage());
+        }
+    }
+
+    private void handleLeave(Session session, UserGameCommand command) {
+        Integer gameID = sessionGameMap.remove(session);
+        if (gameID != null) {
+            broadcastNotification(gameID, command.getAuthToken() + " has left the game.");
+        }
+    }
+
+    private void handleResign(Session session, UserGameCommand command) {
+        Integer gameID = sessionGameMap.get(session);
+        if (gameID == null || !gameID.equals(command.getGameID())) {
+            sendError(session, "Invalid game ID.");
+            return;
+        }
+
+        broadcastNotification(gameID, command.getAuthToken() + " has resigned. The game is over.");
+        games.remove(gameID);
+    }
+
+    private void sendLoadGame(Session session, ChessGame game) {
         ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, game);
         sendMessage(session, gson.toJson(message));
     }
 
-    private void broadcastMove(UserGameCommand command) {
-        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
-                "Player made a move: " + command.getMove(), null);
-        broadcastMessage(gson.toJson(message));
+    private void broadcastLoadGame(Integer gameID, ChessGame game) {
+        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, game);
+        broadcastMessage(gameID, gson.toJson(message));
     }
 
-    private void broadcastResignation(UserGameCommand command) {
-        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
-                "Player resigned", null);
-        broadcastMessage(gson.toJson(message));
+    private void broadcastNotification(Integer gameID, String notification) {
+        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, notification, null);
+        broadcastMessage(gameID, gson.toJson(message));
+    }
+
+    private void sendError(Session session, String errorMessage) {
+        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.ERROR, errorMessage, null);
+        sendMessage(session, gson.toJson(message));
     }
 
     private void sendMessage(Session session, String message) {
         try {
             session.getRemote().sendString(message);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Failed to send message to session: " + e.getMessage());
         }
     }
 
-    private void broadcastMessage(String message) {
-        clients.keySet().forEach(session -> sendMessage(session, message));
+    private void broadcastMessage(Integer gameID, String message) {
+        sessionGameMap.forEach((session, id) -> {
+            if (id.equals(gameID)) {
+                sendMessage(session, message);
+            }
+        });
     }
 }
