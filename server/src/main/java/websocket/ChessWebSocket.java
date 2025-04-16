@@ -1,7 +1,7 @@
 package websocket;
 
 import chess.ChessGame;
-import chess.ChessMove;
+import model.*;
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
@@ -56,18 +56,31 @@ public class ChessWebSocket {
 
     private void handleConnect(Session session, UserGameCommand command) {
         try {
-            ChessGame game = gameService.getGameByID(command.getGameID()).game();
+            GameData gameData = gameService.getGameByID(command.getGameID());
+            if (gameData == null) {
+                sendError(session, "Invalid game ID: " + command.getGameID());
+                return;
+            }
+
+            ChessGame game = gameData.game();
             sessionGameMap.put(session, command.getGameID());
             games.putIfAbsent(command.getGameID(), game);
 
             sendLoadGame(session, game);
 
-            if (sessionGameMap.values().stream().filter(id -> id.equals(command.getGameID())).count() > 1) {
-                broadcastNotification(command.getGameID(), command.getAuthToken() + " has joined the game.");
-            }
+            sessionGameMap.forEach((otherSession, gameID) -> {
+                if (!otherSession.equals(session) && gameID.equals(command.getGameID())) {
+                    sendNotification(otherSession, command.getAuthToken() + " has joined the game.");
+                }
+            });
         } catch (Exception e) {
             sendError(session, "Failed to connect: " + e.getMessage());
         }
+    }
+
+    private void sendNotification(Session session, String message) {
+        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, message, null);
+        sendMessage(session, gson.toJson(notification));
     }
 
     private void handleMakeMove(Session session, UserGameCommand command) {
@@ -106,22 +119,22 @@ public class ChessWebSocket {
     }
 
     private void sendLoadGame(Session session, ChessGame game) {
-        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, game);
+        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, null, game);
         sendMessage(session, gson.toJson(message));
     }
 
     private void broadcastLoadGame(Integer gameID, ChessGame game) {
-        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, game);
+        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, null, game);
         broadcastMessage(gameID, gson.toJson(message));
     }
 
     private void broadcastNotification(Integer gameID, String notification) {
-        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, notification, null);
+        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, null, notification, null);
         broadcastMessage(gameID, gson.toJson(message));
     }
 
     private void sendError(Session session, String errorMessage) {
-        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.ERROR, errorMessage, null);
+        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.ERROR, errorMessage, null, null);
         sendMessage(session, gson.toJson(message));
     }
 
