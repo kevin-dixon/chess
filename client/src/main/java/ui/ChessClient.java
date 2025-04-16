@@ -2,17 +2,37 @@ package ui;
 
 import server.ServerFacade;
 import websocket.NotificationHandler;
+import websocket.ServerMessageObserver;
+import websocket.WebSocketCommunicator;
+import websocket.commands.UserGameCommand;
+import websocket.messages.ServerMessage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ChessClient {
+public class ChessClient implements ServerMessageObserver {
     private final ServerFacade server;
     private final NotificationHandler notificationHandler;
+    private final WebSocketCommunicator webSocketCommunicator;
 
-    public ChessClient(String serverUrl, NotificationHandler notifyHandler) {
+    public ChessClient(String serverUrl, NotificationHandler notifyHandler) throws Exception {
         this.server = new ServerFacade(serverUrl);
         this.notificationHandler = notifyHandler;
+        this.webSocketCommunicator = new WebSocketCommunicator(serverUrl + "/ws");
+        this.webSocketCommunicator.addObserver(this);
+    }
+
+    @Override
+    public void onServerMessage(ServerMessage message) {
+        switch (message.getServerMessageType()) {
+            case LOAD_GAME -> System.out.println("Game loaded: " + message.getGame());
+            case NOTIFICATION -> System.out.println("Notification: " + message.getMessage());
+            case ERROR -> System.err.println("Error: " + message.getMessage());
+        }
+    }
+
+    public void sendCommand(Object command) {
+        webSocketCommunicator.sendCommand((UserGameCommand) command);
     }
 
     public String help() {
@@ -55,6 +75,8 @@ public class ChessClient {
             return new UserClient(server.getServerUrl(), username, authToken, notificationHandler, new ArrayList<>());
         } catch (ResponseException e) {
             return e.getMessage();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -71,6 +93,8 @@ public class ChessClient {
             return new UserClient(server.getServerUrl(), username, authToken, notificationHandler, new ArrayList<>());
         } catch (ResponseException e) {
             return e.getMessage();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

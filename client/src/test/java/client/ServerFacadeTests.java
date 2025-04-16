@@ -14,7 +14,7 @@ public class ServerFacadeTests {
     private static ServerFacade facade;
 
     @BeforeAll
-    public static void init() {
+    public static void init() throws Exception {
         server = new Server();
         int port = server.run(0);
         System.out.println("Started test HTTP server on port " + port);
@@ -201,7 +201,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    void clearDatabaseFailure() {
+    void clearDatabaseFailure() throws Exception {
         ServerFacade invalidFacade = new ServerFacade("http://invalid-url");
         ResponseException exception = assertThrows(ResponseException.class, invalidFacade::clearDatabase);
         assertTrue(exception.getMessage().contains("invalid-url"), "Expected error message to contain 'HTTP'");
@@ -218,7 +218,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    void getServerUrlNegativeTest() {
+    void getServerUrlNegativeTest() throws Exception {
         ServerFacade invalidFacade = new ServerFacade("http://invalid-url");
         assertEquals("http://invalid-url", invalidFacade.getServerUrl(), "Server URL should match the initialized value");
     }

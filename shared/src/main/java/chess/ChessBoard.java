@@ -73,10 +73,13 @@ public class ChessBoard {
     }
 
     public void movePiece(ChessMove move) {
+        if (move == null) {
+            throw new IllegalArgumentException("Move cannot be null.");
+        }
+
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
 
-        // only move if a piece is there
         if (spaces[start.getRow()][start.getColumn()] != null) {
             ChessPiece pieceToMove = spaces[start.getRow()][start.getColumn()];
             spaces[end.getRow()][end.getColumn()] = pieceToMove;

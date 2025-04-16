@@ -15,7 +15,7 @@ public class UserClient {
 
     private List<GameData> cachedGameList; // Cached list of games
 
-    public UserClient(String serverUrl, String userName, String authToken, NotificationHandler notificationHandler, List<GameData> cachedGameList) {
+    public UserClient(String serverUrl, String userName, String authToken, NotificationHandler notificationHandler, List<GameData> cachedGameList) throws Exception {
         this.server = new ServerFacade(serverUrl);
         this.authToken = authToken;
         this.notificationHandler = notificationHandler;

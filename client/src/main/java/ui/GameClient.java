@@ -9,9 +9,8 @@ import model.GameData;
 
 import java.util.List;
 
-import static chess.ChessPiece.PieceType.*;
 import static ui.EscapeSequences.*;
-import websocket.ChessWebSocketClient;
+import websocket.WebSocketCommunicator;
 import websocket.commands.UserGameCommand;
 
 public class GameClient {
@@ -21,7 +20,7 @@ public class GameClient {
     private final boolean isBlackPerspective;
     private final ChessGame chessGame;
     private final List<GameData> cachedGameList;
-    private final ChessWebSocketClient webSocketClient;
+    private final WebSocketCommunicator webSocketClient;
 
     public GameClient(String serverUrl, String authToken, String gameId, boolean isBlackPerspective, List<GameData> cachedGameList) throws Exception {
         this.server = new ServerFacade(serverUrl);
@@ -29,7 +28,7 @@ public class GameClient {
         this.gameId = gameId;
         this.isBlackPerspective = isBlackPerspective;
         this.cachedGameList = cachedGameList;
-        this.webSocketClient = new ChessWebSocketClient(serverUrl + "/ws");
+        this.webSocketClient = new WebSocketCommunicator(serverUrl + "/ws");
 
         // Fetch the game state from the server (or initialize locally)
         this.chessGame = new ChessGame(); // Replace with actual game state retrieval if needed
@@ -42,18 +41,19 @@ public class GameClient {
         try {
             String[] parts = move.split(" ");
             if (parts.length != 2) {
-                throw new IllegalArgumentException("Invalid move format. Use 'start end' (e.g., 'e2 e4').");
+                throw new IllegalArgumentException("Invalid move format. Use 'e2 e4'.");
             }
 
             ChessPosition start = parsePosition(parts[0]);
             ChessPosition end = parsePosition(parts[1]);
             ChessMove chessMove = new ChessMove(start, end, null);
 
-            // Send the command
             UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, Integer.parseInt(gameId), chessMove);
             webSocketClient.sendCommand(command);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             System.out.println("Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Unexpected error: " + e.getMessage());
         }
     }
 

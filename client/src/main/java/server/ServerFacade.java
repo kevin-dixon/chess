@@ -10,15 +10,28 @@ import model.UserData;
 import model.responses.ErrorResponse;
 import model.responses.UserAuthResponse;
 import ui.ResponseException;
+import websocket.WebSocketCommunicator;
 
 import java.io.*;
 import java.net.*;
 
 public class ServerFacade {
     private final String serverUrl;
+    private final WebSocketCommunicator webSocketCommunicator;
+    private final HttpCommunicator httpCommunicator;
 
-    public ServerFacade(String serverUrl) {
+    public ServerFacade(String serverUrl) throws Exception {
         this.serverUrl = serverUrl;
+        this.webSocketCommunicator = new WebSocketCommunicator(serverUrl + "/ws");
+        this.httpCommunicator = new HttpCommunicator(serverUrl);
+    }
+
+    public WebSocketCommunicator getWebSocketCommunicator() {
+        return webSocketCommunicator;
+    }
+
+    public HttpCommunicator getHttpCommunicator() {
+        return httpCommunicator;
     }
 
     public String register(String username, String password, String email) throws ResponseException {

@@ -3,7 +3,7 @@ package client;
 import ui.Repl;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         var serverUrl = "http://localhost:8080";
 
         if (args.length > 0) {

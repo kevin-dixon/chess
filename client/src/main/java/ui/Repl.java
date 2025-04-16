@@ -10,7 +10,7 @@ public class Repl {
     private Object activeClient;
     private final NotificationHandler notificationHandler;
 
-    public Repl(String serverUrl) {
+    public Repl(String serverUrl) throws Exception {
         this.notificationHandler = new NotificationHandler();
         this.activeClient = new ChessClient(serverUrl, notificationHandler); // Initialize ChessClient
     }
