@@ -12,6 +12,7 @@ import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @WebSocket
@@ -110,6 +111,16 @@ public class ChessWebSocket {
             String username = gameService.getAuthUsername(command.getAuthToken());
             if (!username.equals(gameData.getWhiteUsername()) && !username.equals(gameData.getBlackUsername())) {
                 sendError(session, "Observers cannot make moves.");
+                return;
+            }
+            // Validate that it is the player's turn
+            ChessGame.TeamColor currentTurn = game.getTeamTurn();
+            ChessGame.TeamColor playerTeam = username.equals(gameData.getWhiteUsername())
+                    ? ChessGame.TeamColor.WHITE
+                    : ChessGame.TeamColor.BLACK;
+
+            if (currentTurn != playerTeam) {
+                sendError(session, "It is not your turn.");
                 return;
             }
             // Validate that the player is moving their own pieces
