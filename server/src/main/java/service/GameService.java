@@ -100,4 +100,16 @@ public class GameService {
         AuthData authData = authDao.getAuth(authToken);
         return authData != null;
     }
+
+    public String getAuthUsername(String authToken) {
+        try {
+            AuthData authData = authDao.getAuth(authToken);
+            if (authData == null) {
+                throw new DataAccessException("Invalid authentication token.");
+            }
+            return authData.username();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to retrieve username for auth token: " + e.getMessage(), e);
+        }
+    }
 }

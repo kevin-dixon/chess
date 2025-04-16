@@ -1,6 +1,8 @@
 package websocket;
 
 import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import model.*;
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
@@ -96,7 +98,28 @@ public class ChessWebSocket {
         }
 
         ChessGame game = games.get(gameID);
+
         try {
+            // Validate the player's authentication token
+            if (!gameService.isValidAuthToken(command.getAuthToken())) {
+                sendError(session, "Invalid authentication token.");
+                return;
+            }
+            // Ensure the player is not an observer
+            GameData gameData = gameService.getGameByID(gameID);
+            String username = gameService.getAuthUsername(command.getAuthToken());
+            if (!username.equals(gameData.getWhiteUsername()) && !username.equals(gameData.getBlackUsername())) {
+                sendError(session, "Observers cannot make moves.");
+                return;
+            }
+            // Validate that the player is moving their own pieces
+            ChessPosition start = command.getMove().getStartPosition();
+            ChessPiece piece = game.getBoard().getPiece(start);
+            if (piece == null || piece.getTeamColor() != game.getTeamTurn()) {
+                sendError(session, "You cannot move this piece.");
+                return;
+            }
+
             game.makeMove(command.getMove());
             broadcastLoadGame(gameID, game);
 
