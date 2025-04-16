@@ -61,7 +61,10 @@ public class ChessWebSocket {
             games.putIfAbsent(command.getGameID(), game);
 
             sendLoadGame(session, game);
-            broadcastNotification(command.getGameID(), command.getAuthToken() + " has joined the game.");
+
+            if (sessionGameMap.values().stream().filter(id -> id.equals(command.getGameID())).count() > 1) {
+                broadcastNotification(command.getGameID(), command.getAuthToken() + " has joined the game.");
+            }
         } catch (Exception e) {
             sendError(session, "Failed to connect: " + e.getMessage());
         }
