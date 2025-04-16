@@ -46,7 +46,7 @@ public class Server {
 
             Spark.init();
             Spark.awaitInitialization();
-            return Spark.port(); // Return the actual port being used
+            return Spark.port();
         } catch (Exception e) {
             throw new RuntimeException("Failed to start server: " + e.getMessage(), e);
         }

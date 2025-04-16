@@ -375,21 +375,22 @@ public class WebSocketTests {
     }
 
     private void assertMessages(String username, ServerMessage.ServerMessageType[] expectedTypes, List<TestMessage> messages) {
+        System.out.println("Messages for " + username + ": " + messages); // Debugging output
         Assertions.assertEquals(expectedTypes.length, messages.size(), "Expected %d messages for %s, got %d: %s"
                 .formatted(expectedTypes.length, username, messages.size(), messages));
         Arrays.sort(expectedTypes);
         messages.sort(Comparator.comparing(TestMessage::getServerMessageType));
         try {
-            for(int i = 0; i < expectedTypes.length; i++) {
+            for (int i = 0; i < expectedTypes.length; i++) {
                 switch (expectedTypes[i]) {
                     case LOAD_GAME -> assertLoadGame(username, messages.get(i));
                     case NOTIFICATION -> assertNotification(username, messages.get(i));
                     case ERROR -> assertError(username, messages.get(i));
                 }
             }
-        } catch(AssertionError e) {
+        } catch (AssertionError e) {
             Assertions.fail("Expected message types matching %s for %s, got %s"
-                    .formatted(Arrays.toString(expectedTypes), username, messages.reversed()), e);
+                    .formatted(Arrays.toString(expectedTypes), username, messages), e);
         }
     }
 

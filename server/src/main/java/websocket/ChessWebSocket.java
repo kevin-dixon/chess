@@ -124,6 +124,7 @@ public class ChessWebSocket {
 
     private void sendMessage(Session session, String message) {
         try {
+            System.out.println("Sending message: " + message);
             session.getRemote().sendString(message);
         } catch (Exception e) {
             System.err.println("Failed to send message to session: " + e.getMessage());

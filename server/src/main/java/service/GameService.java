@@ -83,13 +83,11 @@ public class GameService {
     }
 
     public void leaveGame(String authToken, int gameID) throws DataAccessException, SQLException {
-        // Validate authToken
         AuthData authData = authDao.getAuth(authToken);
         if (authData == null) {
-            throw new DataAccessException("unauthorized");
+            throw new DataAccessException("Unauthorized");
         }
 
-        // Remove the player from the game
         String username = authData.username();
         gameDao.removePlayerFromGame(gameID, username);
     }
