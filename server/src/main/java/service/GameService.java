@@ -95,4 +95,9 @@ public class GameService {
     public boolean isValidGame(int gameID) throws SQLException, DataAccessException {
         return gameDao.getGameByID(gameID) != null;
     }
+
+    public boolean isValidAuthToken(String authToken) throws DataAccessException, SQLException {
+        AuthData authData = authDao.getAuth(authToken);
+        return authData != null;
+    }
 }

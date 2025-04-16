@@ -56,6 +56,11 @@ public class ChessWebSocket {
 
     private void handleConnect(Session session, UserGameCommand command) {
         try {
+            if (!gameService.isValidAuthToken(command.getAuthToken())) {
+                sendError(session, "Invalid authentication token.");
+                return;
+            }
+
             GameData gameData = gameService.getGameByID(command.getGameID());
             if (gameData == null) {
                 sendError(session, "Invalid game ID: " + command.getGameID());
@@ -94,7 +99,12 @@ public class ChessWebSocket {
         try {
             game.makeMove(command.getMove());
             broadcastLoadGame(gameID, game);
-            broadcastNotification(gameID, command.getAuthToken() + " made a move: " + command.getMove());
+
+            sessionGameMap.forEach((otherSession, id) -> {
+                if (!otherSession.equals(session) && id.equals(gameID)) {
+                    sendNotification(otherSession, command.getAuthToken() + " made a move: " + command.getMove());
+                }
+            });
         } catch (Exception e) {
             sendError(session, "Invalid move: " + e.getMessage());
         }
