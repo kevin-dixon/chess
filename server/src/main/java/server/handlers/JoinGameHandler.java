@@ -3,6 +3,7 @@ package server.handlers;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import model.requests.JoinGameRequest;
+import model.responses.ErrorResponse;
 import service.GameService;
 import service.UserService;
 import spark.Request;
@@ -25,6 +26,7 @@ public class JoinGameHandler implements Route {
 
     @Override
     public Object handle(Request request, Response response) throws Exception {
+
         try {
             String authToken = request.headers("authorization");
 
@@ -34,6 +36,11 @@ public class JoinGameHandler implements Route {
             }
 
             JoinGameRequest joinGameRequest = gson.fromJson(request.body(), JoinGameRequest.class);
+
+            if (joinGameRequest.getPlayerColor() == null || (!joinGameRequest.getPlayerColor().equals("WHITE") && !joinGameRequest.getPlayerColor().equals("BLACK"))) {
+                response.status(400);
+                return gson.toJson(new ErrorResponse("Error: Invalid team color. Must be 'WHITE' or 'BLACK'."));
+            }
 
             gameService.joinGame(authToken, joinGameRequest.getGameID(), joinGameRequest.getPlayerColor());
             response.status(200);
