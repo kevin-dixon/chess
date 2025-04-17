@@ -108,7 +108,7 @@ public class GameSqlDAO {
                 conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
-                throw e;
+                throw new DataAccessException("Failed to remove player from game: " + e.getMessage());
             }
         }
     }

@@ -147,7 +147,14 @@ public class ChessWebSocket {
     private void handleLeave(Session session, UserGameCommand command) {
         Integer gameID = sessionGameMap.remove(session);
         if (gameID != null) {
-            broadcastNotification(gameID, command.getAuthToken() + " has left the game.");
+            String username = command.getAuthToken();
+
+            try {
+                gameService.leaveGame(command.getAuthToken(), gameID);
+                broadcastNotification(gameID, username + " has left the game.");
+            } catch (Exception e) {
+                sendError(session, "Failed to leave game: " + e.getMessage());
+            }
         }
     }
 
