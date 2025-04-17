@@ -158,8 +158,30 @@ public class ChessWebSocket {
             return;
         }
 
-        broadcastNotification(gameID, command.getAuthToken() + " has resigned. The game is over.");
-        games.remove(gameID);
+        try {
+            // Validate the player
+            if (!gameService.isValidAuthToken(command.getAuthToken())) {
+                sendError(session, "Invalid authentication token.");
+                return;
+            }
+            GameData gameData = gameService.getGameByID(gameID);
+            String username = gameService.getAuthUsername(command.getAuthToken());
+            if (!username.equals(gameData.getWhiteUsername()) && !username.equals(gameData.getBlackUsername())) {
+                sendError(session, "Observers cannot resign from the game.");
+                return;
+            }
+
+            // Check if the game is already over
+            if (!games.containsKey(gameID)) {
+                sendError(session, "The game is already over.");
+                return;
+            }
+
+            broadcastNotification(gameID, username + " has resigned. The game is over.");
+            games.remove(gameID);
+        } catch (Exception e) {
+            sendError(session, "Failed to process resign command: " + e.getMessage());
+        }
     }
 
     private void sendLoadGame(Session session, ChessGame game) {

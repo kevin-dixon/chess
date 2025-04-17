@@ -54,7 +54,7 @@ public class GameService {
     public void joinGame(String authToken, int gameID, String playerColor) throws DataAccessException, SQLException {
         AuthData authData = authDao.getAuth(authToken);
         if (authData == null) {
-            throw new DataAccessException("unauthorized");
+            throw new DataAccessException("Unauthorized");
         }
 
         GameData gameData = gameDao.getGameByID(gameID);
@@ -62,16 +62,18 @@ public class GameService {
             throw new DataAccessException("Invalid GameID");
         }
 
-        if (!"WHITE".equals(playerColor) && !"BLACK".equals(playerColor)) {
-            throw new DataAccessException("Invalid Team Color");
+        String username = authData.username();
+        // Check if the team is already taken
+        if (("WHITE".equals(playerColor) && username.equals(gameData.getWhiteUsername())) ||
+                ("BLACK".equals(playerColor) && username.equals(gameData.getBlackUsername()))) {
+            return;
         }
-
-        if (("WHITE".equals(playerColor) && gameData.whiteUsername() != null) ||
-                ("BLACK".equals(playerColor) && gameData.blackUsername() != null)) {
+        if (("WHITE".equals(playerColor) && gameData.getWhiteUsername() != null) ||
+                ("BLACK".equals(playerColor) && gameData.getBlackUsername() != null)) {
             throw new DataAccessException("Team Color Already Taken");
         }
 
-        gameDao.addPlayerToGame(gameID, playerColor, authData.username());
+        gameDao.addPlayerToGame(gameID, playerColor, username);
     }
 
     public GameData getGameByID(int gameID) throws DataAccessException {
@@ -89,6 +91,12 @@ public class GameService {
         }
 
         String username = authData.username();
+        GameData gameData = gameDao.getGameByID(gameID);
+        if (gameData == null) {
+            throw new DataAccessException("Invalid GameID");
+        }
+
+        // Remove the user from the team slot
         gameDao.removePlayerFromGame(gameID, username);
     }
 
