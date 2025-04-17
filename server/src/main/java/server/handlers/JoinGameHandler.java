@@ -37,7 +37,9 @@ public class JoinGameHandler implements Route {
 
             JoinGameRequest joinGameRequest = gson.fromJson(request.body(), JoinGameRequest.class);
 
-            if (joinGameRequest.getPlayerColor() == null || (!joinGameRequest.getPlayerColor().equals("WHITE") && !joinGameRequest.getPlayerColor().equals("BLACK"))) {
+            if (joinGameRequest.getPlayerColor() == null
+                    || (!joinGameRequest.getPlayerColor().equals("WHITE")
+                    && !joinGameRequest.getPlayerColor().equals("BLACK"))) {
                 response.status(400);
                 return gson.toJson(new ErrorResponse("Error: Invalid team color. Must be 'WHITE' or 'BLACK'."));
             }

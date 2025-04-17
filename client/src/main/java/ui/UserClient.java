@@ -15,12 +15,16 @@ public class UserClient {
 
     private List<GameData> cachedGameList; // Cached list of games
 
-    public UserClient(String serverUrl, String userName, String authToken, NotificationHandler notificationHandler, List<GameData> cachedGameList) throws Exception {
+    public UserClient(String serverUrl,
+                      String userName,
+                      String authToken,
+                      NotificationHandler notificationHandler,
+                      List<GameData> cachedGameList) throws Exception {
         this.server = new ServerFacade(serverUrl);
         this.authToken = authToken;
         this.notificationHandler = notificationHandler;
         this.serverUrl = serverUrl;
-        this.cachedGameList = cachedGameList != null ? cachedGameList : new ArrayList<>(); // Use the provided list or initialize a new one
+        this.cachedGameList = cachedGameList != null ? cachedGameList : new ArrayList<>();
     }
 
     public String help() {
@@ -79,8 +83,10 @@ public class UserClient {
             for (int i = 0; i < cachedGameList.size(); i++) {
                 GameData game = cachedGameList.get(i);
                 response.append(i + 1).append(". ").append(game.gameName())
-                        .append(" (White: ").append(game.getWhiteUsername() == null ? "Open" : game.getWhiteUsername())
-                        .append(", Black: ").append(game.getBlackUsername() == null ? "Open" : game.getBlackUsername())
+                        .append(" (White: ").append(game.getWhiteUsername() == null
+                                ? "Open" : game.getWhiteUsername())
+                        .append(", Black: ").append(game.getBlackUsername() == null
+                                ? "Open" : game.getBlackUsername())
                         .append(")\n");
             }
             return response.toString();
@@ -111,7 +117,11 @@ public class UserClient {
 
             // Join the game
             server.joinGame(authToken, gameId, color);
-            return new GameClient(serverUrl, authToken, String.valueOf(gameId), color.equals("BLACK"), cachedGameList);
+            return new GameClient(serverUrl,
+                    authToken,
+                    String.valueOf(gameId),
+                    color.equals("BLACK"),
+                    cachedGameList);
         } catch (NumberFormatException e) {
             return "Error: game number must be an integer";
         } catch (Exception | ResponseException e) {
@@ -135,7 +145,11 @@ public class UserClient {
 
             // Observe the game
             server.observeGame(authToken, gameId);
-            return new GameClient(serverUrl, authToken, String.valueOf(gameId), false, cachedGameList);
+            return new GameClient(serverUrl,
+                    authToken,
+                    String.valueOf(gameId),
+                    false,
+                    cachedGameList);
         } catch (NumberFormatException e) {
             return "Error: game number must be an integer";
         } catch (Exception | ResponseException e) {

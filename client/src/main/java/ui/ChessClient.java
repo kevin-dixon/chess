@@ -2,15 +2,13 @@ package ui;
 
 import server.ServerFacade;
 import websocket.NotificationHandler;
-import websocket.ServerMessageObserver;
 import websocket.WebSocketCommunicator;
 import websocket.commands.UserGameCommand;
-import websocket.messages.ServerMessage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ChessClient implements ServerMessageObserver {
+public class ChessClient {
     private final ServerFacade server;
     private final NotificationHandler notificationHandler;
     private final WebSocketCommunicator webSocketCommunicator;
@@ -20,19 +18,6 @@ public class ChessClient implements ServerMessageObserver {
         this.notificationHandler = notifyHandler;
         this.webSocketCommunicator = new WebSocketCommunicator(serverUrl + "/ws");
         this.webSocketCommunicator.addObserver(this);
-    }
-
-    @Override
-    public void onServerMessage(ServerMessage message) {
-        switch (message.getServerMessageType()) {
-            case LOAD_GAME -> System.out.println("Game loaded: " + message.getGame());
-            case NOTIFICATION -> System.out.println("Notification: " + message.getMessage());
-            case ERROR -> System.err.println("Error: " + message.getMessage());
-        }
-    }
-
-    public void sendCommand(Object command) {
-        webSocketCommunicator.sendCommand((UserGameCommand) command);
     }
 
     public String help() {

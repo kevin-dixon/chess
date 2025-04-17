@@ -39,11 +39,6 @@ public class WebSocketCommunicator {
         }
     }
 
-    @OnClose
-    public void onClose(Session session, CloseReason reason) {
-        System.out.println("Disconnected: " + reason);
-    }
-
     public void sendCommand(UserGameCommand command) {
         try {
             session.getBasicRemote().sendText(gson.toJson(command));

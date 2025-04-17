@@ -12,14 +12,13 @@ import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @WebSocket
 public class ChessWebSocket {
 
-    private static final Map<Session, Integer> sessionGameMap = new ConcurrentHashMap<>();
-    private static final Map<Integer, ChessGame> games = new ConcurrentHashMap<>();
+    private static final Map<Session, Integer> SessionGameMap = new ConcurrentHashMap<>();
+    private static final Map<Integer, ChessGame> Games = new ConcurrentHashMap<>();
     private final Gson gson = new Gson();
     private final GameService gameService = new GameService(new dataaccess.sqldatabase.GameSqlDAO(), new dataaccess.sqldatabase.AuthSqlDAO());
 
@@ -40,7 +39,7 @@ public class ChessWebSocket {
 
     @OnWebSocketClose
     public void onClose(Session session, int statusCode, String reason) {
-        Integer gameID = sessionGameMap.remove(session);
+        Integer gameID = SessionGameMap.remove(session);
         if (gameID != null) {
             broadcastNotification(gameID, "A player has disconnected.");
         }
@@ -71,12 +70,12 @@ public class ChessWebSocket {
             }
 
             ChessGame game = gameData.game();
-            sessionGameMap.put(session, command.getGameID());
-            games.putIfAbsent(command.getGameID(), game);
+            SessionGameMap.put(session, command.getGameID());
+            Games.putIfAbsent(command.getGameID(), game);
 
             sendLoadGame(session, game);
 
-            sessionGameMap.forEach((otherSession, gameID) -> {
+            SessionGameMap.forEach((otherSession, gameID) -> {
                 if (!otherSession.equals(session) && gameID.equals(command.getGameID())) {
                     sendNotification(otherSession, command.getAuthToken() + " has joined the game.");
                 }
@@ -92,13 +91,13 @@ public class ChessWebSocket {
     }
 
     private void handleMakeMove(Session session, UserGameCommand command) {
-        Integer gameID = sessionGameMap.get(session);
+        Integer gameID = SessionGameMap.get(session);
         if (gameID == null || !gameID.equals(command.getGameID())) {
             sendError(session, "Invalid game ID.");
             return;
         }
 
-        ChessGame game = games.get(gameID);
+        ChessGame game = Games.get(gameID);
 
         try {
             // Validate the player's authentication token
@@ -134,7 +133,7 @@ public class ChessWebSocket {
             game.makeMove(command.getMove());
             broadcastLoadGame(gameID, game);
 
-            sessionGameMap.forEach((otherSession, id) -> {
+            SessionGameMap.forEach((otherSession, id) -> {
                 if (!otherSession.equals(session) && id.equals(gameID)) {
                     sendNotification(otherSession, command.getAuthToken() + " made a move: " + command.getMove());
                 }
@@ -145,7 +144,7 @@ public class ChessWebSocket {
     }
 
     private void handleLeave(Session session, UserGameCommand command) {
-        Integer gameID = sessionGameMap.remove(session);
+        Integer gameID = SessionGameMap.remove(session);
         if (gameID != null) {
             String username = command.getAuthToken();
 
@@ -159,7 +158,7 @@ public class ChessWebSocket {
     }
 
     private void handleResign(Session session, UserGameCommand command) {
-        Integer gameID = sessionGameMap.get(session);
+        Integer gameID = SessionGameMap.get(session);
         if (gameID == null || !gameID.equals(command.getGameID())) {
             sendError(session, "Invalid game ID.");
             return;
@@ -179,13 +178,13 @@ public class ChessWebSocket {
             }
 
             // Check if the game is already over
-            if (!games.containsKey(gameID)) {
+            if (!Games.containsKey(gameID)) {
                 sendError(session, "The game is already over.");
                 return;
             }
 
             broadcastNotification(gameID, username + " has resigned. The game is over.");
-            games.remove(gameID);
+            Games.remove(gameID);
         } catch (Exception e) {
             sendError(session, "Failed to process resign command: " + e.getMessage());
         }
@@ -221,7 +220,7 @@ public class ChessWebSocket {
     }
 
     private void broadcastMessage(Integer gameID, String message) {
-        sessionGameMap.forEach((session, id) -> {
+        SessionGameMap.forEach((session, id) -> {
             if (id.equals(gameID)) {
                 sendMessage(session, message);
             }
